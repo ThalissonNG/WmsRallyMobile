@@ -1,0 +1,7 @@
+class Config:
+    SECRET_KEY = 'THALISSON'
+    DB_USER = "RMOTOS"
+    DB_PASSWORD = "RM0TO5987"
+    DB_HOST = "192.168.1.2"
+    DB_PORT = "1521"
+    DB_SERVICE_NAME = "WINT"
