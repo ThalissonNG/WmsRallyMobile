@@ -4,6 +4,25 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
+    def login(e):
+        if username.value == 'thalisson' and password.value == 'Tha2809_':
+            snackbar_sucess = ft.SnackBar(
+                content=ft.Text('Login com sucesso'),
+                bgcolor=ft.colors.GREEN,
+                show_close_icon=True,
+            )
+            page.overlay.append(snackbar_sucess)
+            snackbar_sucess.open = True
+        else:
+            snackbar_error = ft.SnackBar(
+                content=ft.Text('Login incorreto', color=ft.colors.WHITE, size=20),
+                bgcolor=ft.colors.RED,
+                show_close_icon=True
+            )
+            page.overlay.append(snackbar_error)
+            snackbar_error.open = True
+        page.update()
+
     username = ft.TextField(
         label='Usuário',
         prefix_icon=ft.icons.PERSON,
@@ -29,6 +48,7 @@ def main(page: ft.Page):
         bgcolor=ft.colors.BLUE,
         color=ft.colors.WHITE,
         width=300,
+        on_click=login,
     )
     page.add(
         ft.Container(
