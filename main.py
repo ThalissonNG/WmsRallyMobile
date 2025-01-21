@@ -1,63 +1,54 @@
 import flet as ft
-import cx_Oracle
-from database import get_db_connection
+import requests
 
 def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
+
     def login(e):
         username.value = username.value.upper()
         password.value = password.value.upper()
-        dados_usuario = {}
+        page.update()
 
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
+            response = requests.post("http://192.168.1.244:5000/wmsMobile/login", json={
+                "username": username.value,
+                "password": password.value
+            })
+            print(f"Status code: {response.status_code}")
+            print(f"Response: {response.json()}")
 
-            query_login = """
-                        select
-                            r.matricula,
-                            r.nome_guerra,
-                            decrypt(senhabd, nome_guerra) as senha,
-                            r.codfilial,
-                            r.nome
-                        from pcempr r
-                        where r.nome_guerra = :nome_guerra
-                        """
-            cursor.execute(query_login, {'nome_guerra': username.value})
-            result_login = cursor.fetchone()
-            if result_login:
-                dados_usuario[result_login[1]] = {
-                    "matricula": result_login[0],
-                    "usuario": result_login[1],
-                    "senha": result_login[2],
-                    "filial": result_login[3],
-                    "nome": result_login[4]
-                }
-                print(dados_usuario[result_login[1]])
+            if response.status_code == 200:
+                snackbar_sucess = ft.SnackBar(
+                    content=ft.Text('Login com sucesso'),
+                    bgcolor=ft.colors.GREEN,
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_sucess)
+                snackbar_sucess.open = True
+            elif response.status_code == 404:
+                snackbar_error = ft.SnackBar(
+                    content=ft.Text(f'Usário não encontrado {response.json()}', color=ft.colors.WHITE, size=20),
+                    bgcolor=ft.colors.RED,
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_error)
+                snackbar_error.open = True
             else:
-                print(f"Usuário {username.value} não encontrada")
-        except cx_Oracle.DatabaseError as e:
-            error, = e.args
-            print(f"Ocorreu um erro ao executar a consulta: {error.message}")
-        finally:
-            cursor.close()
-            conn.close()
-        
-        if username.value in dados_usuario and password.value == dados_usuario[username.value]['senha']:
-            snackbar_sucess = ft.SnackBar(
-                content=ft.Text('Login com sucesso'),
-                bgcolor=ft.colors.GREEN,
-                show_close_icon=True,
-            )
-            page.overlay.append(snackbar_sucess)
-            snackbar_sucess.open = True
-        else:
+                snackbar_error = ft.SnackBar(
+                    content=ft.Text('Login incorreto', color=ft.colors.WHITE, size=20),
+                    bgcolor=ft.colors.RED,
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_error)
+                snackbar_error.open = True
+
+        except requests.RequestException as e:
             snackbar_error = ft.SnackBar(
-                content=ft.Text('Login incorreto', color=ft.colors.WHITE, size=20),
+                content=ft.Text(f"Erro na conexão: {str(e)}", color=ft.colors.WHITE, size=20),
                 bgcolor=ft.colors.RED,
-                show_close_icon=True
+                show_close_icon=True,
             )
             page.overlay.append(snackbar_error)
             snackbar_error.open = True
@@ -84,12 +75,12 @@ def main(page: ft.Page):
         width=300,
     )
     button_login = ft.ElevatedButton(
-        text='Login',
-        bgcolor=ft.colors.BLUE,
-        color=ft.colors.WHITE,
-        width=300,
+        text="login",
+        bgcolor='#0000ff',
+        color='#ffffff',
         on_click=login,
     )
+
     page.add(
         ft.Container(
             content=ft.Column(
