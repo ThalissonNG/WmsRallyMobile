@@ -1,9 +1,14 @@
 import flet as ft
 import requests
+from menu import menuPage
 
 def main(page: ft.Page):
+    page.controls.clear()
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.title = 'Login'
+    page.window.width = '450'
+    page.window.height = '700'
 
 
     def login(e):
@@ -12,7 +17,7 @@ def main(page: ft.Page):
         page.update()
 
         try:
-            response = requests.post("http://192.168.1.244:5000/wmsMobile/login", json={
+            response = requests.post("http://192.168.1.42:5000/wmsMobile/login", json={
                 "username": username.value,
                 "password": password.value
             })
@@ -27,6 +32,9 @@ def main(page: ft.Page):
                 )
                 page.overlay.append(snackbar_sucess)
                 snackbar_sucess.open = True
+                page.update()
+                menuPage(page, main)
+
             elif response.status_code == 404:
                 snackbar_error = ft.SnackBar(
                     content=ft.Text(f'Usário não encontrado {response.json()}', color=ft.colors.WHITE, size=20),
