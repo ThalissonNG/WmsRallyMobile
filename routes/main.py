@@ -1,7 +1,7 @@
 import flet as ft
 import requests
-from menu import menuPage
-from separar import create_separar_pedido_page
+from menu import menu_page
+from separar import separar_page
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -40,14 +40,13 @@ def main(page: ft.Page):
         if route == "/login":
             page.views.append(create_login_view())
         elif route == "/menu":
-            page.views.append(menuPage(page, navigate_to, create_header()))  # Passando a função navigate_to como argumento
+            page.views.append(menu_page(page, navigate_to, create_header()))  # Passando a função navigate_to como argumento
         elif route == "/separar":
-            page.views.append(create_separar_pedido_page(navigate_to, create_header()))  # Nova rota para Separar Pedido
+            page.views.append(separar_page(navigate_to, create_header()))  # Nova rota para Separar Pedido
         page.update()
 
     # Tela de login
     def create_login_view():
-        
 
         def login(e):
             username.value = username.value.upper()

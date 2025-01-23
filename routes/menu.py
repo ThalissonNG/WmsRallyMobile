@@ -1,6 +1,6 @@
 import flet as ft
 
-def menuPage(page: ft.Page, navigate_to, header):
+def menu_page(page: ft.Page, navigate_to, header):
     welcome_text = ft.Text("Menu Principal", size=24, weight="bold", color="blue")
 
     # Retorna a view configurada
