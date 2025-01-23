@@ -1,103 +1,131 @@
 import flet as ft
 import requests
-from menu import menuPage
+from menu import menuPage  # Certifique-se de que menuPage está implementado corretamente no arquivo menu.py
+from separar import create_separar_pedido_page
 
 def main(page: ft.Page):
-    page.controls.clear()
+    # Configurações gerais da página
+    page.title = "Login"
+    page.window_width = 450
+    page.window_height = 700
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.title = 'Login'
-    page.window.width = '450'
-    page.window.height = '700'
+    page.padding = 20
 
-
-    def login(e):
-        username.value = username.value.upper()
-        password.value = password.value.upper()
+    # Função para alternar entre rotas
+    def navigate_to(route):
+        page.views.clear()
+        if route == "/login":
+            page.views.append(create_login_view())
+        elif route == "/menu":
+            page.views.append(menuPage(page, navigate_to))  # Passando a função navigate_to como argumento
+        elif route == "/separar":
+            page.views.append(create_separar_pedido_page(navigate_to))  # Nova rota para Separar Pedido
         page.update()
 
-        try:
-            response = requests.post("http://192.168.1.42:5000/wmsMobile/login", json={
-                "username": username.value,
-                "password": password.value
-            })
-            print(f"Status code: {response.status_code}")
-            print(f"Response: {response.json()}")
-
-            if response.status_code == 200:
-                snackbar_sucess = ft.SnackBar(
-                    content=ft.Text('Login com sucesso'),
-                    bgcolor=ft.colors.GREEN,
-                    show_close_icon=True,
-                )
-                page.overlay.append(snackbar_sucess)
-                snackbar_sucess.open = True
-                page.update()
-                menuPage(page, main)
-
-            elif response.status_code == 404:
-                snackbar_error = ft.SnackBar(
-                    content=ft.Text(f'Usário não encontrado {response.json()}', color=ft.colors.WHITE, size=20),
-                    bgcolor=ft.colors.RED,
-                    show_close_icon=True,
-                )
-                page.overlay.append(snackbar_error)
-                snackbar_error.open = True
-            else:
-                snackbar_error = ft.SnackBar(
-                    content=ft.Text('Login incorreto', color=ft.colors.WHITE, size=20),
-                    bgcolor=ft.colors.RED,
-                    show_close_icon=True,
-                )
-                page.overlay.append(snackbar_error)
-                snackbar_error.open = True
-
-        except requests.RequestException as e:
-            snackbar_error = ft.SnackBar(
-                content=ft.Text(f"Erro na conexão: {str(e)}", color=ft.colors.WHITE, size=20),
-                bgcolor=ft.colors.RED,
-                show_close_icon=True,
-            )
-            page.overlay.append(snackbar_error)
-            snackbar_error.open = True
-        page.update()
-
-    username = ft.TextField(
-        label='Usuário',
-        prefix_icon=ft.icons.PERSON,
-        bgcolor=ft.colors.BLACK,
-        border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.WHITE,
-        border_width=2,
-        width=300,
-    )
-    password = ft.TextField(
-        label='Senha',
-        prefix_icon=ft.icons.PERSON,
-        bgcolor=ft.colors.BLACK,
-        border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.WHITE,
-        border_width=2,
-        password=True,
-        can_reveal_password=True,
-        width=300,
-    )
-    button_login = ft.ElevatedButton(
-        text="login",
-        bgcolor='#0000ff',
-        color='#ffffff',
-        on_click=login,
-    )
-
-    page.add(
-        ft.Container(
-            content=ft.Column(
-                controls=[username, password, button_login],
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            )
+    # Tela de login
+    def create_login_view():
+        username = ft.TextField(
+            label="Usuário",
+            prefix_icon=ft.icons.PERSON,
+            bgcolor=ft.colors.BLACK,
+            border_radius=ft.border_radius.all(10),
+            border_color=ft.colors.WHITE,
+            border_width=2,
+            width=300,
         )
-    )
-    page.update()
+        password = ft.TextField(
+            label="Senha",
+            prefix_icon=ft.icons.PERSON,
+            bgcolor=ft.colors.BLACK,
+            border_radius=ft.border_radius.all(10),
+            border_color=ft.colors.WHITE,
+            border_width=2,
+            password=True,
+            can_reveal_password=True,
+            width=300,
+        )
 
-ft.app(main)
+        def login(e):
+            username.value = username.value.upper()
+            password.value = password.value.upper()
+            page.update()
+
+            try:
+                response = requests.post(
+                    "http://192.168.1.42:5000/wmsMobile/login",
+                    json={"username": username.value, "password": password.value},
+                )
+                print(f"Status code: {response.status_code}")
+                print(f"Response: {response.json()}")
+
+                if response.status_code == 200:
+                    snackbar_sucess = ft.SnackBar(
+                        content=ft.Text("Login com sucesso"),
+                        bgcolor=ft.colors.GREEN,
+                        show_close_icon=True,
+                    )
+                    page.overlay.append(snackbar_sucess)
+                    snackbar_sucess.open = True
+                    page.update()
+                    navigate_to("/menu")  # Navega para a página de menu
+                elif response.status_code == 404:
+                    snackbar_error = ft.SnackBar(
+                        content=ft.Text(
+                            f"Usuário não encontrado {response.json()}",
+                            color=ft.colors.WHITE,
+                            size=20,
+                        ),
+                        bgcolor=ft.colors.RED,
+                        show_close_icon=True,
+                    )
+                    page.overlay.append(snackbar_error)
+                    snackbar_error.open = True
+                else:
+                    snackbar_error = ft.SnackBar(
+                        content=ft.Text(
+                            "Login incorreto", color=ft.colors.WHITE, size=20
+                        ),
+                        bgcolor=ft.colors.RED,
+                        show_close_icon=True,
+                    )
+                    page.overlay.append(snackbar_error)
+                    snackbar_error.open = True
+            except requests.RequestException as e:
+                snackbar_error = ft.SnackBar(
+                    content=ft.Text(
+                        f"Erro na conexão: {str(e)}", color=ft.colors.WHITE, size=20
+                    ),
+                    bgcolor=ft.colors.RED,
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_error)
+                snackbar_error.open = True
+            page.update()
+
+        button_login = ft.ElevatedButton(
+            text="Login",
+            bgcolor="#0000ff",
+            color="#ffffff",
+            on_click=login,
+        )
+
+        return ft.View(
+            route="/login",
+            controls=[
+                ft.Container(
+                    content=ft.Column(
+                        controls=[username, password, button_login],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                    alignment=ft.alignment.center,
+                )
+            ],
+        )
+
+    # Inicializa a navegação na tela de login
+    navigate_to("/login")
+
+# Inicializa o aplicativo
+ft.app(target=main)
