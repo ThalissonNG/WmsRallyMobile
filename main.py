@@ -1,7 +1,7 @@
 import flet as ft
 import requests
-from menu import menu_page
-from separar import separar_page
+from routes.menu import menu_page
+from routes.separar import separar_page
 
 def main(page: ft.Page):
     page.title = "Login"
