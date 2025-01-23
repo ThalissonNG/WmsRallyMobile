@@ -1,10 +1,9 @@
 import flet as ft
 import requests
-from menu import menuPage  # Certifique-se de que menuPage está implementado corretamente no arquivo menu.py
+from menu import menuPage
 from separar import create_separar_pedido_page
 
 def main(page: ft.Page):
-    # Configurações gerais da página
     page.title = "Login"
     page.window_width = 450
     page.window_height = 700
@@ -25,26 +24,7 @@ def main(page: ft.Page):
 
     # Tela de login
     def create_login_view():
-        username = ft.TextField(
-            label="Usuário",
-            prefix_icon=ft.icons.PERSON,
-            bgcolor=ft.colors.BLACK,
-            border_radius=ft.border_radius.all(10),
-            border_color=ft.colors.WHITE,
-            border_width=2,
-            width=300,
-        )
-        password = ft.TextField(
-            label="Senha",
-            prefix_icon=ft.icons.PERSON,
-            bgcolor=ft.colors.BLACK,
-            border_radius=ft.border_radius.all(10),
-            border_color=ft.colors.WHITE,
-            border_width=2,
-            password=True,
-            can_reveal_password=True,
-            width=300,
-        )
+        
 
         def login(e):
             username.value = username.value.upper()
@@ -68,7 +48,7 @@ def main(page: ft.Page):
                     page.overlay.append(snackbar_sucess)
                     snackbar_sucess.open = True
                     page.update()
-                    navigate_to("/menu")  # Navega para a página de menu
+                    navigate_to("/menu")
                 elif response.status_code == 404:
                     snackbar_error = ft.SnackBar(
                         content=ft.Text(
@@ -103,6 +83,26 @@ def main(page: ft.Page):
                 snackbar_error.open = True
             page.update()
 
+        username = ft.TextField(
+            label="Usuário",
+            prefix_icon=ft.icons.PERSON,
+            bgcolor=ft.colors.BLACK,
+            border_radius=ft.border_radius.all(10),
+            border_color=ft.colors.WHITE,
+            border_width=2,
+            width=300,
+        )
+        password = ft.TextField(
+            label="Senha",
+            prefix_icon=ft.icons.PERSON,
+            bgcolor=ft.colors.BLACK,
+            border_radius=ft.border_radius.all(10),
+            border_color=ft.colors.WHITE,
+            border_width=2,
+            password=True,
+            can_reveal_password=True,
+            width=300,
+        )
         button_login = ft.ElevatedButton(
             text="Login",
             bgcolor="#0000ff",
@@ -120,6 +120,7 @@ def main(page: ft.Page):
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     alignment=ft.alignment.center,
+                    expand=True,
                 )
             ],
         )
