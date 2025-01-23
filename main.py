@@ -13,7 +13,7 @@ def main(page: ft.Page):
 
     def create_header():
         return ft.AppBar(
-            title=ft.Text("329 - Thalisson"),
+            title=ft.Text(f"{matricula} - {usuario}"),
             bgcolor="blue",
             actions=[
                 ft.PopupMenuButton(
@@ -22,10 +22,12 @@ def main(page: ft.Page):
                     icon_color="#0000ff",
                     items=[
                         ft.ElevatedButton(
+                            icon=ft.icons.HOME,
                             text="Menu",
                             on_click=lambda e: navigate_to("/menu"),
                         ),
                         ft.ElevatedButton(
+                            icon=ft.icons.LOGOUT,
                             text="Sair",
                             on_click=lambda e: navigate_to("/login"),
                         ),
@@ -55,13 +57,19 @@ def main(page: ft.Page):
 
             try:
                 response = requests.post(
-                    "http://192.168.1.42:5000/wmsMobile/login",
+                    "http://192.168.1.244:5000/wmsMobile/login",
                     json={"username": username.value, "password": password.value},
                 )
                 print(f"Status code: {response.status_code}")
                 print(f"Response: {response.json()}")
 
                 if response.status_code == 200:
+                    response_data = response.json()
+                    global usuario, matricula
+                    usuario = response_data.get('usuario')
+                    matricula = response_data.get('matricula')
+                    print(matricula, usuario)
+
                     snackbar_sucess = ft.SnackBar(
                         content=ft.Text("Login com sucesso"),
                         bgcolor=ft.colors.GREEN,
