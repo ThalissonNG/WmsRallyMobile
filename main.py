@@ -57,7 +57,7 @@ def main(page: ft.Page):
 
             try:
                 response = requests.post(
-                    "http://192.168.1.244:5000/wmsMobile/login",
+                    "http://192.168.1.42:5000/wmsMobile/login",
                     json={"username": username.value, "password": password.value},
                 )
                 print(f"Status code: {response.status_code}")
@@ -116,18 +116,16 @@ def main(page: ft.Page):
         username = ft.TextField(
             label="Usuário",
             prefix_icon=ft.icons.PERSON,
-            bgcolor=ft.colors.BLACK,
             border_radius=ft.border_radius.all(10),
-            border_color=ft.colors.WHITE,
+            border_color=ft.colors.BLACK,
             border_width=2,
             width=300,
         )
         password = ft.TextField(
             label="Senha",
             prefix_icon=ft.icons.PASSWORD,
-            bgcolor=ft.colors.BLACK,
             border_radius=ft.border_radius.all(10),
-            border_color=ft.colors.WHITE,
+            border_color=ft.colors.BLACK,
             border_width=2,
             password=True,
             can_reveal_password=True,
@@ -137,6 +135,7 @@ def main(page: ft.Page):
             text="Login",
             bgcolor="#0000ff",
             color="#ffffff",
+            width=300,
             on_click=login,
         )
 
