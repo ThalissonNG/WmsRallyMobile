@@ -14,9 +14,8 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "Guardar Bônus",
-                                    expand=True,
-                                    on_click=lambda e: navigate_to("/buscar_bonus"),  # Navegação para a nova página
+                                    "Separar Pedido",
+                                    expand=True
                                 ),
                                 ft.ElevatedButton(
                                     "Conferir Bônus",
@@ -33,7 +32,8 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     ),
                                 ft.ElevatedButton(
                                     "Armazenar Bônus", 
-                                    expand=True
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/armazenar_bonus"),
                                     ),
                             ],
                             spacing=10,

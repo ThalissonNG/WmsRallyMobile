@@ -1,8 +1,9 @@
 import flet as ft
 import requests
-from config import base_url
+from routes.config.config import base_url
 from routes.menu import menu_page
-from routes.guardarBonus import buscar_bonus
+from routes.armazenarEtiqueta import buscar_etiqueta
+from routes.enderecarBonus import enderecar_bonus_page
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -44,8 +45,10 @@ def main(page: ft.Page):
             page.views.append(create_login_view())
         elif route == "/menu":
             page.views.append(menu_page(page, navigate_to, create_header()))  # Passando a função navigate_to como argumento
-        elif route == "/buscar_bonus":
-            page.views.append(buscar_bonus(navigate_to, create_header()))  # Nova rota para Separar Pedido
+        elif route == "/armazenar_bonus":
+            page.views.append(buscar_etiqueta(navigate_to, create_header()))  # Nova rota para Separar Pedido
+        elif route =="/enderecarBonus":
+            page.views.append(enderecar_bonus_page(navigate_to, create_header()))
         page.update()
 
     # Tela de login
@@ -59,7 +62,6 @@ def main(page: ft.Page):
             try:
                 response = requests.post(
                     base_url + "/login",
-                    # "http://192.168.1.42:5000/wmsMobile/login",
                     json={"username": username.value, "password": password.value},
                 )
                 print(f"Status code: {response.status_code}")
