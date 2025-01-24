@@ -4,16 +4,18 @@ from routes.config.config import base_url
 
 def buscar_etiqueta(navigate_to, header):
 
-    def consultarEtiqueta(numetiqueta):
+    def consultarEtiqueta(codetiqueta):
         try:
             response = requests.post(
-                f"{base_url}/bonusConsultar",
-                json={"numbonus": numetiqueta},
+                f"{base_url}/consultarEtiqueta",
+                json={"codetiqueta": codetiqueta},
             )
             if response.status_code == 200:
-                bonus = response.json()
-                print(bonus)
-                navigate_to("/enderecarBonus")
+                resposta = response.json()
+                codproduto = resposta.get("codprod")
+                qt = resposta.get("qt")
+                numbonus = resposta.get("numbonus")
+                print(f"Produto: {codproduto} - Qt: {qt} - Bônus: {numbonus}")
             else:
                 print("Erro ao consultar bônus")
         except Exception as e:
@@ -25,37 +27,32 @@ def buscar_etiqueta(navigate_to, header):
         weight="bold",
         color="blue"
     )
-    numetiqueta = ft.TextField(
-        label="Digite o número do bônus...",
-        prefix_icon=ft.icons.SEARCH,
+    inputEtiqueta = ft.TextField(
+        label="Número Etiqueta",
+        prefix_icon=ft.icons.STICKY_NOTE_2,
         border_radius=ft.border_radius.all(10),
         border_color=ft.colors.BLACK,
         border_width=2,
         width=300,
         keyboard_type=ft.KeyboardType.NUMBER,
     )
-    busca_manual = ft.Container(
+    divEtiqueta = ft.Container(
         content=ft.Column(
             controls=[
                 ft.Text(
-                    "Busca Manual",
+                    "Bipar Etiqueta",
                     size=20,
-                    weight=600
+                    weight=600,
                 ),
-                numetiqueta,
+                inputEtiqueta,
                 ft.ElevatedButton(
                     text="Buscar",
                     width=600,
-                    on_click=lambda e: consultarEtiqueta(numetiqueta.value),
+                    on_click=lambda e: consultarEtiqueta(inputEtiqueta.value),
                 )
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         ),
-        border=ft.border.all(
-            color="black",
-            width=2,
-        ),
-        border_radius=ft.border_radius.all(10),
         padding=10,
     )
     return ft.View(
@@ -63,10 +60,9 @@ def buscar_etiqueta(navigate_to, header):
         controls=[
             header,
             title,
-            busca_manual,
+            ft.Container(height=20),
+            divEtiqueta,
         ],
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        alignment=ft.alignment.center,
-        expand=True,
     )
 
