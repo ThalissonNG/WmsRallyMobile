@@ -1,8 +1,8 @@
 import flet as ft
 
-def separar_page(navigate_to, header):
+def buscar_bonus(navigate_to, header):
     title = ft.Text(
-        "Separar Pedido",
+        "Endereçar Bônus",
         size=24,
         weight="bold",
         color="blue"
@@ -16,7 +16,7 @@ def separar_page(navigate_to, header):
                     weight=600
                 ),
                 ft.TextField(
-                    label="Digite o número do pedido...",
+                    label="Digite o número do bônus...",
                     prefix_icon=ft.icons.SEARCH,
                     border_radius=ft.border_radius.all(10),
                     border_color=ft.colors.BLACK,
