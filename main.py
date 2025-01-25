@@ -3,7 +3,7 @@ import requests
 from routes.config.config import base_url
 from routes.menu import menu_page
 from routes.armazenarEtiqueta import buscar_etiqueta
-from routes.enderecarBonus import enderecar_bonus_page
+from routes.enderecarProduto import enderecar_produto
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -39,7 +39,7 @@ def main(page: ft.Page):
         )
 
     # Função para alternar entre rotas
-    def navigate_to(route):
+    def navigate_to(route, arguments=None):
         page.views.clear()
         if route == "/login":
             page.views.append(create_login_view())
@@ -47,8 +47,8 @@ def main(page: ft.Page):
             page.views.append(menu_page(page, navigate_to, create_header()))  # Passando a função navigate_to como argumento
         elif route == "/armazenar_bonus":
             page.views.append(buscar_etiqueta(navigate_to, create_header()))  # Nova rota para Separar Pedido
-        elif route =="/enderecarBonus":
-            page.views.append(enderecar_bonus_page(navigate_to, create_header()))
+        elif route =="/enderecarProduto":
+            page.views.append(enderecar_produto(navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login

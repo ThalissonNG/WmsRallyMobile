@@ -4,7 +4,7 @@ from routes.config.config import base_url
 
 def buscar_etiqueta(navigate_to, header):
 
-    def consultarEtiqueta(codetiqueta):
+    def consultarEtiqueta(page, codetiqueta):
         try:
             response = requests.post(
                 f"{base_url}/consultarEtiqueta",
@@ -12,12 +12,31 @@ def buscar_etiqueta(navigate_to, header):
             )
             if response.status_code == 200:
                 resposta = response.json()
-                codproduto = resposta.get("codprod")
-                qt = resposta.get("qt")
-                numbonus = resposta.get("numbonus")
-                print(f"Produto: {codproduto} - Qt: {qt} - Bônus: {numbonus}")
+                data = resposta.get("data", {})
+                codprod = data.get("codprod")
+                qt = data.get("qt")
+                numbonus = data.get("numbonus")
+
+                navigate_to("/enderecarProduto",
+                            arguments={
+                                "codprod": codprod,
+                                "qt": qt,
+                                "numbonus": numbonus
+                            })
             else:
-                print("Erro ao consultar bônus")
+                print("Erro ao consultar o código de barras")
+                snackbar_error = ft.SnackBar(
+                        content=ft.Text(
+                            f"Erro ao consultar o código de barras",
+                            color=ft.colors.WHITE,
+                            size=20,
+                        ),
+                        bgcolor=ft.colors.RED,
+                        show_close_icon=True,
+                    )
+                page.snack_bar = snackbar_error
+                snackbar_error.open = True
+                page.update()
         except Exception as e:
             print(e)
     
@@ -48,7 +67,7 @@ def buscar_etiqueta(navigate_to, header):
                 ft.ElevatedButton(
                     text="Buscar",
                     width=600,
-                    on_click=lambda e: consultarEtiqueta(inputEtiqueta.value),
+                    on_click=lambda e: consultarEtiqueta(e.page, inputEtiqueta.value),
                 )
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
