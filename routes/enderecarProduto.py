@@ -8,28 +8,50 @@ def enderecar_produto(navigate_to, header, arguments):
     qt = arguments.get("qt", "N/A")
     numbonus = arguments.get("numbonus", "N/A")
 
-    print(f"Bônus: {numbonus} - Produto: {codprod} - Descrica0: {descricao} - Quantidade: {qt}")
+    print(f"Bônus: {numbonus} - Produto: {codprod} - Descricao: {descricao} - Quantidade: {qt}")
 
-    def guardar_produto(codetiquetaGuardar, enderecoGuardar, qtGuardar):
+    def guardar_produto(page, codbarra, codendereco, qtGuardar):
         try:
             response = requests.post(
                 f"{base_url}/guardarProduto",
-                json={"codetiqueta": codetiquetaGuardar,
-                        "codendereco": enderecoGuardar,
+                json={"codbarra": codbarra,
+                        "codendereco": codendereco,
                         "qt": qtGuardar,
                     }
             )
+            if response.status_code == 400 or response.status_code == 500:
+                resposta = response.json()
+                print(resposta)
+                snackbar_sucess = ft.SnackBar(
+                    content=ft.Text("Informação incompleta", color="white"),
+                    bgcolor=ft.colors.RED,
+                    show_close_icon=True,
+                    duration=1000,
+                )
+                page.overlay.append(snackbar_sucess)
+                snackbar_sucess.open = True
+                page.update()
+            else:
+                print("Produto guardado com sucesso")
+                snackbar_sucess = ft.SnackBar(
+                    content=ft.Text("Produto guardado com sucesso"),
+                    bgcolor=ft.colors.GREEN,
+                    show_close_icon=True,
+                    duration=1000,
+                )
+                page.overlay.append(snackbar_sucess)
+                snackbar_sucess.open = True
+                page.update()
         except Exception as e:
             print(e)
 
-    codetiquetaEndereco = ft.TextField(expand=True)
-    enderecoDestino = ft.TextField(expand=True)
+    codbarra = ft.TextField(expand=True)
+    codendereco = ft.TextField(expand=True)
     qtEndereco = ft.TextField(expand=True)
     numbonus = ft.Container(
         content=ft.Text(
             f"Número do bônus: {numbonus}",
             size=16,
-            color=ft.colors.BLACK,
             text_align="left",
         ),
         padding=10,
@@ -68,8 +90,8 @@ def enderecar_produto(navigate_to, header, arguments):
             rows=[
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(codetiquetaEndereco),
-                        ft.DataCell(enderecoDestino),
+                        ft.DataCell(codbarra),
+                        ft.DataCell(codendereco),
                         ft.DataCell(qtEndereco),
                     ]
                 )
@@ -80,8 +102,9 @@ def enderecar_produto(navigate_to, header, arguments):
     buttonGuardar = ft.ElevatedButton(
         text="Guardar",
         on_click=lambda e: guardar_produto(
-            codetiquetaEndereco.value,
-            enderecoDestino.value,
+            e.page,
+            codbarra.value,
+            codendereco.value,
             qtEndereco.value
             ) 
     )
@@ -104,4 +127,5 @@ def enderecar_produto(navigate_to, header, arguments):
                 # expand=True,
             ),
         ],
+        scroll="always",
     )

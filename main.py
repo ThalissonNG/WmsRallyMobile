@@ -78,6 +78,7 @@ def main(page: ft.Page):
                         content=ft.Text("Login com sucesso"),
                         bgcolor=ft.colors.GREEN,
                         show_close_icon=True,
+                        duration=1000,
                     )
                     page.overlay.append(snackbar_sucess)
                     snackbar_sucess.open = True
