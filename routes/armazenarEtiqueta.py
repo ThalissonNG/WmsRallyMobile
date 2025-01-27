@@ -14,12 +14,14 @@ def buscar_etiqueta(navigate_to, header):
                 resposta = response.json()
                 data = resposta.get("data", {})
                 codprod = data.get("codprod")
+                descricao = data.get("descricao")
                 qt = data.get("qt")
                 numbonus = data.get("numbonus")
 
                 navigate_to("/enderecarProduto",
                             arguments={
                                 "codprod": codprod,
+                                "descricao": descricao,
                                 "qt": qt,
                                 "numbonus": numbonus
                             })
