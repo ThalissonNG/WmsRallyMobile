@@ -5,7 +5,7 @@ from routes.config.config import base_url
 def enderecar_produto(navigate_to, header, arguments):
     codprod = arguments.get("codprod", "N/A")
     descricao = arguments.get("descricao", "N/A")
-    qt = arguments.get("qt", "N/A")
+    qt = int(arguments.get("qt", 0))
     numbonus = arguments.get("numbonus", "N/A")
 
     print(f"Bônus: {numbonus} - Produto: {codprod} - Descricao: {descricao} - Quantidade: {qt}")
@@ -31,7 +31,7 @@ def enderecar_produto(navigate_to, header, arguments):
                 page.overlay.append(snackbar_sucess)
                 snackbar_sucess.open = True
                 page.update()
-            else:
+            elif response.status_code == 200:
                 print("Produto guardado com sucesso")
                 snackbar_sucess = ft.SnackBar(
                     content=ft.Text("Produto guardado com sucesso"),
@@ -41,6 +41,14 @@ def enderecar_produto(navigate_to, header, arguments):
                 )
                 page.overlay.append(snackbar_sucess)
                 snackbar_sucess.open = True
+                
+                nonlocal qt  # Permite modificar a variável `qt` definida fora do escopo da função
+                qt -= int(qtGuardar)  # Atualiza a quantidade
+
+                # Atualiza o texto da tabela na tela
+                tableCodprod.controls[0].rows[0].cells[1].content.value = str(qt)
+                tableCodprod.update()
+
                 page.update()
         except Exception as e:
             print(e)
@@ -70,7 +78,7 @@ def enderecar_produto(navigate_to, header, arguments):
                     ft.DataRow(
                         cells=[
                             ft.DataCell(ft.Text(codprod)),
-                            ft.DataCell(ft.Text(qt)),
+                            ft.DataCell(ft.Text(str(qt))),
                             ft.DataCell(ft.Text(descricao)),
                         ]
                     )
