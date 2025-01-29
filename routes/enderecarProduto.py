@@ -2,22 +2,28 @@ import flet as ft
 import requests
 from routes.config.config import base_url
 
-def enderecar_produto(navigate_to, header, arguments):
+def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     codprod = arguments.get("codprod", "N/A")
     codfab = arguments.get("codfab", "N/A")
     descricao = arguments.get("descricao", "N/A")
     qt = int(arguments.get("qt", 0))
     numbonus = arguments.get("numbonus", "N/A")
+    matricula = arguments.get("matricula", "N/A")
+    codfilial = arguments.get("codfilial", "N/A")
 
     print(f"Bônus: {numbonus} - Produto: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Quantidade: {qt}")
+    print(f"Matricula: {matricula} - codfilial: {codfilial}")
 
     def guardar_produto(page, codbarra, codendereco, qtGuardar):
+        print(f"Matricula: {matricula} - codfilial: {codfilial}")
         try:
             response = requests.post(
                 f"{base_url}/guardarProduto",
                 json={"codbarra": codbarra,
                         "codendereco": codendereco,
                         "qt": qtGuardar,
+                        "matricula": matricula,
+                        "codfilial": codfilial,
                     }
             )
             if response.status_code == 400 or response.status_code == 500:

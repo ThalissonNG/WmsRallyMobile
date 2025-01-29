@@ -2,7 +2,12 @@ import flet as ft
 import requests
 from routes.config.config import base_url
 
-def buscar_etiqueta(navigate_to, header):
+def buscar_etiqueta(navigate_to, header, arguments):
+    matricula = arguments.get("matricula", "N/A")
+    usuario = arguments.get("usuario", "N/A")
+    codfilial = arguments.get("codfilial", "N/A")
+    nomeCompleto = arguments.get("nomeCompleto", "N/A")
+    print(f"matricula: {matricula} - usuario: {usuario}")
 
     def consultarEtiqueta(page, codetiqueta):
         try:
@@ -22,12 +27,17 @@ def buscar_etiqueta(navigate_to, header):
 
                 navigate_to("/enderecarProduto",
                             arguments={
+                                "matricula": matricula,
+                                "usuario": usuario,
+                                "codfilial": codfilial,
+                                "nomeCompleto": nomeCompleto,
                                 "codprod": codprod,
                                 "codfab": codfab,
                                 "descricao": descricao,
                                 "qt": qt,
                                 "numbonus": numbonus
-                            })
+                            }
+                            )
             else:
                 print("Erro ao consultar o código de barras")
                 snackbar_error = ft.SnackBar(

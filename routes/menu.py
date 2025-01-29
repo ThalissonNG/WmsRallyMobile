@@ -1,7 +1,9 @@
 import flet as ft
 
-def menu_page(page: ft.Page, navigate_to, header):
+def menu_page(page: ft.Page, navigate_to, header, arguments):
     welcome_text = ft.Text("Menu Principal", size=24, weight="bold", color="blue")
+    # matricula = arguments.get("matricula", "N/A")
+    # print(matricula)
 
     # Retorna a view configurada
     return ft.View(
@@ -33,7 +35,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                 ft.ElevatedButton(
                                     "Armazenar Bônus", 
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/armazenar_bonus"),
+                                    on_click=lambda e: navigate_to("/armazenar_bonus", arguments),
                                     ),
                             ],
                             spacing=10,

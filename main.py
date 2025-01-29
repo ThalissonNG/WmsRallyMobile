@@ -44,11 +44,11 @@ def main(page: ft.Page):
         if route == "/login":
             page.views.append(create_login_view())
         elif route == "/menu":
-            page.views.append(menu_page(page, navigate_to, create_header()))  # Passando a função navigate_to como argumento
+            page.views.append(menu_page(page, navigate_to, create_header(), arguments))  # Passando a função navigate_to como argumento
         elif route == "/armazenar_bonus":
-            page.views.append(buscar_etiqueta(navigate_to, create_header()))  # Nova rota para Separar Pedido
+            page.views.append(buscar_etiqueta(navigate_to, create_header(), arguments))  # Nova rota para Separar Pedido
         elif route =="/enderecarProduto":
-            page.views.append(enderecar_produto(navigate_to, create_header(), arguments))
+            page.views.append(enderecar_produto(page, navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login
@@ -69,10 +69,13 @@ def main(page: ft.Page):
 
                 if response.status_code == 200:
                     response_data = response.json()
-                    global usuario, matricula
+                    global usuario, matricula, codfilial, nomeCompleto
                     usuario = response_data.get('usuario')
                     matricula = response_data.get('matricula')
-                    print(matricula, usuario)
+                    codfilial = response_data.get('codfilial')
+                    nomeCompleto = response_data.get('nomeCompleto')
+
+                    print(matricula, usuario, codfilial)
 
                     snackbar_sucess = ft.SnackBar(
                         content=ft.Text("Login com sucesso"),
@@ -83,7 +86,13 @@ def main(page: ft.Page):
                     page.overlay.append(snackbar_sucess)
                     snackbar_sucess.open = True
                     page.update()
-                    navigate_to("/menu")
+                    navigate_to("/menu",
+                                arguments={
+                                    'matricula': matricula,
+                                    'usuario': usuario,
+                                    'codfilial': codfilial,
+                                    'nomeCompleto': nomeCompleto}
+                                )
                 elif response.status_code == 404:
                     snackbar_error = ft.SnackBar(
                         content=ft.Text(
