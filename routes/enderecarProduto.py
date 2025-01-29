@@ -4,11 +4,12 @@ from routes.config.config import base_url
 
 def enderecar_produto(navigate_to, header, arguments):
     codprod = arguments.get("codprod", "N/A")
+    codfab = arguments.get("codfab", "N/A")
     descricao = arguments.get("descricao", "N/A")
     qt = int(arguments.get("qt", 0))
     numbonus = arguments.get("numbonus", "N/A")
 
-    print(f"Bônus: {numbonus} - Produto: {codprod} - Descricao: {descricao} - Quantidade: {qt}")
+    print(f"Bônus: {numbonus} - Produto: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Quantidade: {qt}")
 
     def guardar_produto(page, codbarra, codendereco, qtGuardar):
         try:
@@ -46,16 +47,34 @@ def enderecar_produto(navigate_to, header, arguments):
                 qt -= int(qtGuardar)  # Atualiza a quantidade
 
                 # Atualiza o texto da tabela na tela
-                tableCodprod.controls[0].rows[0].cells[1].content.value = str(qt)
-                tableCodprod.update()
+                infosProduto.controls[0].rows[0].cells[1].content.value = str(qt)
+                infosProduto.update()
 
                 page.update()
         except Exception as e:
             print(e)
 
-    codbarra = ft.TextField(expand=True)
-    codendereco = ft.TextField(expand=True)
-    qtEndereco = ft.TextField(expand=True)
+    codbarra = ft.TextField(
+        label="CODBARRA",
+        prefix_icon=ft.icons.BARCODE_READER,
+        border_radius=ft.border_radius.all(10),
+        border_color=ft.colors.BLACK,
+        border_width=2,
+    )
+    codendereco = ft.TextField(
+        label="CODENDERECO",
+        prefix_icon=ft.icons.STORAGE,
+        border_radius=ft.border_radius.all(10),
+        border_color=ft.colors.BLACK,
+        border_width=2,
+    )
+    qtEndereco = ft.TextField(
+        label="QUANTIDADE",
+        prefix_icon=ft.icons.STORAGE,
+        border_radius=ft.border_radius.all(10),
+        border_color=ft.colors.BLACK,
+        border_width=2,
+    )
     numbonus = ft.Container(
         content=ft.Text(
             f"Número do bônus: {numbonus}",
@@ -66,45 +85,61 @@ def enderecar_produto(navigate_to, header, arguments):
         border_radius=ft.border_radius.all(10),
         alignment=ft.alignment.center_left,
     )
-    tableCodprod = ft.Row(
-        controls=[
-            ft.DataTable(
-                columns=[
-                    ft.DataColumn(ft.Text("CODPROD")),
-                    ft.DataColumn(ft.Text("QT")),
-                    ft.DataColumn(ft.Text("DESCRICAO")),
-                ],
-                rows=[
-                    ft.DataRow(
-                        cells=[
-                            ft.DataCell(ft.Text(codprod)),
-                            ft.DataCell(ft.Text(str(qt))),
-                            ft.DataCell(ft.Text(descricao)),
-                        ]
-                    )
-                ],
-            )
-        ],
-        scroll="always",
-        width=400,
-    )
-    tableEndereco = ft.Container(
-        content=ft.DataTable(
-            columns=[
-                ft.DataColumn(ft.Text("CODPROD")),
-                ft.DataColumn(ft.Text("DESTINO")),
-                ft.DataColumn(ft.Text("QUANTIDADE")),
+    infosProduto = ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.Row(
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                ft.Text(
+                                    "CODPROD:",
+                                    weight="bold",
+                                ),
+                                ft.Text(codprod),
+                            ],
+                        ),
+                        ft.Column(
+                            controls=[
+                                ft.Text(
+                                    "CODFAB:",
+                                    weight="bold",
+                                ),
+                                ft.Text(codfab),
+                            ],
+                        ),
+                        ft.Column(
+                            controls=[
+                                ft.Text(
+                                    "QT:",
+                                    weight="bold",
+                                ),
+                                ft.Text(qt),
+                            ],
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_AROUND
+                ),
+                ft.Divider(),
+                ft.Row(
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                ft.Text(
+                                    "DESCRIÇÃO:",
+                                    weight="bold",
+                                ),
+                                ft.Text(descricao),
+                            ],
+                            expand=True,
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.START,
+                ),
+                ft.Divider(),
             ],
-            rows=[
-                ft.DataRow(
-                    cells=[
-                        ft.DataCell(codbarra),
-                        ft.DataCell(codendereco),
-                        ft.DataCell(qtEndereco),
-                    ]
-                )
-            ]
         ),
+        padding=10,
         expand=True,
     )
     buttonGuardar = ft.ElevatedButton(
@@ -126,13 +161,13 @@ def enderecar_produto(navigate_to, header, arguments):
                 content=ft.Column(
                     controls=[
                         numbonus,
-                        tableCodprod,
-                        tableEndereco,
+                        infosProduto,
+                        codbarra,
+                        codendereco,
+                        qtEndereco,
                         buttonGuardar,
                     ],
-                ),
-                # alignment=ft.alignment.center,
-                # expand=True,
+                )
             ),
         ],
         scroll="always",
