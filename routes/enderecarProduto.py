@@ -14,8 +14,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     print(f"Bônus: {numbonus} - Produto: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Quantidade: {qt}")
     print(f"Matricula: {matricula} - codfilial: {codfilial}")
 
-    def guardar_produto(page, codbarra, codendereco, qtGuardar):
-        print(f"Matricula: {matricula} - codfilial: {codfilial}")
+    def guardar_produto(page, codbarra, codendereco, qtGuardar, numbonus):
         try:
             response = requests.post(
                 f"{base_url}/guardarProduto",
@@ -24,6 +23,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                         "qt": qtGuardar,
                         "matricula": matricula,
                         "codfilial": codfilial,
+                        "numbonus": numbonus,
                     }
             )
             if response.status_code == 400 or response.status_code == 500:
@@ -81,7 +81,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
         border_color=ft.colors.BLACK,
         border_width=2,
     )
-    numbonus = ft.Container(
+    numbonus_container = ft.Container(
         content=ft.Text(
             f"Número do bônus: {numbonus}",
             size=16,
@@ -154,7 +154,8 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
             e.page,
             codbarra.value,
             codendereco.value,
-            qtEndereco.value
+            qtEndereco.value,
+            numbonus,
             ) 
     )
 
@@ -166,7 +167,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
             ft.Container(
                 content=ft.Column(
                     controls=[
-                        numbonus,
+                        numbonus_container,
                         infosProduto,
                         codbarra,
                         codendereco,
