@@ -36,7 +36,7 @@ def menu_page(page: ft.Page, navigate_to, header, arguments):
                                     "Armazenar Bônus", 
                                     expand=True,
                                     on_click=lambda e: navigate_to("/armazenar_bonus", arguments),
-                                    ),
+                                ),
                             ],
                             spacing=10,
                         ),
@@ -57,7 +57,9 @@ def menu_page(page: ft.Page, navigate_to, header, arguments):
                             controls=[
                                 ft.ElevatedButton("Carregar carro", expand=True),
                                 ft.ElevatedButton(
-                                    "Consultar Produto ou Endereço", expand=True
+                                    "Consultar Produto ou Endereço",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/consultarProdutoEndereco", arguments),
                                 ),
                             ],
                             spacing=10,

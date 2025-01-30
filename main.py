@@ -4,6 +4,7 @@ from routes.config.config import base_url
 from routes.menu import menu_page
 from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
+from routes.consultarProdutoEndereco import consultar_produto_endereco
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -49,6 +50,8 @@ def main(page: ft.Page):
             page.views.append(buscar_etiqueta(navigate_to, create_header(), arguments))  # Nova rota para Separar Pedido
         elif route =="/enderecarProduto":
             page.views.append(enderecar_produto(page, navigate_to, create_header(), arguments))
+        elif route == "/consultarProdutoEndereco":
+            page.views.append(consultar_produto_endereco(navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login
