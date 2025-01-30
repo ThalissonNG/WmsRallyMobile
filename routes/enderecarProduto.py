@@ -10,6 +10,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     numbonus = arguments.get("numbonus", "N/A")
     matricula = arguments.get("matricula", "N/A")
     codfilial = arguments.get("codfilial", "N/A")
+    codetiqueta = arguments.get("codetiqueta", "N/A")
 
     print(f"Bônus: {numbonus} - Produto: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Quantidade: {qt}")
     print(f"Matricula: {matricula} - codfilial: {codfilial}")
@@ -24,6 +25,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                         "matricula": matricula,
                         "codfilial": codfilial,
                         "numbonus": numbonus,
+                        "codetiqueta": codetiqueta,
                     }
             )
             if response.status_code == 400 or response.status_code == 500:

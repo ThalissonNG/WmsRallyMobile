@@ -35,7 +35,8 @@ def buscar_etiqueta(navigate_to, header, arguments):
                                 "codfab": codfab,
                                 "descricao": descricao,
                                 "qt": qt,
-                                "numbonus": numbonus
+                                "numbonus": numbonus,
+                                "codetiqueta": codetiqueta,
                             }
                             )
             else:
