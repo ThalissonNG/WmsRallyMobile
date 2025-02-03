@@ -48,7 +48,8 @@ def menu_page(page: ft.Page, navigate_to, header, arguments):
                                     ),
                                 ft.ElevatedButton(
                                     "Transferir Produto",
-                                    expand=True
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/transferirProduto")
                                     ),
                             ],
                             spacing=10,

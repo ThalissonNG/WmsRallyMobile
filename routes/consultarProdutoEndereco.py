@@ -170,7 +170,6 @@ def consultar_produto_endereco(navigate_to, header, arguments):
             ),
             border=ft.border.all(1, 'black'),
         )
-
     
     def consultar_endereco(codendereco_valor, e):
         # Limpa a lista de produtos do column

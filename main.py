@@ -5,6 +5,7 @@ from routes.menu import menu_page
 from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
 from routes.consultarProdutoEndereco import consultar_produto_endereco
+from routes.transferirProduto import transferir_produto
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -52,6 +53,8 @@ def main(page: ft.Page):
             page.views.append(enderecar_produto(page, navigate_to, create_header(), arguments))
         elif route == "/consultarProdutoEndereco":
             page.views.append(consultar_produto_endereco(navigate_to, create_header(), arguments))
+        elif route =="/transferirProduto":
+            page.views.append(transferir_produto(navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login
