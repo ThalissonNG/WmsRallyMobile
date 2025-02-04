@@ -54,7 +54,7 @@ def main(page: ft.Page):
         elif route == "/consultarProdutoEndereco":
             page.views.append(consultar_produto_endereco(navigate_to, create_header(), arguments))
         elif route =="/transferirProduto":
-            page.views.append(transferir_produto(navigate_to, create_header(), arguments))
+            page.views.append(transferir_produto(page, navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login
