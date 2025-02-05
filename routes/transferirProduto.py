@@ -3,15 +3,37 @@ import requests
 from routes.config.config import base_url
 
 def transferir_produto(page, navigate, header, arguments):
-    # 1) Crie o Column de produtos normalmente:
+    # Container para os resultados da consulta de endereço
     lista_produtos = ft.Column(scroll=ft.ScrollMode.AUTO)
+    print(arguments)
+    # codfilial = arguments.get("codfilial", "N/A")
+    
+    # Container para os resultados da consulta do produto (codbarra)
+    produtoInfoContainer = ft.Container()
 
+    # Campo para preencher endereço de destino no dialog de produto
+    enderecoDestinoField = ft.TextField(
+        label="Endereço Destino",
+        border_radius=ft.border_radius.all(10),
+        border_color=ft.colors.BLACK,
+        border_width=2,
+    )
+    # Campo para quantidade, que será pré-preenchido
+    quantidadeField = ft.TextField(
+        label="Quantidade",
+        border_radius=ft.border_radius.all(10),
+        border_color=ft.colors.BLACK,
+        border_width=2,
+    )
+    
     title = ft.Text(
         "Transferir Produto",
         size=24,
         weight="bold",
         color="blue"
     )
+    
+    # Campo para inserir o endereço atual
     codenderecoAtual = ft.TextField(
         label="CODENDERECO",
         prefix_icon=ft.icons.BARCODE_READER,
@@ -19,48 +41,95 @@ def transferir_produto(page, navigate, header, arguments):
         border_color=ft.colors.BLACK,
         border_width=2,
     )
-    buttonCodendereco = ft.ElevatedButton(
+    # Botão para consultar produtos no endereço
+    buttonConsultarEndereco = ft.ElevatedButton(
         text="Consultar",
         on_click=lambda e: consultar_endereco(codenderecoAtual.value, e),
     )
-    codbarra = ft.TextField(
+    
+    # Campo para inserir o código de barras no diálogo de endereço
+    codbarra_dialog = ft.TextField(
         label="CODBARRA",
         prefix_icon=ft.icons.BARCODE_READER,
         border_radius=ft.border_radius.all(10),
         border_color=ft.colors.BLACK,
         border_width=2,
     )
-    buttonCodbarra = ft.ElevatedButton(
+    
+    # Botão para transferir (consulta por codbarra)
+    buttonTransferirProduto = ft.ElevatedButton(
         text="Transferir",
-        on_click=lambda e: consultar_codbarra(codbarra.value, codenderecoAtual.value, e)
+        on_click=lambda e: consultar_codbarra(codbarra_dialog.value, codenderecoAtual.value, e)
     )
-
-    # 2) Crie o AlertDialog já referenciando esse Column no 'content'
-    dialog = ft.AlertDialog(
-        title=ft.Text(f"Itens do endereço"),
-        content=lista_produtos,    # <-- Aqui colocamos o Column como 'content'
+    
+    # Dialog de Endereço: exibe os produtos do endereço e permite digitar o CODBARRA
+    dialogEnderecoContent = ft.Column(
+        controls=[
+            lista_produtos,
+            codbarra_dialog,
+            buttonTransferirProduto
+        ],
+        scroll=ft.ScrollMode.AUTO
+    )
+    dialogEndereco = ft.AlertDialog(
+        title=ft.Text("Itens do endereço"),
+        content=dialogEnderecoContent,
         actions=[
-            codbarra,
-            buttonCodbarra,
-            ft.ElevatedButton("Fechar", on_click=lambda e: fechar_dialog(page)),
+            ft.ElevatedButton("Fechar", on_click=lambda e: fechar_dialogEndereco(e))
         ],
     )
-
-    def abrir_dialog():
-        page.dialog = dialog
-        dialog.open = True
+    
+    # Dialog de Produto: exibe as informações do produto selecionado e os campos para endereço destino e quantidade
+    dialogProdutoContent = ft.Column(
+        controls=[
+            produtoInfoContainer,  # Container que receberá as informações do produto
+            enderecoDestinoField,  # Campo para endereço destino
+            quantidadeField,       # Campo para quantidade (pré-preenchido)
+            ft.ElevatedButton("Confirmar", on_click=lambda e: confirmar_transferencia(codbarra_dialog.value, codenderecoAtual.value, enderecoDestinoField.value, quantidadeField.value, e))
+        ],
+        scroll=ft.ScrollMode.AUTO
+    )
+    dialogProduto = ft.AlertDialog(
+        title=ft.Text("Confirmação de Transferência"),
+        content=dialogProdutoContent,
+        actions=[
+            ft.ElevatedButton("Fechar", on_click=lambda e: fechar_dialogProduto(e))
+        ],
+    )
+    
+    # Funções para abrir/fechar os diálogos:
+    def abrir_dialogEndereco():
+        page.dialog = dialogEndereco
+        dialogEndereco.open = True
         page.update()
-
-    def fechar_dialog(e):
-        dialog.open = False
+    
+    def fechar_dialogEndereco(e):
+        dialogEndereco.open = False
         new_lista_produtos = ft.Column(scroll=ft.ScrollMode.AUTO)
-        dialog.content = new_lista_produtos
-        nonlocal lista_produtos  # Use nonlocal para modificar a variável do escopo da função transferir_produto
+        dialogEndereco.content = ft.Column(
+            controls=[new_lista_produtos, codbarra_dialog, buttonTransferirProduto],
+            scroll=ft.ScrollMode.AUTO
+        )
+        nonlocal lista_produtos
         lista_produtos = new_lista_produtos
+        codbarra_dialog.value = ""
         page.update()
-
-
-    def criar_container_endereco(row):
+    
+    def abrir_dialogProduto():
+        page.dialog = dialogProduto
+        dialogProduto.open = True
+        page.update()
+    
+    def fechar_dialogProduto(e):
+        dialogProduto.open = False
+        produtoInfoContainer.content = None
+        enderecoDestinoField.value = ""
+        quantidadeField.value = ""
+        page.update()
+    
+    # Função para criar um container com o layout de um produto (para consulta de endereço ou produto)
+    def criar_container_produto(row):
+        # Para consulta de endereço, assumimos que row é: [codprod, codfab, qt, descricao]
         codprod, codfab, qt, descricao = row
         return ft.Container(
             padding=10,
@@ -71,22 +140,13 @@ def transferir_produto(page, navigate, header, arguments):
                         alignment=ft.MainAxisAlignment.SPACE_AROUND,
                         controls=[
                             ft.Column(
-                                controls=[
-                                    ft.Text("CODPROD", weight="BOLD"),
-                                    ft.Text(str(codprod)),
-                                ]
+                                controls=[ft.Text("CODPROD", weight="BOLD"), ft.Text(str(codprod))]
                             ),
                             ft.Column(
-                                controls=[
-                                    ft.Text("CODFAB", weight="BOLD"),
-                                    ft.Text(str(codfab)),
-                                ]
+                                controls=[ft.Text("CODFAB", weight="BOLD"), ft.Text(str(codfab))]
                             ),
                             ft.Column(
-                                controls=[
-                                    ft.Text("QT", weight="BOLD"),
-                                    ft.Text(str(qt)),
-                                ]
+                                controls=[ft.Text("QT", weight="BOLD"), ft.Text(str(qt))]
                             ),
                         ],
                     ),
@@ -95,10 +155,7 @@ def transferir_produto(page, navigate, header, arguments):
                         controls=[
                             ft.Column(
                                 expand=True,
-                                controls=[
-                                    ft.Text("PRODUTO", weight="BOLD"),
-                                    ft.Text(descricao),
-                                ]
+                                controls=[ft.Text("PRODUTO", weight="BOLD"), ft.Text(descricao)]
                             )
                         ],
                     ),
@@ -106,29 +163,58 @@ def transferir_produto(page, navigate, header, arguments):
             ),
             border=ft.border.all(1, 'black'),
         )
-
+    
+    # Consulta de endereço: preenche o container com os produtos desse endereço e abre dialogEndereco
     def consultar_endereco(codenderecoAtual, e):
         lista_produtos.controls.clear()
         try:
             response = requests.post(
                 f"{base_url}/transferirProduto",
-                json={"codenderecoAtual":codenderecoAtual}
+                json={"codenderecoAtual": codenderecoAtual}
             )
             if response.status_code == 200:
                 dados = response.json()
                 dados_endereco = dados.get("dados_endereco", [])
                 lista_produtos.controls.clear()
-                # Preenche o Column com os dados
                 for row in dados_endereco:
-                    container_end = criar_container_endereco(row)
+                    container_end = criar_container_produto(row)
                     lista_produtos.controls.append(container_end)
-
-                # Após adicionar todos os produtos, abra o diálogo
-                abrir_dialog()
+                abrir_dialogEndereco()
             elif response.status_code == 402:
                 snackbar_error = ft.SnackBar(
+                    content=ft.Text(f"Endereço: {codenderecoAtual} não encontrado", color=ft.colors.WHITE, size=20),
+                    bgcolor=ft.colors.RED,
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_error)
+                snackbar_error.open = True
+            e.page.update()
+        except Exception as exc:
+            print("Erro na requisição (endereco):", exc)
+        e.page.update()
+    
+    # Consulta de produto (codbarra): preenche o dialogProduto com as informações do produto
+    def consultar_codbarra(codbarra, codenderecoAtual, e):
+        try:
+            response = requests.post(
+                f"{base_url}/transferirProduto",
+                json={"codbarra": codbarra, "codenderecoAtual": codenderecoAtual}
+            )
+            if response.status_code == 201:
+                dados = response.json()
+                dados_produto = dados.get("dados_produto", [])
+                if dados_produto:
+                    # Pega o primeiro produto retornado
+                    row = dados_produto[0]
+                    container_prod = criar_container_produto(row)
+                    produtoInfoContainer.content = container_prod
+                    # Preenche o campo de quantidade com o qt do produto
+                    quantidadeField.value = str(row[2])
+                    abrir_dialogProduto()
+            elif response.status_code == 403:
+                snackbar_error = ft.SnackBar(
                     content=ft.Text(
-                        f"Endereço: {codenderecoAtual} não encontrado",
+                        f"Produto: {codbarra} não encontrado no endereço: {codenderecoAtual}",
                         color=ft.colors.WHITE,
                         size=20,
                     ),
@@ -139,30 +225,54 @@ def transferir_produto(page, navigate, header, arguments):
                 snackbar_error.open = True
             e.page.update()
         except Exception as exc:
-            print("Erro na requisição (endereco):", exc)
+            print("Erro na requisição (produto):", exc)
         e.page.update()
-
-    def consultar_codbarra(codbarra, codenderecoAtual, e):
+    
+    # Função para confirmar a transferência (exemplo)
+    def confirmar_transferencia(codbarra, codenderecoAtual, codenderecoNovo, quantidade, e):
         try:
-            response = requests.post(
+            response  =requests.post(
                 f"{base_url}/transferirProduto",
                 json={"codbarra": codbarra,
-                        "codenderecoAtual": codenderecoAtual
+                    "codenderecoAtual": codenderecoAtual,
+                    "codenderecoNovo": codenderecoNovo,
+                    "quantidade": quantidade
                 }
             )
-            if response.status_code == 200:
-                print("Tem codbarra")
-            else:
-                print("Não tem codbarra")
+            if response.status_code == 202:
+                print("Atualizado com sucesso")
+            elif response.status_code == 405:
+                print("Erro na atualização")
         except Exception as exc:
-            print("Erro na requisição (endereco):", exc)
+            print("Erro na requisição (produto):", exc)
         e.page.update()
+        fechar_dialogProduto(e)
+    
+    # Como a tela sempre consulta o endereço, usamos apenas um tab (de Endereço)
+    tabs = ft.Tabs(
+        selected_index=0,
+        animation_duration=300,
+        height=200,
+        tabs=[
+            ft.Tab(
+                text="Endereço",
+                content=ft.Column(
+                    [
+                        ft.Text("Informe o código de barras do endereço", size=16),
+                        codenderecoAtual,
+                        buttonConsultarEndereco,
+                    ]
+                ),
+            ),
+        ],
+    )
+    
     return ft.View(
         route="/transferirProduto",
         controls=[
             header,
             title,
-            codenderecoAtual,
-            buttonCodendereco,
-        ]
+            tabs,
+        ],
+        scroll=ft.ScrollMode.AUTO,
     )
