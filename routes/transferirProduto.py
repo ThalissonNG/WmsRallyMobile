@@ -1,11 +1,14 @@
 import flet as ft
 import requests
 from routes.config.config import base_url
+from routes.config.config import user_info
 
-def transferir_produto(page, navigate, header, arguments):
+def transferir_produto(page, navigate, header):
     # Container para os resultados da consulta de endereço
     lista_produtos = ft.Column(scroll=ft.ScrollMode.AUTO)
-    print(arguments)
+    matricula = user_info.get("matricula")
+
+    print(f"User config na tela transferirProdutos: {matricula}")
     # codfilial = arguments.get("codfilial", "N/A")
     
     # Container para os resultados da consulta do produto (codbarra)

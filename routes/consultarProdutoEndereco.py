@@ -1,8 +1,11 @@
 import flet as ft
 import requests
 from routes.config.config import base_url
+from routes.config.config import user_info
 
-def consultar_produto_endereco(navigate_to, header, arguments):
+def consultar_produto_endereco(navigate_to, header):
+    matricula = user_info.get("matricula")
+    print(f"User info tela de consultarProduto: {matricula}")
 
     lista_produtos_col = ft.Column(scroll=ft.ScrollMode.AUTO)
 

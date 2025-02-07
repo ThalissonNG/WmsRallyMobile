@@ -1,12 +1,13 @@
 import flet as ft
 import requests
 from routes.config.config import base_url
+from routes.config.config import user_info
 
-def buscar_etiqueta(navigate_to, header, arguments):
-    matricula = arguments.get("matricula", "N/A")
-    usuario = arguments.get("usuario", "N/A")
-    codfilial = arguments.get("codfilial", "N/A")
-    nomeCompleto = arguments.get("nomeCompleto", "N/A")
+def buscar_etiqueta(navigate_to, header):
+    matricula = user_info.get("matricula", "N/A")
+    usuario = user_info.get("usuario", "N/A")
+    codfilial = user_info.get("codfilial", "N/A")
+    nomeCompleto = user_info.get("nomeCompleto", "N/A")
     print(f"matricula: {matricula} - usuario: {usuario}")
 
     def consultarEtiqueta(page, codetiqueta):
@@ -91,7 +92,7 @@ def buscar_etiqueta(navigate_to, header, arguments):
         padding=10,
     )
     return ft.View(
-        route="/separar",
+        route="/armazenar_bonus",
         controls=[
             header,
             title,

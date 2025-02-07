@@ -1,7 +1,11 @@
 import flet as ft
+from routes.config.config import user_info
 
-def menu_page(page: ft.Page, navigate_to, header, arguments):
+def menu_page(page: ft.Page, navigate_to, header):
     welcome_text = ft.Text("Menu Principal", size=24, weight="bold", color="blue")
+    matricula = user_info.get("matricula")
+    print(f"User config na tela Menu: {matricula}")
+    
     # matricula = arguments.get("matricula", "N/A")
     # print(matricula)
 
@@ -35,7 +39,7 @@ def menu_page(page: ft.Page, navigate_to, header, arguments):
                                 ft.ElevatedButton(
                                     "Armazenar Bônus", 
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/armazenar_bonus", arguments),
+                                    on_click=lambda e: navigate_to("/armazenar_bonus"),
                                 ),
                             ],
                             spacing=10,
@@ -60,7 +64,7 @@ def menu_page(page: ft.Page, navigate_to, header, arguments):
                                 ft.ElevatedButton(
                                     "Consultar Produto ou Endereço",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/consultarProdutoEndereco", arguments),
+                                    on_click=lambda e: navigate_to("/consultarProdutoEndereco"),
                                 ),
                             ],
                             spacing=10,

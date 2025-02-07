@@ -1,6 +1,7 @@
 import flet as ft
 import requests
 from routes.config.config import base_url
+from routes.config.config import user_info
 
 def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     codprod = arguments.get("codprod", "N/A")
@@ -8,12 +9,12 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     descricao = arguments.get("descricao", "N/A")
     qt = int(arguments.get("qt", 0))
     numbonus = arguments.get("numbonus", "N/A")
-    matricula = arguments.get("matricula", "N/A")
-    codfilial = arguments.get("codfilial", "N/A")
     codetiqueta = arguments.get("codetiqueta", "N/A")
+    matricula = user_info.get("matricula", "N/A")
+    codfilial = user_info.get("codfilial", "N/A")
 
     print(f"Bônus: {numbonus} - Produto: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Quantidade: {qt}")
-    print(f"Matricula: {matricula} - codfilial: {codfilial}")
+    print(f"Informações do arquivo config: Matricula: {matricula} - codfilial: {codfilial}")
 
     def guardar_produto(page, codbarra, codendereco, qtGuardar, numbonus):
         try:

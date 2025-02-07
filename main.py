@@ -15,9 +15,12 @@ def main(page: ft.Page):
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.padding = 20
 
+    # Cabeçalho que usa as variáveis globais definidas após o login
     def create_header():
+        # Importa o módulo config para acessar as informações atualizadas
+        import routes.config.config as config
         return ft.AppBar(
-            title=ft.Text(f"{matricula} - {usuario}"),
+            title=ft.Text(f"{config.user_info.get('matricula', '')} - {config.user_info.get('usuario', '')}"),
             bgcolor="blue",
             actions=[
                 ft.PopupMenuButton(
@@ -40,26 +43,25 @@ def main(page: ft.Page):
             ]
         )
 
-    # Função para alternar entre rotas
+    # Função de navegação entre rotas
     def navigate_to(route, arguments=None):
         page.views.clear()
         if route == "/login":
             page.views.append(create_login_view())
         elif route == "/menu":
-            page.views.append(menu_page(page, navigate_to, create_header(), arguments))  # Passando a função navigate_to como argumento
+            page.views.append(menu_page(page, navigate_to, create_header()))
         elif route == "/armazenar_bonus":
-            page.views.append(buscar_etiqueta(navigate_to, create_header(), arguments))  # Nova rota para Separar Pedido
-        elif route =="/enderecarProduto":
+            page.views.append(buscar_etiqueta(navigate_to, create_header(),))
+        elif route == "/enderecarProduto":
             page.views.append(enderecar_produto(page, navigate_to, create_header(), arguments))
         elif route == "/consultarProdutoEndereco":
-            page.views.append(consultar_produto_endereco(navigate_to, create_header(), arguments))
-        elif route =="/transferirProduto":
-            page.views.append(transferir_produto(page, navigate_to, create_header(), arguments))
+            page.views.append(consultar_produto_endereco(navigate_to, create_header()))
+        elif route == "/transferirProduto":
+            page.views.append(transferir_produto(page, navigate_to, create_header()))
         page.update()
 
     # Tela de login
     def create_login_view():
-
         def login(e):
             username.value = username.value.upper()
             password.value = password.value.upper()
@@ -81,7 +83,17 @@ def main(page: ft.Page):
                     codfilial = response_data.get('codfilial')
                     nomeCompleto = response_data.get('nomeCompleto')
 
+                    # Atualiza o dicionário global de usuário no módulo config
+                    import routes.config.config as config
+                    config.user_info.update({
+                        'matricula': matricula,
+                        'usuario': usuario,
+                        'codfilial': codfilial,
+                        'nomeCompleto': nomeCompleto,
+                    })
+
                     print(matricula, usuario, codfilial)
+                    print(f"UserConfig: {config.user_info}")
 
                     snackbar_sucess = ft.SnackBar(
                         content=ft.Text("Login com sucesso"),
@@ -92,13 +104,12 @@ def main(page: ft.Page):
                     page.overlay.append(snackbar_sucess)
                     snackbar_sucess.open = True
                     page.update()
-                    navigate_to("/menu",
-                                arguments={
-                                    'matricula': matricula,
-                                    'usuario': usuario,
-                                    'codfilial': codfilial,
-                                    'nomeCompleto': nomeCompleto}
-                                )
+                    navigate_to("/menu", arguments={
+                        'matricula': matricula,
+                        'usuario': usuario,
+                        'codfilial': codfilial,
+                        'nomeCompleto': nomeCompleto
+                    })
                 elif response.status_code == 404:
                     snackbar_error = ft.SnackBar(
                         content=ft.Text(
@@ -113,19 +124,15 @@ def main(page: ft.Page):
                     snackbar_error.open = True
                 else:
                     snackbar_error = ft.SnackBar(
-                        content=ft.Text(
-                            "Login incorreto", color=ft.colors.WHITE, size=20
-                        ),
+                        content=ft.Text("Login incorreto", color=ft.colors.WHITE, size=20),
                         bgcolor=ft.colors.RED,
                         show_close_icon=True,
                     )
                     page.overlay.append(snackbar_error)
                     snackbar_error.open = True
-            except requests.RequestException as e:
+            except requests.RequestException as exc:
                 snackbar_error = ft.SnackBar(
-                    content=ft.Text(
-                        f"Erro na conexão: {str(e)}", color=ft.colors.WHITE, size=20
-                    ),
+                    content=ft.Text(f"Erro na conexão: {str(exc)}", color=ft.colors.WHITE, size=20),
                     bgcolor=ft.colors.RED,
                     show_close_icon=True,
                 )
