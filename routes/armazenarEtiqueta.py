@@ -1,7 +1,6 @@
 import flet as ft
 import requests
-from routes.config.config import base_url
-from routes.config.config import user_info
+from routes.config.config import base_url, user_info, colorVariaveis
 
 def buscar_etiqueta(navigate_to, header):
     matricula = user_info.get("matricula", "N/A")
@@ -61,13 +60,13 @@ def buscar_etiqueta(navigate_to, header):
         "Armazenar Produto(s)",
         size=24,
         weight="bold",
-        color="blue"
+        color=colorVariaveis['titulo']
     )
     inputEtiqueta = ft.TextField(
         label="Número Etiqueta",
         prefix_icon=ft.icons.STICKY_NOTE_2,
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
         width=300,
         keyboard_type=ft.KeyboardType.NUMBER,
@@ -83,6 +82,8 @@ def buscar_etiqueta(navigate_to, header):
                 inputEtiqueta,
                 ft.ElevatedButton(
                     text="Buscar",
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    color=colorVariaveis['texto'],
                     width=600,
                     on_click=lambda e: consultarEtiqueta(e.page, inputEtiqueta.value),
                 )

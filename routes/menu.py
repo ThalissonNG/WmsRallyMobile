@@ -1,19 +1,21 @@
 import flet as ft
-from routes.config.config import user_info
+from routes.config.config import user_info, colorVariaveis
 
 def menu_page(page: ft.Page, navigate_to, header):
-    welcome_text = ft.Text("Menu Principal", size=24, weight="bold", color="blue")
+    
     matricula = user_info.get("matricula")
     print(f"User config na tela Menu: {matricula}")
-    
-    # matricula = arguments.get("matricula", "N/A")
-    # print(matricula)
 
+    titulo = ft.Text(
+        "Menu Principal",
+        size=24, weight="bold",
+        color=colorVariaveis['titulo']
+    )
     # Retorna a view configurada
     return ft.View(
         route="/menu",  # Define a rota da página
         controls=[header,
-                welcome_text,
+                titulo,
                 ft.Container(height=20),
                 ft.Column(
                     controls=[ 

@@ -1,7 +1,6 @@
 import flet as ft
 import requests
-from routes.config.config import base_url
-from routes.config.config import user_info
+from routes.config.config import base_url, user_info, colorVariaveis
 
 def consultar_produto_endereco(navigate_to, header):
     matricula = user_info.get("matricula")
@@ -97,7 +96,7 @@ def consultar_produto_endereco(navigate_to, header):
                     ),
                 ]
             ),
-            border=ft.border.all(1, 'black'),
+            border=ft.border.all(1, colorVariaveis['bordarInput']),
         )
 
     def consultar_produto(codbarra, e):
@@ -171,7 +170,7 @@ def consultar_produto_endereco(navigate_to, header):
                     ),
                 ]
             ),
-            border=ft.border.all(1, 'black'),
+            border=ft.border.all(1, colorVariaveis['bordarInput']),
         )
     
     def consultar_endereco(codendereco_valor, e):
@@ -205,15 +204,19 @@ def consultar_produto_endereco(navigate_to, header):
         "Consultar Produto ou Endereço",
         size=24,
         weight="bold",
-        color="blue"
+        color=colorVariaveis['titulo']
     )
     codbarra = ft.TextField(
         label="Código de Barras",
-        width=300
+        width=300,
+        border_radius=ft.border_radius.all(10),
+        border_color=colorVariaveis['bordarInput'],
     )
     codendereco = ft.TextField(
         label="Endereço",
-        width=300
+        width=300,
+        border_radius=ft.border_radius.all(10),
+        border_color=colorVariaveis['bordarInput'],
     )
 
     tabs = ft.Tabs(
@@ -229,6 +232,8 @@ def consultar_produto_endereco(navigate_to, header):
                         codbarra,
                         ft.ElevatedButton(
                             text="Consultar",
+                            color=colorVariaveis['texto'],
+                            bgcolor=colorVariaveis['botaoAcao'],
                             on_click=lambda e: consultar_produto(codbarra.value, e),
                         ),
                     ]
@@ -242,6 +247,8 @@ def consultar_produto_endereco(navigate_to, header):
                         codendereco,
                         ft.ElevatedButton(
                             text="Consultar",
+                            color=colorVariaveis['texto'],
+                            bgcolor=colorVariaveis['botaoAcao'],
                             on_click=lambda e: consultar_endereco(codendereco.value, e),
                         ),
                     ],

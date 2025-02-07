@@ -1,6 +1,6 @@
 import flet as ft
 import requests
-from routes.config.config import base_url
+from routes.config.config import base_url, colorVariaveis
 from routes.menu import menu_page
 from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
@@ -21,12 +21,12 @@ def main(page: ft.Page):
         import routes.config.config as config
         return ft.AppBar(
             title=ft.Text(f"{config.user_info.get('matricula', '')} - {config.user_info.get('usuario', '')}"),
-            bgcolor="blue",
+            bgcolor=colorVariaveis['botaoAcao'],
             actions=[
                 ft.PopupMenuButton(
                     icon=ft.icons.MENU,
                     icon_size=40,
-                    icon_color="#0000ff",
+                    icon_color=colorVariaveis['icones'],
                     items=[
                         ft.ElevatedButton(
                             icon=ft.icons.HOME,
@@ -97,7 +97,7 @@ def main(page: ft.Page):
 
                     snackbar_sucess = ft.SnackBar(
                         content=ft.Text("Login com sucesso"),
-                        bgcolor=ft.colors.GREEN,
+                        bgcolor=colorVariaveis['sucesso'],
                         show_close_icon=True,
                         duration=1000,
                     )
@@ -114,26 +114,34 @@ def main(page: ft.Page):
                     snackbar_error = ft.SnackBar(
                         content=ft.Text(
                             f"Usuário não encontrado {response.json()}",
-                            color=ft.colors.WHITE,
+                            color=colorVariaveis['texto'],
                             size=20,
                         ),
-                        bgcolor=ft.colors.RED,
+                        bgcolor=colorVariaveis['erro'],
                         show_close_icon=True,
                     )
                     page.overlay.append(snackbar_error)
                     snackbar_error.open = True
                 else:
                     snackbar_error = ft.SnackBar(
-                        content=ft.Text("Login incorreto", color=ft.colors.WHITE, size=20),
-                        bgcolor=ft.colors.RED,
+                        content=ft.Text(
+                            "Login incorreto",
+                            color=colorVariaveis['texto'],
+                            size=20
+                        ),
+                        bgcolor=colorVariaveis['erro'],
                         show_close_icon=True,
                     )
                     page.overlay.append(snackbar_error)
                     snackbar_error.open = True
             except requests.RequestException as exc:
                 snackbar_error = ft.SnackBar(
-                    content=ft.Text(f"Erro na conexão: {str(exc)}", color=ft.colors.WHITE, size=20),
-                    bgcolor=ft.colors.RED,
+                    content=ft.Text(
+                        f"Erro na conexão: {str(exc)}",
+                        color=colorVariaveis['texto'],
+                        size=20
+                    ),
+                    bgcolor=colorVariaveis['erro'],
                     show_close_icon=True,
                 )
                 page.overlay.append(snackbar_error)
@@ -144,7 +152,7 @@ def main(page: ft.Page):
             label="Usuário",
             prefix_icon=ft.icons.PERSON,
             border_radius=ft.border_radius.all(10),
-            border_color=ft.colors.BLACK,
+            border_color=colorVariaveis['bordarInput'],
             border_width=2,
             width=300,
         )
@@ -152,7 +160,7 @@ def main(page: ft.Page):
             label="Senha",
             prefix_icon=ft.icons.PASSWORD,
             border_radius=ft.border_radius.all(10),
-            border_color=ft.colors.BLACK,
+            border_color=colorVariaveis['bordarInput'],
             border_width=2,
             password=True,
             can_reveal_password=True,
@@ -160,8 +168,8 @@ def main(page: ft.Page):
         )
         button_login = ft.ElevatedButton(
             text="Login",
-            bgcolor="#0000ff",
-            color="#ffffff",
+            bgcolor=colorVariaveis['botaoAcao'],
+            color=colorVariaveis['texto'],
             width=300,
             on_click=login,
         )

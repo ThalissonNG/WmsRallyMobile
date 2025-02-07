@@ -1,7 +1,6 @@
 import flet as ft
 import requests
-from routes.config.config import base_url
-from routes.config.config import user_info
+from routes.config.config import base_url, user_info, colorVariaveis
 
 def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     codprod = arguments.get("codprod", "N/A")
@@ -67,21 +66,21 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
         label="CODBARRA",
         prefix_icon=ft.icons.BARCODE_READER,
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
     )
     codendereco = ft.TextField(
         label="CODENDERECO",
         prefix_icon=ft.icons.STORAGE,
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
     )
     qtEndereco = ft.TextField(
         label="QUANTIDADE",
         prefix_icon=ft.icons.STORAGE,
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
     )
     numbonus_container = ft.Container(
@@ -91,7 +90,6 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
             text_align="left",
         ),
         padding=10,
-        border_radius=ft.border_radius.all(10),
         alignment=ft.alignment.center_left,
     )
     infosProduto = ft.Container(
@@ -153,6 +151,8 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     )
     buttonGuardar = ft.ElevatedButton(
         text="Guardar",
+        bgcolor=colorVariaveis['botaoAcao'],
+        color=colorVariaveis['texto'],
         on_click=lambda e: guardar_produto(
             e.page,
             codbarra.value,

@@ -1,7 +1,6 @@
 import flet as ft
 import requests
-from routes.config.config import base_url
-from routes.config.config import user_info
+from routes.config.config import base_url, user_info, colorVariaveis
 
 def transferir_produto(page, navigate, header):
     # Container para os resultados da consulta de endereço
@@ -9,7 +8,6 @@ def transferir_produto(page, navigate, header):
     matricula = user_info.get("matricula")
 
     print(f"User config na tela transferirProdutos: {matricula}")
-    # codfilial = arguments.get("codfilial", "N/A")
     
     # Container para os resultados da consulta do produto (codbarra)
     produtoInfoContainer = ft.Container()
@@ -18,14 +16,14 @@ def transferir_produto(page, navigate, header):
     enderecoDestinoField = ft.TextField(
         label="Endereço Destino",
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
     )
     # Campo para quantidade, que será pré-preenchido
     quantidadeField = ft.TextField(
         label="Quantidade",
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
     )
     
@@ -33,7 +31,7 @@ def transferir_produto(page, navigate, header):
         "Transferir Produto",
         size=24,
         weight="bold",
-        color="blue"
+        color=colorVariaveis['titulo']
     )
     
     # Campo para inserir o endereço atual
@@ -41,12 +39,14 @@ def transferir_produto(page, navigate, header):
         label="CODENDERECO",
         prefix_icon=ft.icons.BARCODE_READER,
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
     )
     # Botão para consultar produtos no endereço
     buttonConsultarEndereco = ft.ElevatedButton(
         text="Consultar",
+        color=colorVariaveis['texto'],
+        bgcolor=colorVariaveis['botaoAcao'],
         on_click=lambda e: consultar_endereco(codenderecoAtual.value, e),
     )
     
@@ -55,13 +55,15 @@ def transferir_produto(page, navigate, header):
         label="CODBARRA",
         prefix_icon=ft.icons.BARCODE_READER,
         border_radius=ft.border_radius.all(10),
-        border_color=ft.colors.BLACK,
+        border_color=colorVariaveis['bordarInput'],
         border_width=2,
     )
     
     # Botão para transferir (consulta por codbarra)
     buttonTransferirProduto = ft.ElevatedButton(
         text="Transferir",
+        color=colorVariaveis['texto'],
+        bgcolor=colorVariaveis['botaoAcao'],
         on_click=lambda e: consultar_codbarra(codbarra_dialog.value, codenderecoAtual.value, e)
     )
     
@@ -78,7 +80,12 @@ def transferir_produto(page, navigate, header):
         title=ft.Text("Itens do endereço"),
         content=dialogEnderecoContent,
         actions=[
-            ft.ElevatedButton("Fechar", on_click=lambda e: fechar_dialogEndereco(e))
+            ft.ElevatedButton(
+                "Fechar",
+                color=colorVariaveis['texto'],
+                bgcolor=colorVariaveis['botaoAcao'],
+                on_click=lambda e: fechar_dialogEndereco(e)
+            )
         ],
     )
     
@@ -88,7 +95,11 @@ def transferir_produto(page, navigate, header):
             produtoInfoContainer,  # Container que receberá as informações do produto
             enderecoDestinoField,  # Campo para endereço destino
             quantidadeField,       # Campo para quantidade (pré-preenchido)
-            ft.ElevatedButton("Confirmar", on_click=lambda e: confirmar_transferencia(codbarra_dialog.value, codenderecoAtual.value, enderecoDestinoField.value, quantidadeField.value, e))
+            ft.ElevatedButton(
+                "Confirmar",
+                color=colorVariaveis['texto'],
+                bgcolor=colorVariaveis['botaoAcao'],
+                on_click=lambda e: confirmar_transferencia(codbarra_dialog.value, codenderecoAtual.value, enderecoDestinoField.value, quantidadeField.value, e))
         ],
         scroll=ft.ScrollMode.AUTO
     )
@@ -96,7 +107,11 @@ def transferir_produto(page, navigate, header):
         title=ft.Text("Confirmação de Transferência"),
         content=dialogProdutoContent,
         actions=[
-            ft.ElevatedButton("Fechar", on_click=lambda e: fechar_dialogProduto(e))
+            ft.ElevatedButton(
+                "Fechar",
+                color=colorVariaveis['texto'],
+                bgcolor=colorVariaveis['botaoAcao'],
+                on_click=lambda e: fechar_dialogProduto(e))
         ],
     )
     
@@ -164,7 +179,7 @@ def transferir_produto(page, navigate, header):
                     ),
                 ]
             ),
-            border=ft.border.all(1, 'black'),
+            border=ft.border.all(1, colorVariaveis['bordarInput']),
         )
     
     # Consulta de endereço: preenche o container com os produtos desse endereço e abre dialogEndereco
@@ -185,8 +200,12 @@ def transferir_produto(page, navigate, header):
                 abrir_dialogEndereco()
             elif response.status_code == 402:
                 snackbar_error = ft.SnackBar(
-                    content=ft.Text(f"Endereço: {codenderecoAtual} não encontrado", color=ft.colors.WHITE, size=20),
-                    bgcolor=ft.colors.RED,
+                    content=ft.Text(
+                        f"Endereço: {codenderecoAtual} não encontrado",
+                        color=colorVariaveis['texto'],
+                        size=20
+                    ),
+                    bgcolor=colorVariaveis['erro'],
                     show_close_icon=True,
                 )
                 page.overlay.append(snackbar_error)
@@ -218,10 +237,10 @@ def transferir_produto(page, navigate, header):
                 snackbar_error = ft.SnackBar(
                     content=ft.Text(
                         f"Produto: {codbarra} não encontrado no endereço: {codenderecoAtual}",
-                        color=ft.colors.WHITE,
+                        color=colorVariaveis['texto'],
                         size=20,
                     ),
-                    bgcolor=ft.colors.RED,
+                    bgcolor=colorVariaveis['erro'],
                     show_close_icon=True,
                 )
                 page.overlay.append(snackbar_error)
