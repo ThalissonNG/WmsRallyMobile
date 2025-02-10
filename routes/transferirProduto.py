@@ -6,8 +6,8 @@ def transferir_produto(page, navigate, header):
     # Container para os resultados da consulta de endereço
     lista_produtos = ft.Column(scroll=ft.ScrollMode.AUTO)
     matricula = user_info.get("matricula")
+    codfilial = user_info.get("codfilial")
 
-    print(f"User config na tela transferirProdutos: {matricula}")
     
     # Container para os resultados da consulta do produto (codbarra)
     produtoInfoContainer = ft.Container()

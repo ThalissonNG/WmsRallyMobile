@@ -4,6 +4,7 @@ from routes.config.config import base_url, user_info, colorVariaveis
 
 def consultar_produto_endereco(navigate_to, header):
     matricula = user_info.get("matricula")
+    codfilial = user_info.get("codfilial")
     print(f"User info tela de consultarProduto: {matricula}")
 
     lista_produtos_col = ft.Column(scroll=ft.ScrollMode.AUTO)
@@ -103,7 +104,8 @@ def consultar_produto_endereco(navigate_to, header):
         try:
             response = requests.post(
                 f"{base_url}/consultarProdutoEndereco",
-                json={"codbarra": codbarra},
+                json={"codbarra": codbarra,
+                    "codfilial": codfilial},
             )
             if response.status_code == 200:
                 dados = response.json()
