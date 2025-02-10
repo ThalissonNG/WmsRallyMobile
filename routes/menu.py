@@ -23,7 +23,8 @@ def menu_page(page: ft.Page, navigate_to, header):
                             controls=[
                                 ft.ElevatedButton(
                                     "Separar Pedido",
-                                    expand=True
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/separar_pedido")
                                 ),
                                 ft.ElevatedButton(
                                     "Conferir Bônus",
