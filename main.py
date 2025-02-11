@@ -6,7 +6,7 @@ from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
 from routes.consultarProdutoEndereco import consultar_produto_endereco
 from routes.transferirProduto import transferir_produto
-from routes.separarPedido import buscar_pedido
+from routes.buscarPedido import buscar_pedido
 
 def main(page: ft.Page):
     page.title = "Login"
