@@ -1,54 +1,20 @@
 import flet as ft
 import requests
-from routes.config.config import base_url, colorVariaveis
+from routes.config.config import base_url, colorVariaveis, user_info
 
 def buscar_pedido(e, navigate_to, header):
-    # Funções de overlay
-    def show_overlay(e):
-        inputCodetiqueta = ft.TextField(
-            label="Etiqueta",
-            prefix_icon=ft.icons.INSERT_DRIVE_FILE,
-            border_radius=ft.border_radius.all(10),
-            border_color=colorVariaveis['bordarInput'],
-            border_width=2,
-            width=300,
-            keyboard_type=ft.KeyboardType.NUMBER,
-        )
-        overlay = ft.Container(
-            width=e.width,
-            height=e.height,
-            bgcolor=ft.colors.BLACK,
-            alignment=ft.alignment.center,
-            content=ft.Column(
-                controls=[
-                    ft.Text("Pedido encontrado!", size=30, weight="bold"),
-                    ft.Text("Bipe um etiqueta e coloque na caixa onde irá os produtos"),
-                    inputCodetiqueta,
-                    ft.ElevatedButton(
-                        text="Fechar",
-                        on_click=lambda e: close_overlay(e.page)
-                    )
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-        )
-        e.overlay.append(overlay)
-        e.update()
-
-    def close_overlay(page):
-        page.overlay.clear()
-        page.update()
+    matricula = user_info.get('matricula')
+    print(matricula)
 
     def pedidoManual(numped):
         try:
             response = requests.post(
                 f"{base_url}/separarPedido",
-                json={"numped": numped}
+                json={"numped": numped,
+                        "matricula": matricula}
             )
             if response.status_code == 200:
-                print("tem pedido")
-                show_overlay(e)
+                print("Tem pedido manual")
             else:
                 print("Não tem pedido")
         except Exception as exc:
@@ -57,11 +23,12 @@ def buscar_pedido(e, navigate_to, header):
     def pedidoAutomatico():
         try:
             response = requests.post(
-                f"{base_url}/separarPedido"
+                f"{base_url}/separarPedido",
+                json={"numped": None,
+                        "matricula": matricula}
             )
             if response.status_code == 201:
                 print("Tem pedido automatico")
-                show_overlay(e)
             else:
                 print("Não tem pedido")
         except Exception as exc:
@@ -94,7 +61,7 @@ def buscar_pedido(e, navigate_to, header):
         on_click=lambda e: pedidoManual(inputNumped.value)
     )
     buscaAutomatica = ft.Text(
-        "Busca Manual",
+        "Busca Automatica",
         size=18,
         weight="bold",
     )
