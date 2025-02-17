@@ -9,12 +9,15 @@ def buscar_pedido(e, navigate_to, header):
     def pedidoManual(numped):
         try:
             response = requests.post(
-                f"{base_url}/separarPedido",
+                f"{base_url}/buscarPedido",
                 json={"numped": numped,
                         "matricula": matricula}
             )
             if response.status_code == 200:
                 print("Tem pedido manual")
+                navigate_to("/separar_pedido")
+            elif response.status_code == 201:
+                navigate_to("/separar_pedido")
             else:
                 print("Não tem pedido")
         except Exception as exc:
@@ -23,12 +26,15 @@ def buscar_pedido(e, navigate_to, header):
     def pedidoAutomatico():
         try:
             response = requests.post(
-                f"{base_url}/separarPedido",
+                f"{base_url}/buscarPedido",
                 json={"numped": None,
                         "matricula": matricula}
             )
-            if response.status_code == 201:
+            if response.status_code == 200:
                 print("Tem pedido automatico")
+                navigate_to("/separar_pedido")
+            elif response.status_code == 201:
+                navigate_to("/separar_pedido")
             else:
                 print("Não tem pedido")
         except Exception as exc:
@@ -77,7 +83,7 @@ def buscar_pedido(e, navigate_to, header):
         on_click=lambda e: pedidoAutomatico()
     )
     return ft.View(
-        route="/separar_pedido",
+        route="/buscar_pedido",
         controls=[
             header,
             title,
