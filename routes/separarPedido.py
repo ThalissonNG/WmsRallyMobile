@@ -4,42 +4,46 @@ from routes.config.config import base_url, colorVariaveis, user_info
 
 def separar_pedido(e, navigate_to, header):
     matricula = user_info.get('matricula')
+    dados_itens = []  # Inicializa a variável dados_itens
+
     try:
-        response =  requests.post(
+        response = requests.post(
             base_url + "/separarPedido",
             json={"matricula": matricula}
         )
         if response.status_code == 200:
             dados = response.json()
             print("Recebido com sucesso")
-            dados_itens = dados.get("dados_itens", [])
+            dados_itens = dados.get("dados_itens", [])  # Atualiza dados_itens com a resposta da API
             print(dados_itens)
         else:
             print("Deu erro")
     except Exception as exc:
         print(f"Erro: {exc}")
-    
+
     title = ft.Text(
         "Separar pedido",
         size=24,
         weight="bold",
         color=colorVariaveis['titulo']
     )
+
     inputCodendereco = ft.TextField(
         label="Bipar Endereço",
         prefix_icon=ft.icons.SCANNER,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,
-        # width=300,
         keyboard_type=ft.KeyboardType.NUMBER
     )
+
     botaoEndereco = ft.ElevatedButton(
         text="buscar",
         bgcolor=colorVariaveis['botaoAcao'],
         color=colorVariaveis['texto'],
         width=600,
     )
+
     tabsSeparar = ft.Container(
         padding=10,
         expand=True,
@@ -48,7 +52,6 @@ def separar_pedido(e, navigate_to, header):
                 ft.Column(
                     expand=True,
                     controls=[
-                        
                         ft.Row(
                             alignment=ft.MainAxisAlignment.CENTER,
                             controls=[
@@ -116,77 +119,87 @@ def separar_pedido(e, navigate_to, header):
                         botaoEndereco,
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    
                 )
             ]
         )
     )
+
+    # Criação dinâmica dos itens no tabsResumo
+    resumo_controls = []
+    for item in dados_itens:
+        codprod = item[1]  # Índice 1: Código do produto
+        descricao = item[3]  # Índice 3: Descrição
+        qt = item[4]  # Índice 4: Quantidade
+
+        resumo_controls.extend([
+            ft.Row(
+                controls=[
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                "Codprod",
+                                weight="bold"
+                            ),
+                            ft.Text(str(codprod))
+                        ]
+                    ),
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                "Descrição",
+                                weight="bold"
+                            ),
+                            ft.Text(
+                                descricao,
+                                no_wrap=False,
+                                width=200
+                            )
+                        ]
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.START,
+            ),
+            ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                controls=[
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                "Qt",
+                                weight="bold"
+                            ),
+                            ft.Text(str(qt))
+                        ]
+                    ),
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                "Sep",
+                                weight="bold"
+                            ),
+                            ft.Text("5")
+                        ]
+                    ),
+                    ft.Column(
+                        controls=[
+                            ft.Text(
+                                "Dif",
+                                weight="bold"
+                            ),
+                            ft.Text(-4)
+                        ]
+                    ),
+                ],
+            ),
+            ft.Divider(),
+        ])
+
     tabsResumo = ft.Container(
         content=ft.Column(
-            controls=[
-                ft.Row(
-                    controls=[
-                        ft.Column(
-                            controls=[
-                                ft.Text(
-                                    "Codprod",
-                                    weight="bold"
-                                ),
-                                ft.Text("1200")
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text(
-                                    "Descrição",
-                                    weight="bold"
-                                ),
-                                ft.Text(
-                                    "thalisson manoel da fonseca deodato",
-                                    no_wrap=False,
-                                    width=200
-                                )
-                            ]
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.START,
-                ),
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                    controls=[
-                        ft.Column(
-                            controls=[
-                                ft.Text(
-                                    "Qt",
-                                    weight="bold"
-                                ),
-                                ft.Text("10")
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text(
-                                    "Sep",
-                                    weight="bold"
-                                ),
-                                ft.Text("8")
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text(
-                                    "Dif",
-                                    weight="bold"
-                                ),
-                                ft.Text("2")
-                            ]
-                        ),
-                    ],
-                    
-                ),
-                ft.Divider(),
-            ]
-        )
+            controls=resumo_controls,  # Adiciona os controles dinâmicos aqui
+            scroll=ft.ScrollMode.AUTO
+        ),
+        
     )
 
     tabs = ft.Tabs(
@@ -207,7 +220,7 @@ def separar_pedido(e, navigate_to, header):
                     content=tabsResumo,
                     expand=True,
                     width="100%"
-                )
+                ),
             ),
             ft.Tab(
                 text="Finalizar",
@@ -217,12 +230,14 @@ def separar_pedido(e, navigate_to, header):
             ),
         ],
     )
+
     main_container = ft.Container(
         content=tabs,
         expand=True,
         width="100%",
         height="100%",
     )
+
     return ft.View(
         route="/separar_pedido",
         controls=[
@@ -231,5 +246,4 @@ def separar_pedido(e, navigate_to, header):
             ft.Container(height=10),
             main_container
         ],
-        # expand=True,
     )
