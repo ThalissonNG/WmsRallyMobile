@@ -128,43 +128,63 @@ def separar_pedido(e, navigate_to, header):
                     controls=[
                         ft.Column(
                             controls=[
-                                ft.Text("Codprod"),
+                                ft.Text(
+                                    "Codprod",
+                                    weight="bold"
+                                ),
                                 ft.Text("1200")
                             ]
                         ),
                         ft.Column(
                             controls=[
-                                ft.Text("Descrição"),
-                                ft.Text("thalisson manoel da fonseca deodato", no_wrap=False, width=300)
+                                ft.Text(
+                                    "Descrição",
+                                    weight="bold"
+                                ),
+                                ft.Text(
+                                    "thalisson manoel da fonseca deodato",
+                                    no_wrap=False,
+                                    width=200
+                                )
                             ]
                         ),
                     ],
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    alignment=ft.MainAxisAlignment.START,
                 ),
-                ft.Divider(),
                 ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_AROUND,
                     controls=[
                         ft.Column(
                             controls=[
-                                ft.Text("Qt"),
+                                ft.Text(
+                                    "Qt",
+                                    weight="bold"
+                                ),
                                 ft.Text("10")
                             ]
                         ),
                         ft.Column(
                             controls=[
-                                ft.Text("Sep"),
+                                ft.Text(
+                                    "Sep",
+                                    weight="bold"
+                                ),
                                 ft.Text("8")
                             ]
                         ),
                         ft.Column(
                             controls=[
-                                ft.Text("Dif"),
+                                ft.Text(
+                                    "Dif",
+                                    weight="bold"
+                                ),
                                 ft.Text("2")
                             ]
                         ),
                     ],
-                    alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                )
+                    
+                ),
+                ft.Divider(),
             ]
         )
     )
