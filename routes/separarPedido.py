@@ -14,8 +14,10 @@ def separar_pedido(e, navigate_to, header):
         if response.status_code == 200:
             dados = response.json()
             print("Recebido com sucesso")
-            dados_itens = dados.get("dados_itens", [])  # Atualiza dados_itens com a resposta da API
-            print(dados_itens)
+            dados_itens = dados.get("dados_itens", [])
+            dados_codbarras = dados.get("dados_codbarras", [])
+            print(f"Dados itens: {dados_itens}")
+            print(f"Dados codbarras: {dados_codbarras}")
         else:
             print("Deu erro")
     except Exception as exc:
@@ -186,7 +188,7 @@ def separar_pedido(e, navigate_to, header):
                                 "Dif",
                                 weight="bold"
                             ),
-                            ft.Text(-4)
+                            ft.Text(int(qt) + 5)
                         ]
                     ),
                 ],
