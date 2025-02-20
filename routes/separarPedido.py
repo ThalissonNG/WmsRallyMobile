@@ -5,6 +5,7 @@ from routes.config.config import base_url, colorVariaveis, user_info
 def separar_pedido(e, navigate_to, header):
     matricula = user_info.get('matricula')
     dados_itens = []  # Inicializa a variável dados_itens
+    dados_codbarras = []
 
     try:
         response = requests.post(
@@ -22,6 +23,16 @@ def separar_pedido(e, navigate_to, header):
             print("Deu erro")
     except Exception as exc:
         print(f"Erro: {exc}")
+
+    # Extração dos dados de endereço do primeiro item (se houver)
+    if dados_itens and len(dados_itens[0]) >= 12:
+        mod_val = str(dados_itens[0][7])
+        rua_val = str(dados_itens[0][8])
+        edf_val = str(dados_itens[0][9])
+        niv_val = str(dados_itens[0][10])
+        apt_val = str(dados_itens[0][11])
+    else:
+        mod_val = rua_val = edf_val = niv_val = apt_val = "N/A"
 
     title = ft.Text(
         "Separar pedido",
@@ -44,7 +55,70 @@ def separar_pedido(e, navigate_to, header):
         bgcolor=colorVariaveis['botaoAcao'],
         color=colorVariaveis['texto'],
         width=600,
+        on_click=lambda e: validar_endereco(e)
     )
+
+    inputCodbarra = ft.TextField(
+        label="Bipar produto",
+        prefix_icon=ft.icons.SCANNER,
+        border_radius=ft.border_radius.all(10),
+        border_color=colorVariaveis['bordarInput'],
+        border_width=2,
+        keyboard_type=ft.KeyboardType.NUMBER
+    )
+
+    def validar_endereco(e):
+        endereco_digitado = inputCodendereco.value
+        print(f"Endereço digitado: {inputCodendereco.value}")
+        if dados_itens:
+            endereco_solicitado = dados_itens[0][6]  # Índice 6: codendereco
+            print(f"Endereço solicitado: {endereco_solicitado}")
+            if int(endereco_digitado) == endereco_solicitado:
+                print("Endereços iguais")
+                exibir_dialog_produto(e.page, dados_itens[0])
+            else:
+                mostrar_snackbar(e, "Endereço incorreto!", colorVariaveis['erro'])
+
+    def exibir_dialog_produto(page, item):
+        codprod = item[1]      # Índice 1: Código do produto
+        codfab = item[2]       # Índice 2: Código do fabricante
+        descricao = item[3]    # Índice 3: Descrição
+        qtpedida = item[4]     # Índice 4: Quantidade pedida
+        qtseparada = item[5]   # Índice 5: Quantidade separada
+
+        dialog = ft.AlertDialog(
+            title=ft.Text("Produto"),
+            content=ft.Column(
+                controls=[
+                    ft.Text(f"Código do Produto: {codprod}"),
+                    ft.Text(f"Código do Fabricante: {codfab}"),
+                    ft.Text(f"Descrição: {descricao}"),
+                    ft.Text(f"Quantidade Pedida: {qtpedida}"),
+                    ft.Text(f"Quantidade Separada: {qtseparada}"),
+                    inputCodbarra
+                ]
+            ),
+            actions=[
+                ft.TextButton("Confirmar", on_click=lambda e: print(inputCodbarra.value))
+            ],
+            actions_alignment=ft.MainAxisAlignment.END
+        )
+        page.dialog = dialog
+        dialog.open = True
+        page.update()
+
+    def fechar_dialog(e):
+        e.page.dialog.open = False
+        e.page.update()
+
+    def mostrar_snackbar(e, mensagem, cor):
+        snackbar = ft.SnackBar(
+            content=ft.Text(mensagem, color="white"),
+            bgcolor=cor,
+        )
+        e.page.overlay.append(snackbar)
+        snackbar.open = True
+        e.page.update()
 
     tabsSeparar = ft.Container(
         padding=10,
@@ -71,47 +145,32 @@ def separar_pedido(e, navigate_to, header):
                             controls=[
                                 ft.Column(
                                     controls=[
-                                        ft.Text(
-                                            "Mod",
-                                            weight="bold"
-                                        ),
-                                        ft.Text("1")
+                                        ft.Text("Mod", weight="bold"),
+                                        ft.Text(mod_val)
                                     ]
                                 ),
                                 ft.Column(
                                     controls=[
-                                        ft.Text(
-                                            "Rua",
-                                            weight="bold"
-                                        ),
-                                        ft.Text("3")
+                                        ft.Text("Rua", weight="bold"),
+                                        ft.Text(rua_val)
                                     ]
                                 ),
                                 ft.Column(
                                     controls=[
-                                        ft.Text(
-                                            "Edf",
-                                            weight="bold"
-                                        ),
-                                        ft.Text("22")
+                                        ft.Text("Edf", weight="bold"),
+                                        ft.Text(edf_val)
                                     ]
                                 ),
                                 ft.Column(
                                     controls=[
-                                        ft.Text(
-                                            "Niv",
-                                            weight="bold"
-                                        ),
-                                        ft.Text("3")
+                                        ft.Text("Niv", weight="bold"),
+                                        ft.Text(niv_val)
                                     ]
                                 ),
                                 ft.Column(
                                     controls=[
-                                        ft.Text(
-                                            "Apt",
-                                            weight="bold"
-                                        ),
-                                        ft.Text("15")
+                                        ft.Text("Apt", weight="bold"),
+                                        ft.Text(apt_val)
                                     ]
                                 ),
                             ]
@@ -126,31 +185,24 @@ def separar_pedido(e, navigate_to, header):
         )
     )
 
-    # Criação dinâmica dos itens no tabsResumo
+    # Criação dinâmica dos itens no tab "Resumo"
     resumo_controls = []
     for item in dados_itens:
-        codprod = item[1]  # Índice 1: Código do produto
-        descricao = item[3]  # Índice 3: Descrição
-        qt = item[4]  # Índice 4: Quantidade
-
+        codprod = item[1]   # Índice 1: Código do produto
+        descricao = item[3] # Índice 3: Descrição
+        qt = item[4]        # Índice 4: Quantidade
         resumo_controls.extend([
             ft.Row(
                 controls=[
                     ft.Column(
                         controls=[
-                            ft.Text(
-                                "Codprod",
-                                weight="bold"
-                            ),
+                            ft.Text("Codprod", weight="bold"),
                             ft.Text(str(codprod))
                         ]
                     ),
                     ft.Column(
                         controls=[
-                            ft.Text(
-                                "Descrição",
-                                weight="bold"
-                            ),
+                            ft.Text("Descrição", weight="bold"),
                             ft.Text(
                                 descricao,
                                 no_wrap=False,
@@ -166,29 +218,20 @@ def separar_pedido(e, navigate_to, header):
                 controls=[
                     ft.Column(
                         controls=[
-                            ft.Text(
-                                "Qt",
-                                weight="bold"
-                            ),
+                            ft.Text("Qt", weight="bold"),
                             ft.Text(str(qt))
                         ]
                     ),
                     ft.Column(
                         controls=[
-                            ft.Text(
-                                "Sep",
-                                weight="bold"
-                            ),
+                            ft.Text("Sep", weight="bold"),
                             ft.Text("5")
                         ]
                     ),
                     ft.Column(
                         controls=[
-                            ft.Text(
-                                "Dif",
-                                weight="bold"
-                            ),
-                            ft.Text(int(qt) + 5)
+                            ft.Text("Dif", weight="bold"),
+                            ft.Text(str(int(qt) + 5))
                         ]
                     ),
                 ],
@@ -198,10 +241,9 @@ def separar_pedido(e, navigate_to, header):
 
     tabsResumo = ft.Container(
         content=ft.Column(
-            controls=resumo_controls,  # Adiciona os controles dinâmicos aqui
+            controls=resumo_controls,
             scroll=ft.ScrollMode.AUTO
-        ),
-        
+        )
     )
 
     tabs = ft.Tabs(
@@ -227,7 +269,7 @@ def separar_pedido(e, navigate_to, header):
             ft.Tab(
                 text="Finalizar",
                 content=ft.Container(
-                    ft.Text("Finalizar separação"),
+                    content=ft.Text("Finalizar separação"),
                 ),
             ),
         ],
