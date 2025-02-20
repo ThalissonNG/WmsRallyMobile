@@ -99,13 +99,44 @@ def separar_pedido(e, navigate_to, header):
                 ]
             ),
             actions=[
-                ft.TextButton("Confirmar", on_click=lambda e: print(inputCodbarra.value))
+                ft.TextButton("Confirmar", on_click=lambda e: validar_codbarra(e, item))
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
         page.dialog = dialog
         dialog.open = True
         page.update()
+
+    def validar_codbarra(e, item):
+        codbarra_digitado = inputCodbarra.value
+        print(f"Código de barras digitado: {codbarra_digitado}")
+
+        # Verificar se o código de barras existe em dados_codbarras
+        codprod_encontrado = None
+        for codbarras in dados_codbarras:
+            if codbarras[1] == codbarra_digitado:  # Índice 1: Código de barras
+                codprod_encontrado = codbarras[0]  # Índice 0: Código do produto
+                break  # Para a busca assim que encontrar um código de barras válido
+
+        if codprod_encontrado is not None:
+            # Verificar se o codprod encontrado corresponde ao item atual
+            if codprod_encontrado == item[1]:  # Índice 1: Código do produto
+                # Atualizar a quantidade separada
+                item[5] += 1  # Índice 5: Quantidade separada
+                print(f"Quantidade separada atualizada: {item[5]}")
+                print(f"Dados_itens atualizado: {dados_itens}")
+
+                # Verificar se a quantidade separada é igual à quantidade pedida
+                if item[5] == item[4]:  # Índice 4: Quantidade pedida
+                    mostrar_snackbar(e, "Quantidade completa! Passando para o próximo item.", colorVariaveis['sucesso'])
+                    fechar_dialog(e)
+                    # Aqui você pode adicionar a lógica para passar para o próximo item
+                else:
+                    mostrar_snackbar(e, "Produto validado com sucesso!", colorVariaveis['sucesso'])
+            else:
+                mostrar_snackbar(e, "Produto não corresponde ao endereço!", colorVariaveis['erro'])
+        else:
+            mostrar_snackbar(e, "Código de barras inválido!", colorVariaveis['erro'])
 
     def fechar_dialog(e):
         e.page.dialog.open = False
@@ -191,6 +222,7 @@ def separar_pedido(e, navigate_to, header):
         codprod = item[1]   # Índice 1: Código do produto
         descricao = item[3] # Índice 3: Descrição
         qt = item[4]        # Índice 4: Quantidade
+        sep = item[5]
         resumo_controls.extend([
             ft.Row(
                 controls=[
@@ -225,13 +257,13 @@ def separar_pedido(e, navigate_to, header):
                     ft.Column(
                         controls=[
                             ft.Text("Sep", weight="bold"),
-                            ft.Text("5")
+                            ft.Text(str(sep))
                         ]
                     ),
                     ft.Column(
                         controls=[
                             ft.Text("Dif", weight="bold"),
-                            ft.Text(str(int(qt) + 5))
+                            ft.Text(str(int(qt) - int(sep)))
                         ]
                     ),
                 ],
