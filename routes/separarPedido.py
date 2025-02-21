@@ -2,7 +2,7 @@ import flet as ft
 import requests
 from routes.config.config import base_url, colorVariaveis, user_info
 
-def separar_pedido(e, navigate_to, header):
+def separar_pedido(page, navigate_to, header):
     matricula = user_info.get('matricula')
     dados_itens = []  # Inicializa a variável dados_itens
     dados_codbarras = []
@@ -133,6 +133,8 @@ def separar_pedido(e, navigate_to, header):
                     # Aqui você pode adicionar a lógica para passar para o próximo item
                 else:
                     mostrar_snackbar(e, "Produto validado com sucesso!", colorVariaveis['sucesso'])
+                # Atualizar a aba "Resumo"
+                atualizar_resumo(e.page)
             else:
                 mostrar_snackbar(e, "Produto não corresponde ao endereço!", colorVariaveis['erro'])
         else:
@@ -150,6 +152,69 @@ def separar_pedido(e, navigate_to, header):
         e.page.overlay.append(snackbar)
         snackbar.open = True
         e.page.update()
+
+    def atualizar_resumo(page):
+        # Criação dinâmica dos itens no tab "Resumo"
+        resumo_controls = []
+        for item in dados_itens:
+            codprod = item[1]   # Índice 1: Código do produto
+            descricao = item[3] # Índice 3: Descrição
+            qt = item[4]        # Índice 4: Quantidade
+            sep = item[5]
+            resumo_controls.extend([
+                ft.Row(
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                ft.Text("Codprod", weight="bold"),
+                                ft.Text(str(codprod))
+                            ]
+                        ),
+                        ft.Column(
+                            controls=[
+                                ft.Text("Descrição", weight="bold"),
+                                ft.Text(
+                                    descricao,
+                                    no_wrap=False,
+                                    width=200
+                                )
+                            ]
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.START,
+                ),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                ft.Text("Qt", weight="bold"),
+                                ft.Text(str(qt))
+                            ]
+                        ),
+                        ft.Column(
+                            controls=[
+                                ft.Text("Sep", weight="bold"),
+                                ft.Text(str(sep))
+                            ]
+                        ),
+                        ft.Column(
+                            controls=[
+                                ft.Text("Dif", weight="bold"),
+                                ft.Text(str(int(qt) - int(sep)))
+                            ]
+                        ),
+                    ],
+                ),
+                ft.Divider(),
+            ])
+
+        # Atualizar o conteúdo da aba "Resumo"
+        tabsResumo.content = ft.Column(
+            controls=resumo_controls,
+            scroll=ft.ScrollMode.AUTO
+        )
+        page.update()
 
     tabsSeparar = ft.Container(
         padding=10,
@@ -216,64 +281,10 @@ def separar_pedido(e, navigate_to, header):
         )
     )
 
-    # Criação dinâmica dos itens no tab "Resumo"
-    resumo_controls = []
-    for item in dados_itens:
-        codprod = item[1]   # Índice 1: Código do produto
-        descricao = item[3] # Índice 3: Descrição
-        qt = item[4]        # Índice 4: Quantidade
-        sep = item[5]
-        resumo_controls.extend([
-            ft.Row(
-                controls=[
-                    ft.Column(
-                        controls=[
-                            ft.Text("Codprod", weight="bold"),
-                            ft.Text(str(codprod))
-                        ]
-                    ),
-                    ft.Column(
-                        controls=[
-                            ft.Text("Descrição", weight="bold"),
-                            ft.Text(
-                                descricao,
-                                no_wrap=False,
-                                width=200
-                            )
-                        ]
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.START,
-            ),
-            ft.Row(
-                alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                controls=[
-                    ft.Column(
-                        controls=[
-                            ft.Text("Qt", weight="bold"),
-                            ft.Text(str(qt))
-                        ]
-                    ),
-                    ft.Column(
-                        controls=[
-                            ft.Text("Sep", weight="bold"),
-                            ft.Text(str(sep))
-                        ]
-                    ),
-                    ft.Column(
-                        controls=[
-                            ft.Text("Dif", weight="bold"),
-                            ft.Text(str(int(qt) - int(sep)))
-                        ]
-                    ),
-                ],
-            ),
-            ft.Divider(),
-        ])
-
+    # Inicializa a aba "Resumo"
     tabsResumo = ft.Container(
         content=ft.Column(
-            controls=resumo_controls,
+            controls=[],
             scroll=ft.ScrollMode.AUTO
         )
     )
@@ -313,6 +324,9 @@ def separar_pedido(e, navigate_to, header):
         width="100%",
         height="100%",
     )
+
+    # Atualiza a aba "Resumo" inicialmente
+    atualizar_resumo(page)
 
     return ft.View(
         route="/separar_pedido",
