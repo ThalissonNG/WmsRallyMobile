@@ -2,10 +2,18 @@ import flet as ft
 import requests
 from routes.config.config import base_url, colorVariaveis, user_info
 
+# Variável global para rastrear o índice do produto atual
+current_index = 0
+# Variáveis globais para armazenar os dados carregados
+global_dados_itens = []
+global_dados_codbarras = []
+
 def separar_pedido(page, navigate_to, header):
+    global current_index, global_dados_itens, global_dados_codbarras
+
     matricula = user_info.get('matricula')
-    dados_itens = []  # Inicializa a variável dados_itens
-    dados_codbarras = []
+    dados_itens = []       # Dados dos itens do pedido
+    dados_codbarras = []   # Dados dos códigos de barras
 
     try:
         response = requests.post(
@@ -24,13 +32,32 @@ def separar_pedido(page, navigate_to, header):
     except Exception as exc:
         print(f"Erro: {exc}")
 
-    # Extração dos dados de endereço do primeiro item (se houver)
-    if dados_itens and len(dados_itens[0]) >= 12:
-        mod_val = str(dados_itens[0][7])
-        rua_val = str(dados_itens[0][8])
-        edf_val = str(dados_itens[0][9])
-        niv_val = str(dados_itens[0][10])
-        apt_val = str(dados_itens[0][11])
+    # Se não houver dados, exiba uma mensagem apropriada
+    if not dados_itens:
+        return ft.View(
+            route="/separar_pedido",
+            controls=[
+                header,
+                ft.Text("Nenhum produto encontrado.", size=24, weight="bold", color=colorVariaveis['titulo'])
+            ]
+        )
+
+    # Armazena os dados globalmente, se ainda não foram armazenados
+    if not global_dados_itens:
+        global_dados_itens = dados_itens
+    if not global_dados_codbarras:
+        global_dados_codbarras = dados_codbarras
+
+    # Use o produto atual com base no índice global
+    produto_atual = global_dados_itens[current_index]
+
+    # Extração dos dados de endereço do produto atual (índices 7 a 11)
+    if produto_atual and len(produto_atual) >= 12:
+        mod_val = str(produto_atual[7])
+        rua_val = str(produto_atual[8])
+        edf_val = str(produto_atual[9])
+        niv_val = str(produto_atual[10])
+        apt_val = str(produto_atual[11])
     else:
         mod_val = rua_val = edf_val = niv_val = apt_val = "N/A"
 
@@ -69,15 +96,15 @@ def separar_pedido(page, navigate_to, header):
 
     def validar_endereco(e):
         endereco_digitado = inputCodendereco.value
-        print(f"Endereço digitado: {inputCodendereco.value}")
-        if dados_itens:
-            endereco_solicitado = dados_itens[0][6]  # Índice 6: codendereco
-            print(f"Endereço solicitado: {endereco_solicitado}")
-            if int(endereco_digitado) == endereco_solicitado:
-                print("Endereços iguais")
-                exibir_dialog_produto(e.page, dados_itens[0])
-            else:
-                mostrar_snackbar(e, "Endereço incorreto!", colorVariaveis['erro'])
+        print(f"Endereço digitado: {endereco_digitado}")
+        # Obtemos o endereço solicitado do produto atual
+        endereco_solicitado = produto_atual[6]  # Índice 6: codendereco
+        print(f"Endereço solicitado: {endereco_solicitado}")
+        if int(endereco_digitado) == endereco_solicitado:
+            print("Endereços iguais")
+            exibir_dialog_produto(e.page, produto_atual)
+        else:
+            mostrar_snackbar(e.page, "Endereço incorreto!", colorVariaveis['erro'])
 
     def exibir_dialog_produto(page, item):
         codprod = item[1]      # Índice 1: Código do produto
@@ -111,111 +138,52 @@ def separar_pedido(page, navigate_to, header):
         codbarra_digitado = inputCodbarra.value
         print(f"Código de barras digitado: {codbarra_digitado}")
 
-        # Verificar se o código de barras existe em dados_codbarras
+        # Verificar se o código de barras existe em global_dados_codbarras
         codprod_encontrado = None
-        for codbarras in dados_codbarras:
+        for codbarras in global_dados_codbarras:
             if codbarras[1] == codbarra_digitado:  # Índice 1: Código de barras
-                codprod_encontrado = codbarras[0]  # Índice 0: Código do produto
-                break  # Para a busca assim que encontrar um código de barras válido
+                codprod_encontrado = codbarras[0]   # Índice 0: Código do produto
+                break
 
         if codprod_encontrado is not None:
-            # Verificar se o codprod encontrado corresponde ao item atual
-            if codprod_encontrado == item[1]:  # Índice 1: Código do produto
-                # Atualizar a quantidade separada
-                item[5] += 1  # Índice 5: Quantidade separada
+            if codprod_encontrado == item[1]:  # Verifica se corresponde ao produto atual
+                item[5] += 1  # Atualiza a quantidade separada
                 print(f"Quantidade separada atualizada: {item[5]}")
-                print(f"Dados_itens atualizado: {dados_itens}")
+                print(f"Dados_itens atualizado: {global_dados_itens}")
 
-                # Verificar se a quantidade separada é igual à quantidade pedida
-                if item[5] == item[4]:  # Índice 4: Quantidade pedida
-                    mostrar_snackbar(e, "Quantidade completa! Passando para o próximo item.", colorVariaveis['sucesso'])
-                    fechar_dialog(e)
-                    # Aqui você pode adicionar a lógica para passar para o próximo item
+                if item[5] == item[4]:
+                    mostrar_snackbar(e.page, "Quantidade completa! Passando para o próximo item.", colorVariaveis['sucesso'])
+                    fechar_dialog(e.page)
+                    # Avança para o próximo produto, se houver
+                    global current_index
+                    if current_index < len(global_dados_itens) - 1:
+                        current_index += 1
+                        # Atualiza a view com o novo produto (reconstruindo a tela)
+                        navigate_to("/separar_pedido")
+                    else:
+                        mostrar_snackbar(e.page, "Todos os produtos foram separados!", colorVariaveis['sucesso'])
                 else:
-                    mostrar_snackbar(e, "Produto validado com sucesso!", colorVariaveis['sucesso'])
-                # Atualizar a aba "Resumo"
-                atualizar_resumo(e.page)
+                    mostrar_snackbar(e.page, "Produto validado com sucesso!", colorVariaveis['sucesso'])
             else:
-                mostrar_snackbar(e, "Produto não corresponde ao endereço!", colorVariaveis['erro'])
+                mostrar_snackbar(e.page, "Produto não corresponde ao endereço!", colorVariaveis['erro'])
         else:
-            mostrar_snackbar(e, "Código de barras inválido!", colorVariaveis['erro'])
+            mostrar_snackbar(e.page, "Código de barras inválido!", colorVariaveis['erro'])
+        page.update()
 
-    def fechar_dialog(e):
-        e.page.dialog.open = False
-        e.page.update()
+    def fechar_dialog(page):
+        page.dialog.open = False
+        page.update()
 
-    def mostrar_snackbar(e, mensagem, cor):
+    def mostrar_snackbar(page, mensagem, cor):
         snackbar = ft.SnackBar(
             content=ft.Text(mensagem, color="white"),
             bgcolor=cor,
         )
-        e.page.overlay.append(snackbar)
+        page.overlay.append(snackbar)
         snackbar.open = True
-        e.page.update()
-
-    def atualizar_resumo(page):
-        # Criação dinâmica dos itens no tab "Resumo"
-        resumo_controls = []
-        for item in dados_itens:
-            codprod = item[1]   # Índice 1: Código do produto
-            descricao = item[3] # Índice 3: Descrição
-            qt = item[4]        # Índice 4: Quantidade
-            sep = item[5]
-            resumo_controls.extend([
-                ft.Row(
-                    controls=[
-                        ft.Column(
-                            controls=[
-                                ft.Text("Codprod", weight="bold"),
-                                ft.Text(str(codprod))
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("Descrição", weight="bold"),
-                                ft.Text(
-                                    descricao,
-                                    no_wrap=False,
-                                    width=200
-                                )
-                            ]
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.START,
-                ),
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                    controls=[
-                        ft.Column(
-                            controls=[
-                                ft.Text("Qt", weight="bold"),
-                                ft.Text(str(qt))
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("Sep", weight="bold"),
-                                ft.Text(str(sep))
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("Dif", weight="bold"),
-                                ft.Text(str(int(qt) - int(sep)))
-                            ]
-                        ),
-                    ],
-                ),
-                ft.Divider(),
-            ])
-
-        # Atualizar o conteúdo da aba "Resumo"
-        tabsResumo.content = ft.Column(
-            controls=resumo_controls,
-            scroll=ft.ScrollMode.AUTO
-        )
         page.update()
 
+    # Construção do tab "Separar" com os dados do endereço do produto atual
     tabsSeparar = ft.Container(
         padding=10,
         expand=True,
@@ -227,11 +195,7 @@ def separar_pedido(page, navigate_to, header):
                         ft.Row(
                             alignment=ft.MainAxisAlignment.CENTER,
                             controls=[
-                                ft.Text(
-                                    "Vá ao endereço:",
-                                    weight="bold",
-                                    size=20,
-                                )
+                                ft.Text("Vá ao endereço:", weight="bold", size=20)
                             ]
                         ),
                         ft.Divider(),
@@ -281,10 +245,64 @@ def separar_pedido(page, navigate_to, header):
         )
     )
 
-    # Inicializa a aba "Resumo"
+    # Construção dinâmica do tab "Resumo"
+    resumo_controls = []
+    for item in global_dados_itens:
+        codprod = item[1]    # Índice 1: Código do produto
+        descricao = item[3]  # Índice 3: Descrição
+        qt = item[4]         # Índice 4: Quantidade pedida
+        sep = item[5]        # Índice 5: Quantidade separada
+        resumo_controls.extend([
+            ft.Row(
+                controls=[
+                    ft.Column(
+                        controls=[
+                            ft.Text("Codprod", weight="bold"),
+                            ft.Text(str(codprod))
+                        ]
+                    ),
+                    ft.Column(
+                        controls=[
+                            ft.Text("Descrição", weight="bold"),
+                            ft.Text(
+                                descricao,
+                                no_wrap=False,
+                                width=200
+                            )
+                        ]
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.START,
+            ),
+            ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                controls=[
+                    ft.Column(
+                        controls=[
+                            ft.Text("Qt", weight="bold"),
+                            ft.Text(str(qt))
+                        ]
+                    ),
+                    ft.Column(
+                        controls=[
+                            ft.Text("Sep", weight="bold"),
+                            ft.Text(str(sep))
+                        ]
+                    ),
+                    ft.Column(
+                        controls=[
+                            ft.Text("Dif", weight="bold"),
+                            ft.Text(str(int(qt) - int(sep)))
+                        ]
+                    ),
+                ],
+            ),
+            ft.Divider(),
+        ])
+
     tabsResumo = ft.Container(
         content=ft.Column(
-            controls=[],
+            controls=resumo_controls,
             scroll=ft.ScrollMode.AUTO
         )
     )
@@ -324,9 +342,6 @@ def separar_pedido(page, navigate_to, header):
         width="100%",
         height="100%",
     )
-
-    # Atualiza a aba "Resumo" inicialmente
-    atualizar_resumo(page)
 
     return ft.View(
         route="/separar_pedido",
