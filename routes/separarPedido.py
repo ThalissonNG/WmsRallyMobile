@@ -159,7 +159,7 @@ def separar_pedido(page, navigate_to, header):
 
                 if item[5] == item[4]:
                     mostrar_snackbar(e.page, "Quantidade completa! Passando para o próximo item.", colorVariaveis['sucesso'])
-                    # atualizar_resumo(e.page)
+                    atualizar_resumo(e.page)
                     fechar_dialog(e.page)
                     global current_index
                     if current_index < len(global_dados_itens) - 1:
@@ -249,7 +249,7 @@ def separar_pedido(page, navigate_to, header):
             controls=resumo_controls,
             scroll=ft.ScrollMode.AUTO
         )
-        tabsResumo.content.update()
+        tabsResumo.update()
         page.update()
 
     # Construção do tab "Separar" com os dados do endereço do produto atual
