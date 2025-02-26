@@ -113,6 +113,9 @@ def separar_pedido(page, navigate_to, header):
         qtpedida = item[4]     # Índice 4: Quantidade pedida
         qtseparada = item[5]   # Índice 5: Quantidade separada
 
+        # Cria um widget de texto para exibir a quantidade separada e armazena sua referência
+        qt_text = ft.Text(f"Quantidade Separada: {qtseparada}")
+
         dialog = ft.AlertDialog(
             title=ft.Text("Produto"),
             content=ft.Column(
@@ -121,12 +124,12 @@ def separar_pedido(page, navigate_to, header):
                     ft.Text(f"Código do Fabricante: {codfab}"),
                     ft.Text(f"Descrição: {descricao}"),
                     ft.Text(f"Quantidade Pedida: {qtpedida}"),
-                    ft.Text(f"Quantidade Separada: {qtseparada}"),
+                    qt_text,
                     inputCodbarra
                 ]
             ),
             actions=[
-                ft.TextButton("Confirmar", on_click=lambda e: validar_codbarra(e, item))
+                ft.TextButton("Confirmar", on_click=lambda e: validar_codbarra(e, item, qt_text))
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
@@ -134,7 +137,7 @@ def separar_pedido(page, navigate_to, header):
         dialog.open = True
         page.update()
 
-    def validar_codbarra(e, item):
+    def validar_codbarra(e, item, qt_text):
         codbarra_digitado = inputCodbarra.value
         print(f"Código de barras digitado: {codbarra_digitado}")
 
@@ -147,18 +150,24 @@ def separar_pedido(page, navigate_to, header):
 
         if codprod_encontrado is not None:
             if codprod_encontrado == item[1]:  # Verifica se corresponde ao produto atual
-                item[5] += 1  # Atualiza a quantidade separada
+                # Incrementa a quantidade separada e atualiza o widget
+                item[5] += 1
+                qt_text.value = f"Quantidade Separada: {item[5]}"
+                qt_text.update()
+
+                # Limpa o campo de código de barras para o próximo input
+                inputCodbarra.value = ""
+                inputCodbarra.update()
+
                 print(f"Quantidade separada atualizada: {item[5]}")
                 print(f"Dados_itens atualizado: {global_dados_itens}")
 
-                if item[5] == item[4]:
+                if item[5] == item[4]:  # Se atingiu a quantidade pedida
                     mostrar_snackbar(e.page, "Quantidade completa! Passando para o próximo item.", colorVariaveis['sucesso'])
                     fechar_dialog(e.page)
-                    # Avança para o próximo produto, se houver
                     global current_index
                     if current_index < len(global_dados_itens) - 1:
                         current_index += 1
-                        # Atualiza a view com o novo produto (reconstruindo a tela)
                         navigate_to("/separar_pedido")
                     else:
                         mostrar_snackbar(e.page, "Todos os produtos foram separados!", colorVariaveis['sucesso'])
@@ -168,7 +177,7 @@ def separar_pedido(page, navigate_to, header):
                 mostrar_snackbar(e.page, "Produto não corresponde ao endereço!", colorVariaveis['erro'])
         else:
             mostrar_snackbar(e.page, "Código de barras inválido!", colorVariaveis['erro'])
-        page.update()
+        e.page.update()
 
     def fechar_dialog(page):
         page.dialog.open = False
