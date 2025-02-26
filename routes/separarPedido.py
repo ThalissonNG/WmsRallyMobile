@@ -85,6 +85,14 @@ def separar_pedido(page, navigate_to, header):
         on_click=lambda e: validar_endereco(e)
     )
 
+    botaoFinalizar = ft.ElevatedButton(
+        text="Finalizar",
+        bgcolor=colorVariaveis['botaoAcao'],
+        color=colorVariaveis['texto'],
+        width=300,
+        on_click=lambda e: finalizar(e)
+    )
+
     inputCodbarra = ft.TextField(
         label="Bipar produto",
         prefix_icon=ft.icons.SCANNER,
@@ -155,7 +163,6 @@ def separar_pedido(page, navigate_to, header):
                 inputCodbarra.value = ""
                 inputCodbarra.update()
                 print(f"Quantidade separada atualizada: {item[5]}")
-                print(f"Dados_itens atualizado: {global_dados_itens}")
 
                 if item[5] == item[4]:
                     mostrar_snackbar(e.page, "Quantidade completa! Passando para o próximo item.", colorVariaveis['sucesso'])
@@ -166,9 +173,18 @@ def separar_pedido(page, navigate_to, header):
                         current_index += 1
                         navigate_to("/separar_pedido")
                     else:
+                        # Todos os produtos foram separados; vamos limpar a parte do endereço
+                        inputCodendereco.value = ""
+                        inputCodendereco.update()
+                        # Atualiza o container de separação para exibir uma mensagem de conclusão
+                        tabsSeparar.content = ft.Column(
+                            controls=[
+                                ft.Text("Todos os produtos foram separados!", size=20, weight="bold", color=colorVariaveis['sucesso'])
+                            ]
+                        )
+                        tabsSeparar.update()
                         mostrar_snackbar(e.page, "Todos os produtos foram separados!", colorVariaveis['sucesso'])
-                else:
-                    mostrar_snackbar(e.page, "Produto validado com sucesso!", colorVariaveis['sucesso'])
+
                 atualizar_resumo(e.page)
             else:
                 mostrar_snackbar(e.page, "Produto não corresponde ao endereço!", colorVariaveis['erro'])
@@ -251,6 +267,10 @@ def separar_pedido(page, navigate_to, header):
         )
         tabsResumo.update()
         page.update()
+
+    def finalizar(e):
+        print("Dados_itens atualizados:", global_dados_itens)
+        e.page.update()
 
     # Construção do tab "Separar" com os dados do endereço do produto atual
     tabsSeparar = ft.Container(
@@ -376,6 +396,9 @@ def separar_pedido(page, navigate_to, header):
         )
     )
 
+    tabFinalizar = ft.Container(
+        botaoFinalizar
+    )
     tabs = ft.Tabs(
         selected_index=0,
         animation_duration=200,
@@ -399,7 +422,9 @@ def separar_pedido(page, navigate_to, header):
             ft.Tab(
                 text="Finalizar",
                 content=ft.Container(
-                    content=ft.Text("Finalizar separação"),
+                    content=tabFinalizar,
+                    # expand=True,
+                    width="100%"
                 ),
             ),
         ],
