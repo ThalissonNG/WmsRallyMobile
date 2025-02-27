@@ -51,15 +51,8 @@ def separar_pedido(page, navigate_to, header):
     # Use o produto atual com base no índice global
     produto_atual = global_dados_itens[current_index]
 
-    # Extração dos dados de endereço do produto atual (índices 7 a 11)
-    if produto_atual and len(produto_atual) >= 12:
-        mod_val = str(produto_atual[7])
-        rua_val = str(produto_atual[8])
-        edf_val = str(produto_atual[9])
-        niv_val = str(produto_atual[10])
-        apt_val = str(produto_atual[11])
-    else:
-        mod_val = rua_val = edf_val = niv_val = apt_val = "N/A"
+    # Filtra todos os itens com o mesmo codprod (código do produto)
+    itens_produto_atual = [item for item in global_dados_itens if item[1] == produto_atual[1]]
 
     title = ft.Text(
         "Separar pedido",
@@ -85,14 +78,6 @@ def separar_pedido(page, navigate_to, header):
         on_click=lambda e: validar_endereco(e)
     )
 
-    botaoFinalizar = ft.ElevatedButton(
-        text="Finalizar",
-        bgcolor=colorVariaveis['botaoAcao'],
-        color=colorVariaveis['texto'],
-        width=300,
-        on_click=lambda e: finalizar(e)
-    )
-
     inputCodbarra = ft.TextField(
         label="Bipar produto",
         prefix_icon=ft.icons.SCANNER,
@@ -105,14 +90,21 @@ def separar_pedido(page, navigate_to, header):
     def validar_endereco(e):
         endereco_digitado = inputCodendereco.value
         print(f"Endereço digitado: {endereco_digitado}")
-        # Obtemos o endereço solicitado do produto atual
-        endereco_solicitado = produto_atual[6]  # Índice 6: codendereco
-        print(f"Endereço solicitado: {endereco_solicitado}")
-        if int(endereco_digitado) == endereco_solicitado:
-            print("Endereços iguais")
-            exibir_dialog_produto(e.page, produto_atual)
+        if dados_itens:
+            # Verifica se o endereço digitado corresponde a algum dos endereços do produto atual
+            endereco_encontrado = None
+            for item in itens_produto_atual:
+                if int(endereco_digitado) == item[6]:  # Índice 6: codendereco
+                    endereco_encontrado = item
+                    break
+
+            if endereco_encontrado:
+                print("Endereço válido")
+                exibir_dialog_produto(e.page, endereco_encontrado)
+            else:
+                mostrar_snackbar(e.page, "Endereço incorreto!", colorVariaveis['erro'])
         else:
-            mostrar_snackbar(e.page, "Endereço incorreto!", colorVariaveis['erro'])
+            mostrar_snackbar(e.page, "Nenhum produto encontrado.", colorVariaveis['erro'])
 
     def exibir_dialog_produto(page, item):
         codprod = item[1]      # Índice 1: Código do produto
@@ -163,6 +155,7 @@ def separar_pedido(page, navigate_to, header):
                 inputCodbarra.value = ""
                 inputCodbarra.update()
                 print(f"Quantidade separada atualizada: {item[5]}")
+                print(f"Dados_itens atualizado: {global_dados_itens}")
 
                 if item[5] == item[4]:
                     mostrar_snackbar(e.page, "Quantidade completa! Passando para o próximo item.", colorVariaveis['sucesso'])
@@ -173,18 +166,9 @@ def separar_pedido(page, navigate_to, header):
                         current_index += 1
                         navigate_to("/separar_pedido")
                     else:
-                        # Todos os produtos foram separados; vamos limpar a parte do endereço
-                        inputCodendereco.value = ""
-                        inputCodendereco.update()
-                        # Atualiza o container de separação para exibir uma mensagem de conclusão
-                        tabsSeparar.content = ft.Column(
-                            controls=[
-                                ft.Text("Todos os produtos foram separados!", size=20, weight="bold", color=colorVariaveis['sucesso'])
-                            ]
-                        )
-                        tabsSeparar.update()
                         mostrar_snackbar(e.page, "Todos os produtos foram separados!", colorVariaveis['sucesso'])
-
+                else:
+                    mostrar_snackbar(e.page, "Produto validado com sucesso!", colorVariaveis['sucesso'])
                 atualizar_resumo(e.page)
             else:
                 mostrar_snackbar(e.page, "Produto não corresponde ao endereço!", colorVariaveis['erro'])
@@ -265,14 +249,59 @@ def separar_pedido(page, navigate_to, header):
             controls=resumo_controls,
             scroll=ft.ScrollMode.AUTO
         )
-        tabsResumo.update()
         page.update()
 
-    def finalizar(e):
-        print("Dados_itens atualizados:", global_dados_itens)
-        e.page.update()
-
     # Construção do tab "Separar" com os dados do endereço do produto atual
+    enderecos_controls = []
+    for item in itens_produto_atual:
+        mod_val = str(item[7])
+        rua_val = str(item[8])
+        edf_val = str(item[9])
+        niv_val = str(item[10])
+        apt_val = str(item[11])
+        enderecos_controls.append(
+            ft.Column(
+                controls=[
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                        controls=[
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Mod", weight="bold"),
+                                    ft.Text(mod_val)
+                                ]
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Rua", weight="bold"),
+                                    ft.Text(rua_val)
+                                ]
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Edf", weight="bold"),
+                                    ft.Text(edf_val)
+                                ]
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Niv", weight="bold"),
+                                    ft.Text(niv_val)
+                                ]
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("Apt", weight="bold"),
+                                    ft.Text(apt_val)
+                                ]
+                            ),
+                        ]
+                    ),
+                    ft.Divider(),
+                ]
+            )
+        )
+
     tabsSeparar = ft.Container(
         padding=10,
         expand=True,
@@ -288,51 +317,17 @@ def separar_pedido(page, navigate_to, header):
                             ]
                         ),
                         ft.Divider(),
-                        ft.Row(
-                            expand=True,
-                            alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                            controls=[
-                                ft.Column(
-                                    controls=[
-                                        ft.Text("Mod", weight="bold"),
-                                        ft.Text(mod_val)
-                                    ]
-                                ),
-                                ft.Column(
-                                    controls=[
-                                        ft.Text("Rua", weight="bold"),
-                                        ft.Text(rua_val)
-                                    ]
-                                ),
-                                ft.Column(
-                                    controls=[
-                                        ft.Text("Edf", weight="bold"),
-                                        ft.Text(edf_val)
-                                    ]
-                                ),
-                                ft.Column(
-                                    controls=[
-                                        ft.Text("Niv", weight="bold"),
-                                        ft.Text(niv_val)
-                                    ]
-                                ),
-                                ft.Column(
-                                    controls=[
-                                        ft.Text("Apt", weight="bold"),
-                                        ft.Text(apt_val)
-                                    ]
-                                ),
-                            ]
-                        ),
-                        ft.Divider(),
+                        *enderecos_controls,  # Adiciona todos os endereços
                         inputCodendereco,
                         botaoEndereco,
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 )
-            ]
+            ],
+            scroll=ft.ScrollMode.AUTO  # Permite a rolagem vertical
         )
     )
+
 
     # Construção dinâmica do tab "Resumo"
     resumo_controls = []
@@ -396,9 +391,6 @@ def separar_pedido(page, navigate_to, header):
         )
     )
 
-    tabFinalizar = ft.Container(
-        botaoFinalizar
-    )
     tabs = ft.Tabs(
         selected_index=0,
         animation_duration=200,
@@ -422,9 +414,7 @@ def separar_pedido(page, navigate_to, header):
             ft.Tab(
                 text="Finalizar",
                 content=ft.Container(
-                    content=tabFinalizar,
-                    # expand=True,
-                    width="100%"
+                    content=ft.Text("Finalizar separação"),
                 ),
             ),
         ],
