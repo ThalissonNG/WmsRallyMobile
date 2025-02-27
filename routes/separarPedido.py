@@ -25,6 +25,8 @@ def separar_pedido(page, navigate_to, header):
             print("Recebido com sucesso")
             dados_itens = dados.get("dados_itens", [])
             dados_codbarras = dados.get("dados_codbarras", [])
+            dados_resumo = dados.get("dados_resumo", [])
+            print(f"Dados resumo: {dados_resumo}")
             print(f"Dados itens: {dados_itens}")
             print(f"Dados codbarras: {dados_codbarras}")
         else:
@@ -85,6 +87,14 @@ def separar_pedido(page, navigate_to, header):
         border_color=colorVariaveis['bordarInput'],
         border_width=2,
         keyboard_type=ft.KeyboardType.NUMBER
+    )
+
+    botaoFinalizar = ft.ElevatedButton(
+        text="Finalizar",
+        bgcolor=colorVariaveis['botaoAcao'],
+        color=colorVariaveis['texto'],
+        width=300,
+        on_click=lambda e: finalizar(e)
     )
 
     def validar_endereco(e):
@@ -188,6 +198,10 @@ def separar_pedido(page, navigate_to, header):
         page.overlay.append(snackbar)
         snackbar.open = True
         page.update()
+
+    def finalizar(e):
+        print("Botão finalizar:", global_dados_itens)
+        e.page.update()
 
     # Função para atualizar a aba "Resumo" com os dados atuais
     def atualizar_resumo(page):
@@ -328,7 +342,6 @@ def separar_pedido(page, navigate_to, header):
         )
     )
 
-
     # Construção dinâmica do tab "Resumo"
     resumo_controls = []
     for item in global_dados_itens:
@@ -391,6 +404,13 @@ def separar_pedido(page, navigate_to, header):
         )
     )
 
+    tabsfinalizar = ft.Container(
+        content=ft.Column(
+            controls=[
+                botaoFinalizar
+            ]
+        )	
+    )
     tabs = ft.Tabs(
         selected_index=0,
         animation_duration=200,
@@ -414,7 +434,9 @@ def separar_pedido(page, navigate_to, header):
             ft.Tab(
                 text="Finalizar",
                 content=ft.Container(
-                    content=ft.Text("Finalizar separação"),
+                    content=tabsfinalizar,
+                    expand=True,
+                    width="100%"
                 ),
             ),
         ],
