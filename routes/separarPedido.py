@@ -7,9 +7,10 @@ current_index = 0
 # Variáveis globais para armazenar os dados carregados
 global_dados_itens = []
 global_dados_codbarras = []
+global_dados_resumo = []
 
 def separar_pedido(page, navigate_to, header):
-    global current_index, global_dados_itens, global_dados_codbarras
+    global current_index, global_dados_itens, global_dados_codbarras, global_dados_resumo
 
     matricula = user_info.get('matricula')
     dados_itens = []       # Dados dos itens do pedido
@@ -49,6 +50,8 @@ def separar_pedido(page, navigate_to, header):
         global_dados_itens = dados_itens
     if not global_dados_codbarras:
         global_dados_codbarras = dados_codbarras
+    if not global_dados_resumo:
+        global_dados_resumo = dados_resumo
 
     # Use o produto atual com base no índice global
     produto_atual = global_dados_itens[current_index]
@@ -206,64 +209,36 @@ def separar_pedido(page, navigate_to, header):
     # Função para atualizar a aba "Resumo" com os dados atuais
     def atualizar_resumo(page):
         resumo_controls = []
-        for item in global_dados_itens:
-            codprod = item[1]    # Índice 1: Código do produto
-            descricao = item[3]  # Índice 3: Descrição
-            qt = item[4]         # Índice 4: Quantidade pedida
-            sep = item[5]        # Índice 5: Quantidade separada
-            resumo_controls.extend([
+        for item in global_dados_resumo:
+            codprod = item[0]
+            codfab = item[1]
+            descricao = item[2]
+            coenderecoorigem = item[3]
+            qtpedida = item[4]
+            qtseparada = item[5]
+            qtrestante = item[6]
+            resumo_controls.append(
                 ft.Row(
                     controls=[
-                        ft.Column(
-                            controls=[
-                                ft.Text("Codprod", weight="bold"),
-                                ft.Text(str(codprod))
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("Descrição", weight="bold"),
-                                ft.Text(
-                                    descricao,
-                                    no_wrap=False,
-                                    width=200
-                                )
-                            ]
-                        ),
+                        ft.Text(f"Codprod: {codprod}", weight="bold"),
+                        ft.Text(f"Codfab: {codfab}", weight="bold"),
+                        ft.Text(f"Descrição: {descricao}", weight="bold"),
+                        ft.Text(f"End. Origem: {coenderecoorigem}", weight="bold"),
+                        ft.Text(f"Qtd Pedida: {qtpedida}", weight="bold"),
+                        ft.Text(f"Qtd Separada: {qtseparada}", weight="bold"),
+                        ft.Text(f"Qtd Restante: {qtrestante}", weight="bold")
                     ],
-                    alignment=ft.MainAxisAlignment.START,
-                ),
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                    controls=[
-                        ft.Column(
-                            controls=[
-                                ft.Text("Qt", weight="bold"),
-                                ft.Text(str(qt))
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("Sep", weight="bold"),
-                                ft.Text(str(sep))
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("Dif", weight="bold"),
-                                ft.Text(str(int(qt) - int(sep)))
-                            ]
-                        ),
-                    ],
-                ),
-                ft.Divider(),
-            ])
-        # Atualiza o conteúdo do tab "Resumo"
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                )
+            )
+            resumo_controls.append(ft.Divider())
         tabsResumo.content = ft.Column(
             controls=resumo_controls,
             scroll=ft.ScrollMode.AUTO
         )
+        tabsResumo.update()
         page.update()
+
 
     # Construção do tab "Separar" com os dados do endereço do produto atual
     enderecos_controls = []
@@ -344,11 +319,12 @@ def separar_pedido(page, navigate_to, header):
 
     # Construção dinâmica do tab "Resumo"
     resumo_controls = []
-    for item in global_dados_itens:
-        codprod = item[1]    # Índice 1: Código do produto
-        descricao = item[3]  # Índice 3: Descrição
-        qt = item[4]         # Índice 4: Quantidade pedida
-        sep = item[5]        # Índice 5: Quantidade separada
+    for item in global_dados_resumo:
+        codprod = item[0]      # Código do produto
+        codfab = item[1]       # Código do fabricante
+        descricao = item[2]    # Descrição
+        qt = item[4]           # Quantidade pedida
+        sep = item[5]          # Quantidade separada
         resumo_controls.extend([
             ft.Row(
                 controls=[
@@ -356,6 +332,12 @@ def separar_pedido(page, navigate_to, header):
                         controls=[
                             ft.Text("Codprod", weight="bold"),
                             ft.Text(str(codprod))
+                        ]
+                    ),
+                    ft.Column(
+                        controls=[
+                            ft.Text("Codfab", weight="bold"),
+                            ft.Text(str(codfab))
                         ]
                     ),
                     ft.Column(
@@ -396,6 +378,7 @@ def separar_pedido(page, navigate_to, header):
             ),
             ft.Divider(),
         ])
+
 
     tabsResumo = ft.Container(
         content=ft.Column(
