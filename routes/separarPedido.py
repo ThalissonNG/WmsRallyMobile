@@ -24,13 +24,9 @@ def separar_pedido(page, navigate_to, header):
         )
         if response.status_code == 200:
             dados = response.json()
-            print("Recebido com sucesso")
             dados_itens = dados.get("dados_itens", [])
             dados_codbarras = dados.get("dados_codbarras", [])
             dados_resumo = dados.get("dados_resumo", [])
-            print(f"Dados resumo: {dados_resumo}")
-            print(f"Dados itens: {dados_itens}")
-            print(f"Dados codbarras: {dados_codbarras}")
         else:
             print("Deu erro")
     except Exception as exc:
@@ -125,7 +121,6 @@ def separar_pedido(page, navigate_to, header):
 
     def validar_endereco(e):
         endereco_digitado = inputCodendereco.value
-        print(f"Endereço digitado: {endereco_digitado}")
         if endereco_digitado and endereco_digitado.strip():
             endereco_encontrado = None
             for item in itens_produto_atual:
@@ -133,7 +128,6 @@ def separar_pedido(page, navigate_to, header):
                     endereco_encontrado = item
                     break
             if endereco_encontrado:
-                print("Endereço válido")
                 exibir_dialog_produto(e.page, endereco_encontrado)
             else:
                 mostrar_snackbar(e.page, "Endereço incorreto!", colorVariaveis['erro'])
@@ -173,7 +167,6 @@ def separar_pedido(page, navigate_to, header):
     
     def validar_codbarra(e, item, qt_text, codendereco):
         codbarra_digitado = inputCodbarra.value
-        print(f"Código de barras digitado: {codbarra_digitado}")
         codprod_encontrado = None
         for codbarras in global_dados_codbarras:
             if codbarras[1] == codbarra_digitado:
@@ -186,8 +179,7 @@ def separar_pedido(page, navigate_to, header):
                 qt_text.update()
                 inputCodbarra.value = ""
                 inputCodbarra.update()
-                print(f"Quantidade separada atualizada: {item[5]}")
-                print(f"Dados_itens atualizado: {global_dados_itens}")
+
                 # Update global summary for this product:
                 atualizado = False
                 for resumo_item in global_dados_resumo:
@@ -252,7 +244,8 @@ def separar_pedido(page, navigate_to, header):
         page.update()
     
     def finalizar(e):
-        print("Botão finalizar:", global_dados_itens)
+        print("Botão finalizar dados itens:", global_dados_itens)
+        print("Botão finalizar dados RESUMO:", global_dados_resumo)
         e.page.update()
     
     # Function to update the "Resumo" tab based on global_dados_resumo.
