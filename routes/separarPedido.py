@@ -86,12 +86,6 @@ def separar_pedido(page, navigate_to, header):
         color=colorVariaveis['titulo']
     )
 
-    # Display product info (e.g., description and product code)
-    produto_info_text = ft.Text(
-        f"Produto atual: {produto_atual[3]} (Código: {produto_atual[1]})",
-        size=16,
-        color=colorVariaveis['titulo']
-    )
 
     inputCodendereco = ft.TextField(
         label="Bipar Endereço",
@@ -366,7 +360,6 @@ def separar_pedido(page, navigate_to, header):
                             alignment=ft.MainAxisAlignment.CENTER,
                             controls=[ft.Text("Vá ao endereço:", weight="bold", size=20)]
                         ),
-                        produto_info_text,
                         ft.Divider(),
                         *enderecos_controls,
                         inputCodendereco,
@@ -440,15 +433,9 @@ def separar_pedido(page, navigate_to, header):
     tabsfinalizar = ft.Container(
         content=ft.Column(
             controls=[
-                ft.Text("Progresso Geral", weight="bold", size=18),
-                ft.Text(f"{sum(item[5] for item in global_dados_resumo)} de {sum(item[4] for item in global_dados_resumo)} itens separados"),
-                ft.ProgressBar(
-                    value=sum(item[5] for item in global_dados_resumo) / sum(item[4] for item in global_dados_resumo)
-                    if sum(item[4] for item in global_dados_resumo) > 0 else 0
-                ),
-                ft.Container(height=20),
                 botaoFinalizar
-            ]
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
     )
     
