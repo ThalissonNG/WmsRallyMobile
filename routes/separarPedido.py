@@ -257,7 +257,13 @@ def separar_pedido(page, navigate_to, header):
                 }
             )
             if response.status_code == 202:
-                print("Pedido enviado para a finalização com sucesso")
+                mostrar_snackbar(e.page, "Separação finalizada com sucesso!", colorVariaveis['sucesso'])
+                global_dados_itens.clear()
+                global_dados_codbarras.clear()
+                global_dados_resumo.clear()
+                global_enderecos_origem.clear()
+                current_index = 0
+                navigate_to("/buscar_pedido")
             else:
                 print("Erro ao enviar pedido para finalização")
         except Exception as exc:
