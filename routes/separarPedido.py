@@ -114,7 +114,7 @@ def separar_pedido(page, navigate_to, header):
         bgcolor=colorVariaveis['botaoAcao'],
         color=colorVariaveis['texto'],
         width=300,
-        on_click=lambda e: finalizar(e)
+        on_click=lambda e: finalizar(e, global_dados_itens, global_dados_resumo)
     )
 
     # --- Functions for handling barcode and address validation ---
@@ -243,9 +243,25 @@ def separar_pedido(page, navigate_to, header):
         snackbar.open = True
         page.update()
     
-    def finalizar(e):
-        print("Botão finalizar dados itens:", global_dados_itens)
-        print("Botão finalizar dados RESUMO:", global_dados_resumo)
+    def finalizar(e, dados_itens_finalizar, dados_resumo_finalizar):
+        print("Botão finalizar dados itens:", dados_itens_finalizar)
+        print("Botão finalizar dados RESUMO:", dados_resumo_finalizar)
+        try:
+            response = requests.post(
+                f"{base_url}/separarPedido",
+                json={
+                    "matricula": matricula,
+                    "dados_itens_finalizar": global_dados_itens,
+                    "dados_resumo_finalizar": global_dados_resumo,
+                    "action": "finalizar"
+                }
+            )
+            if response.status_code == 202:
+                print("Pedido enviado para a finalização com sucesso")
+            else:
+                print("Erro ao enviar pedido para finalização")
+        except Exception as exc:
+            print(f"Erro: {exc}")
         e.page.update()
     
     # Function to update the "Resumo" tab based on global_dados_resumo.
