@@ -19,7 +19,10 @@ def buscar_transferencia_devolucao(e, navigate_to, header):
                 }
             )
             if response.status_code == 200:
-                print("Tem pedido manual")
+                print("Iniciada separação")
+                navigate_to("/separar_transferencia_devolucao")
+            elif response.status_code == 202:
+                print("Separação em andamento")
                 navigate_to("/separar_transferencia_devolucao")
             elif response.status_code == 404:
                 print("Não tem pedido")
