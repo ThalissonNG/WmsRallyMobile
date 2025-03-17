@@ -27,8 +27,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     on_click=lambda e: navigate_to("/buscar_pedido")
                                 ),
                                 ft.ElevatedButton(
-                                    "Conferir Bônus",
-                                    expand=True
+                                    "Transferência/Devolução",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/buscar_transferencia_devolucao")
                                     ),
                             ],
                             spacing=10,

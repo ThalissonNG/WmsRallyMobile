@@ -8,6 +8,7 @@ from routes.consultarProdutoEndereco import consultar_produto_endereco
 from routes.transferirProduto import transferir_produto
 from routes.buscarPedido import buscar_pedido
 from routes.separarPedido import separar_pedido
+from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -64,6 +65,8 @@ def main(page: ft.Page):
             page.views.append(buscar_pedido(page, navigate_to, create_header()))
         elif route == "/separar_pedido":
             page.views.append(separar_pedido(page, navigate_to, create_header()))
+        elif route == "/buscar_transferencia_devolucao":
+            page.views.append(buscar_transferencia_devolucao(page, navigate_to, create_header()))
         page.update()
 
     # Tela de login
