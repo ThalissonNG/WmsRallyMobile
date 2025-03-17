@@ -20,6 +20,7 @@ def buscar_transferencia_devolucao(e, navigate_to, header):
             )
             if response.status_code == 200:
                 print("Tem pedido manual")
+                navigate_to("/separar_transferencia_devolucao")
             elif response.status_code == 404:
                 print("Não tem pedido")
         except Exception as exc:
