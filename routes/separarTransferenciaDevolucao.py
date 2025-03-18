@@ -14,6 +14,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                 "codfilial": codfilial
             }
         )
+        print(f"Status code: {response.status_code}")
         if response.status_code == 200:
             dados = response.json()
             dados_itens = dados.get("dados_itens", [])
@@ -21,9 +22,23 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             dados_resumo = dados.get("dados_resumo", [])
         else:
             print("Erro ao buscar dados")
+            try:
+                dados = response.json()
+                mensagem = dados.get("mensagem", "Erro desconhecido")
+                status = dados.get("status", response.status_code)
+            except ValueError:
+                mensagem = "Erro ao processar a resposta da API"
+                status = response.status_code
+            
+            print(f"Mensagem: {mensagem} - Status: {status}")
             dados_itens, dados_codbarras, dados_resumo = [], [], []
+        
+        print(f"dados_itens: {dados_itens}")
+        print(f"dados_codbarras: {dados_codbarras}")
+        print(f"dados_resumo: {dados_resumo}")
+
     except Exception as exc:
-        print(exc)
+        print(f"Erro na requisição:{exc}")
         dados_itens, dados_codbarras, dados_resumo = [], [], []
 
     title = ft.Text(
