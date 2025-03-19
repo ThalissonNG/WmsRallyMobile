@@ -8,7 +8,6 @@ def separar_transferencia_devolucao(e, navigate_to, header):
     
     try:
         response = requests.post(
-          # ****NÃO MUDAR A URL DA REQUISIÇÃO****
             f"{base_url}/buscar_dados_transferencia_devolucao",
             json={"matricula": matricula, "codfilial": codfilial}
         )
@@ -16,8 +15,6 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             dados = response.json()
             dados_itens = dados.get("dados_itens", [])
             dados_resumo = dados.get("dados_resumo", [])
-
-            print("Recebido do backend:", dados_resumo)
         else:
             print("Erro ao buscar os dados da transferência/devolução")
             dados_itens = []
@@ -34,9 +31,53 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         color=colorVariaveis['titulo']
     )
 
-    # Exibir apenas o primeiro produto da lista
+    def validar_endereco(e, endereco_digitado, item):
+        if endereco_digitado.isdigit() and int(endereco_digitado) == item[6]:
+            abrir_dialogo_produto(e, item)
+        else:
+            snack = ft.SnackBar(
+                content=ft.Text("Endereço incorreto!", color="white"),
+                bgcolor=colorVariaveis['erro']
+            )
+            e.page.snack_bar = snack
+            snack.open = True
+            e.page.update()
+    
+    def abrir_dialogo_produto(e, item):
+        def fechar_dialogo(e):
+            e.page.dialog.open = False
+            e.page.update()
+        
+        dialog = ft.AlertDialog(
+            title=ft.Text("Confirmação de Produto"),
+            content=ft.Column(
+                controls=[
+                    ft.Text(f"Código do Produto: {item[1]}"),
+                    ft.Text(f"Descrição: {item[3]}"),
+                    ft.Text(f"Quantidade Pedida: {item[4]}"),
+                    ft.Text(f"Quantidade Separada: 0"),
+                    ft.TextField(label="Código de Barras"),
+                ]
+            ),
+            actions=[
+                ft.TextButton("Confirmar", on_click=lambda e: print("Produto confirmado!")),
+                ft.TextButton("Cancelar", on_click=fechar_dialogo),
+            ],
+        )
+        e.page.dialog = dialog
+        dialog.open = True
+        e.page.update()
+
     if dados_itens:
         item = dados_itens[0]
+        input_endereco = ft.TextField(label="Digite o código do endereço")
+        botao_validar = ft.ElevatedButton(
+            text="Validar Endereço",
+            bgcolor=colorVariaveis['botaoAcao'],
+            color=colorVariaveis['texto'],
+            on_click=lambda e: validar_endereco(e, input_endereco.value, item)
+        )
+
         produto_container = ft.Container(
             padding=10,
             border=ft.border.all(1, color=colorVariaveis['bordarInput']),
@@ -62,7 +103,9 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                             ft.Column(controls=[ft.Text("NIV", weight="bold"), ft.Text(str(item[10]))]),
                             ft.Column(controls=[ft.Text("APT", weight="bold"), ft.Text(str(item[11]))]),
                         ]
-                    )
+                    ),
+                    input_endereco,
+                    botao_validar,
                 ]
             )
         )
@@ -85,35 +128,10 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         )
     )
     
-    # Criar aba de Resumo
-    resumo_controls = []
-    for item in dados_resumo:
-        resumo_controls.extend([
-            ft.Row(
-                controls=[
-                    ft.Column(controls=[ft.Text("CODPROD", weight="bold"), ft.Text(str(item[0]))]),
-                    ft.Column(controls=[ft.Text("CODFAB", weight="bold"), ft.Text(item[1])]),
-                ]
-            ),
-            ft.Text(item[2], weight="bold"),
-            ft.Row(
-                controls=[
-                    ft.Column(controls=[ft.Text("QT PEDIDA", weight="bold"), ft.Text(str(item[4]))]),
-                    ft.Column(controls=[ft.Text("QT SEPARADA", weight="bold"), ft.Text(str(item[5]))]),
-                    ft.Column(controls=[ft.Text("QT RESTANTE", weight="bold"), ft.Text(str(item[4] - item[5]))]),
-                ]
-            ),
-            ft.Divider(),
-        ])
-    
     tabsResumo = ft.Container(
-        content=ft.Column(
-            controls=resumo_controls,
-            scroll=ft.ScrollMode.AUTO
-        )
+        content=ft.Text("Resumo dos produtos", size=20, weight="bold"),
     )
     
-    # Criar aba de Finalizar
     tabsFinalizar = ft.Container(
         content=ft.Column(
             controls=[
@@ -128,7 +146,6 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         )
     )
     
-    # Criar Tabs
     tabs = ft.Tabs(
         selected_index=0,
         animation_duration=200,
