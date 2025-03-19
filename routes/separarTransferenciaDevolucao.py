@@ -15,14 +15,17 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             dados = response.json()
             dados_itens = dados.get("dados_itens", [])
             dados_resumo = dados.get("dados_resumo", [])
+            dados_codbarras = dados.get("dados_codbarras", [])
         else:
             print("Erro ao buscar os dados da transferência/devolução")
             dados_itens = []
             dados_resumo = []
+            dados_codbarras = []
     except Exception as exc:
         print(f"Erro: {exc}")
         dados_itens = []
         dados_resumo = []
+        dados_codbarras = []
     
     title = ft.Text(
         "Separar Transferência/Devolução",
@@ -44,6 +47,27 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             e.page.update()
     
     def abrir_dialogo_produto(e, item):
+        qt_separada = ft.Text(f"Quantidade Separada: 0")
+        input_codbarra = ft.TextField(label="Código de Barras")
+        
+        def validar_codbarra(e):
+            codbarra_digitado = input_codbarra.value
+            for cod in dados_codbarras:
+                if cod[0] == item[1] and cod[1] == codbarra_digitado:
+                    qt_atual = int(qt_separada.value.split(": ")[1]) + 1
+                    qt_separada.value = f"Quantidade Separada: {qt_atual}"
+                    qt_separada.update()
+                    input_codbarra.value = ""
+                    input_codbarra.update()
+                    return
+            snack = ft.SnackBar(
+                content=ft.Text("Código de barras incorreto!", color="white"),
+                bgcolor=colorVariaveis['erro']
+            )
+            e.page.snack_bar = snack
+            snack.open = True
+            e.page.update()
+        
         def fechar_dialogo(e):
             e.page.dialog.open = False
             e.page.update()
@@ -55,12 +79,12 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     ft.Text(f"Código do Produto: {item[1]}"),
                     ft.Text(f"Descrição: {item[3]}"),
                     ft.Text(f"Quantidade Pedida: {item[4]}"),
-                    ft.Text(f"Quantidade Separada: 0"),
-                    ft.TextField(label="Código de Barras"),
+                    qt_separada,
+                    input_codbarra,
                 ]
             ),
             actions=[
-                ft.TextButton("Confirmar", on_click=lambda e: print("Produto confirmado!")),
+                ft.TextButton("Confirmar", on_click=validar_codbarra),
                 ft.TextButton("Cancelar", on_click=fechar_dialogo),
             ],
         )
