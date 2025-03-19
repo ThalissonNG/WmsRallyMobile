@@ -8,18 +8,24 @@ def separar_transferencia_devolucao(e, navigate_to, header):
     
     try:
         response = requests.post(
+          # ****NÃO MUDAR A URL DA REQUISIÇÃO****
             f"{base_url}/buscar_dados_transferencia_devolucao",
             json={"matricula": matricula, "codfilial": codfilial}
         )
         if response.status_code == 200:
             dados = response.json()
             dados_itens = dados.get("dados_itens", [])
+            dados_resumo = dados.get("dados_resumo", [])
+
+            print("Recebido do backend:", dados_resumo)
         else:
             print("Erro ao buscar os dados da transferência/devolução")
             dados_itens = []
+            dados_resumo = []
     except Exception as exc:
         print(f"Erro: {exc}")
         dados_itens = []
+        dados_resumo = []
     
     title = ft.Text(
         "Separar Transferência/Devolução",
@@ -79,19 +85,57 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         )
     )
     
+    # Criar aba de Resumo
+    resumo_controls = []
+    for item in dados_resumo:
+        resumo_controls.extend([
+            ft.Row(
+                controls=[
+                    ft.Column(controls=[ft.Text("CODPROD", weight="bold"), ft.Text(str(item[0]))]),
+                    ft.Column(controls=[ft.Text("CODFAB", weight="bold"), ft.Text(item[1])]),
+                ]
+            ),
+            ft.Text(item[2], weight="bold"),
+            ft.Row(
+                controls=[
+                    ft.Column(controls=[ft.Text("QT PEDIDA", weight="bold"), ft.Text(str(item[4]))]),
+                    ft.Column(controls=[ft.Text("QT SEPARADA", weight="bold"), ft.Text(str(item[5]))]),
+                    ft.Column(controls=[ft.Text("QT RESTANTE", weight="bold"), ft.Text(str(item[4] - item[5]))]),
+                ]
+            ),
+            ft.Divider(),
+        ])
+    
+    tabsResumo = ft.Container(
+        content=ft.Column(
+            controls=resumo_controls,
+            scroll=ft.ScrollMode.AUTO
+        )
+    )
+    
+    # Criar aba de Finalizar
+    tabsFinalizar = ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.ElevatedButton(
+                    text="Finalizar",
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    color=colorVariaveis['texto'],
+                    on_click=lambda e: print("Clicou pra finalizar")
+                )
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )
+    )
+    
     # Criar Tabs
     tabs = ft.Tabs(
         selected_index=0,
         animation_duration=200,
         tabs=[
-            ft.Tab(
-                text="Separar",
-                content=ft.Container(
-                    content=tabsSeparar,
-                    expand=True,
-                    width="100%"
-                ),
-            ),
+            ft.Tab(text="Separar", content=tabsSeparar),
+            ft.Tab(text="Resumo", content=tabsResumo),
+            ft.Tab(text="Finalizar", content=tabsFinalizar),
         ],
     )
     
