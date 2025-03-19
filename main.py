@@ -13,8 +13,8 @@ from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 
 def main(page: ft.Page):
     page.title = "Login"
-    page.window_width = 450
-    page.window_height = 700
+    page.window_width = 480
+    page.window_height = 800
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.padding = 20
