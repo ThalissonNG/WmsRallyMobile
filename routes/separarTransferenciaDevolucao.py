@@ -136,6 +136,33 @@ def separar_transferencia_devolucao(e, navigate_to, header):
     else:
         produto_container = ft.Text("Nenhum produto para separar", size=18, color=colorVariaveis['erro'])
     
+    def construir_tabs_resumo():
+        return ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Text("Resumo dos produtos", size=20, weight="bold"),
+                    *[
+                        ft.Column([
+                            ft.Row([
+                                ft.Text(f"CODPROD: {item[0]}", weight="bold"),
+                                ft.Text(f"CODFAB: {item[1]}", weight="bold"),
+                            ]),
+                            ft.Text(item[2], weight="bold"),
+                            ft.Row([
+                                ft.Text(f"Qt Pedida: {item[4]}", weight="bold"),
+                                ft.Text(f"Qt Separada: {item[5]}", weight="bold"),
+                                ft.Text(f"Qt Restante: {item[4] - item[5]}", weight="bold"),
+                            ]),
+                            ft.Divider()
+                        ])
+                        for item in dados_resumo
+                    ]
+                ],
+                scroll=ft.ScrollMode.AUTO
+            )
+        )
+    
+
     tabsSeparar = ft.Container(
         padding=10,
         expand=True,
@@ -152,9 +179,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         )
     )
     
-    tabsResumo = ft.Container(
-        content=ft.Text("Resumo dos produtos", size=20, weight="bold"),
-    )
+    tabsResumo = construir_tabs_resumo()
     
     tabsFinalizar = ft.Container(
         content=ft.Column(
