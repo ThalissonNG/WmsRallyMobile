@@ -34,6 +34,58 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         color=colorVariaveis['titulo']
     )
 
+    def atualizar_tab_separar():
+    # Verifica se ainda há produtos para separar
+        if dados_itens:
+            next_item = dados_itens[0]
+            # Cria os controles para o próximo produto
+            novo_input_endereco = ft.TextField(label="Digite o código do endereço")
+            novo_botao_validar = ft.ElevatedButton(
+                text="Validar Endereço",
+                bgcolor=colorVariaveis['botaoAcao'],
+                color=colorVariaveis['texto'],
+                on_click=lambda e: validar_endereco(e, novo_input_endereco.value, next_item)
+            )
+            novo_produto_container = ft.Container(
+                padding=10,
+                border=ft.border.all(1, color=colorVariaveis['bordarInput']),
+                border_radius=10,
+                content=ft.Column(
+                    controls=[
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Column(controls=[ft.Text("CODPROD", weight="bold"), ft.Text(str(next_item[1]))]),
+                                ft.Column(controls=[ft.Text("CODFAB", weight="bold"), ft.Text(next_item[2])]),
+                                ft.Column(controls=[ft.Text("QT", weight="bold"), ft.Text(str(next_item[4]))]),
+                            ]
+                        ),
+                        ft.Text(next_item[3], weight="bold"),
+                        ft.Divider(),
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Column(controls=[ft.Text("MOD", weight="bold"), ft.Text(str(next_item[7]))]),
+                                ft.Column(controls=[ft.Text("RUA", weight="bold"), ft.Text(str(next_item[8]))]),
+                                ft.Column(controls=[ft.Text("EDI", weight="bold"), ft.Text(str(next_item[9]))]),
+                                ft.Column(controls=[ft.Text("NIV", weight="bold"), ft.Text(str(next_item[10]))]),
+                                ft.Column(controls=[ft.Text("APT", weight="bold"), ft.Text(str(next_item[11]))]),
+                            ]
+                        ),
+                        novo_input_endereco,
+                        novo_botao_validar,
+                    ]
+                )
+            )
+            # Atualiza o terceiro controle do Column que compõe o tabsSeparar (onde o produto é exibido)
+            tabsSeparar.content.controls[2] = novo_produto_container
+            tabsSeparar.update()
+        else:
+            # Se não houver mais produtos, exibe uma mensagem apropriada
+            tabsSeparar.content.controls[2] = ft.Text("Nenhum produto para separar", size=18, color=colorVariaveis['erro'])
+            tabsSeparar.update()
+
+
     def validar_endereco(e, endereco_digitado, item):
         for item in dados_itens:
             if int(endereco_digitado) == item[6]:
@@ -67,7 +119,10 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     tabsResumo.content = construir_tabs_resumo()
                     tabsResumo.update()
                     e.page.update()
-                    print(dados_resumo)
+                    if item[5] == item[4]:
+                        dados_itens.pop(0)
+                        atualizar_tab_separar()
+                        fechar_dialogo(e)
                     return
             snack = ft.SnackBar(
                 content=ft.Text("Código de barras incorreto!", color="white"),
