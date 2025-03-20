@@ -35,30 +35,39 @@ def separar_transferencia_devolucao(e, navigate_to, header):
     )
 
     def validar_endereco(e, endereco_digitado, item):
-        if endereco_digitado.isdigit() and int(endereco_digitado) == item[6]:
-            abrir_dialogo_produto(e, item)
-        else:
-            snack = ft.SnackBar(
-                content=ft.Text("Endereço incorreto!", color="white"),
-                bgcolor=colorVariaveis['erro']
-            )
-            e.page.snack_bar = snack
-            snack.open = True
-            e.page.update()
+        for item in dados_itens:
+            if int(endereco_digitado) == item[6]:
+                for resumo_item in dados_resumo:
+                    if resumo_item[0] == item[1]:  # Verifica se o produto no resumo é o mesmo de dados_itens
+                        abrir_dialogo_produto(e, resumo_item)
+                        return
+        snack = ft.SnackBar(
+            content=ft.Text("Endereço incorreto!", color="white"),
+            bgcolor=colorVariaveis['erro']
+        )
+        e.page.snack_bar = snack
+        snack.open = True
+        e.page.update()
     
     def abrir_dialogo_produto(e, item):
-        qt_separada = ft.Text(f"Quantidade Separada: 0")
+        qt_separada = ft.Text(f"Quantidade Separada: {item[5]}")
         input_codbarra = ft.TextField(label="Código de Barras")
         
         def validar_codbarra(e):
             codbarra_digitado = input_codbarra.value
             for cod in dados_codbarras:
-                if cod[0] == item[1] and cod[1] == codbarra_digitado:
-                    qt_atual = int(qt_separada.value.split(": ")[1]) + 1
-                    qt_separada.value = f"Quantidade Separada: {qt_atual}"
+                if cod[0] == item[0] and cod[1] == codbarra_digitado:
+                    item[3] = cod[2]  # Atualiza codenderecoorigem
+                    item[5] += 1  # Atualiza qt separada
+                    item[6] = item[4] - item[5]  # Atualiza qt restante
+                    qt_separada.value = f"Quantidade Separada: {item[5]}"
                     qt_separada.update()
                     input_codbarra.value = ""
                     input_codbarra.update()
+                    tabsResumo.content = construir_tabs_resumo()
+                    tabsResumo.update()
+                    e.page.update()
+                    print(dados_resumo)
                     return
             snack = ft.SnackBar(
                 content=ft.Text("Código de barras incorreto!", color="white"),
@@ -76,8 +85,8 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             title=ft.Text("Confirmação de Produto"),
             content=ft.Column(
                 controls=[
-                    ft.Text(f"Código do Produto: {item[1]}"),
-                    ft.Text(f"Descrição: {item[3]}"),
+                    ft.Text(f"Código do Produto: {item[0]}"),
+                    ft.Text(f"Descrição: {item[2]}"),
                     ft.Text(f"Quantidade Pedida: {item[4]}"),
                     qt_separada,
                     input_codbarra,
