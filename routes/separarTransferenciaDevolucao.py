@@ -34,6 +34,26 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         color=colorVariaveis['titulo']
     )
 
+    def envio_resumo(dados_resumo):
+        try:
+            response = requests.post(
+                f"{base_url}/finalizar_transferencia_devolucao",
+                json={
+                    "dados_resumo": dados_resumo,
+                    "matricula": matricula,
+                    "codfilial": codfilial
+                }
+            )
+            if response.status_code == 200:
+                print("Resumo enviado com sucesso")
+            else:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                print(mensagem)
+                print("Erro ao enviar o resumo")
+        except Exception as exc:
+            print(f"Erro: {exc}")
+
     def atualizar_tab_separar():
     # Verifica se ainda há produtos para separar
         if dados_itens:
@@ -84,7 +104,6 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             # Se não houver mais produtos, exibe uma mensagem apropriada
             tabsSeparar.content.controls[2] = ft.Text("Nenhum produto para separar", size=18, color=colorVariaveis['erro'])
             tabsSeparar.update()
-
 
     def validar_endereco(e, endereco_digitado, item):
         for item in dados_itens:
@@ -226,6 +245,49 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             )
         )
     
+    def finalizar(e):
+        # Cria uma lista com as divergências encontradas
+        divergencias = [
+            f"Produto {item[0]}: Qt Pedida {item[4]} vs Qt Separada {item[5]}"
+            for item in dados_resumo if item[4] != item[5]
+        ]
+        
+        if divergencias:
+            # Monta o conteúdo do dialog mostrando os detalhes das divergências
+            content_dialog = ft.Column(
+                controls=[
+                    ft.Text("Divergências encontradas:"),
+                    ft.Column(controls=[ft.Text(text) for text in divergencias]),
+                    ft.Divider(),
+                    ft.Text("Deseja finalizar assim mesmo?")
+                ]
+            )
+            
+            # Função para confirmar a finalização mesmo havendo divergências
+            def confirmar_finalizacao(e):
+                print("Finalização confirmada, mesmo com divergências.")
+                e.page.dialog.open = False
+                e.page.update()
+                envio_resumo(dados_resumo)
+                # Aqui você pode inserir a lógica final de finalização
+            
+            # Cria o AlertDialog com os botões de ação
+            dialog = ft.AlertDialog(
+                title=ft.Text("Divergências Encontradas"),
+                content=content_dialog,
+                actions=[
+                    ft.TextButton("Finalizar Assim Mesmo", on_click=confirmar_finalizacao),
+                    ft.TextButton("Cancelar", on_click=lambda e: (setattr(e.page.dialog, "open", False), e.page.update()))
+                ]
+            )
+            e.page.dialog = dialog
+            dialog.open = True
+            e.page.update()
+        else:
+            print("Nenhuma divergência encontrada, finalizando...")
+            envio_resumo(dados_resumo)
+            # Prossegue com a finalização normalmente
+
 
     tabsSeparar = ft.Container(
         padding=10,
@@ -252,7 +314,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     text="Finalizar",
                     bgcolor=colorVariaveis['botaoAcao'],
                     color=colorVariaveis['texto'],
-                    on_click=lambda e: print("Clicou pra finalizar")
+                    on_click=lambda e: finalizar(e)
                 )
             ],
             alignment=ft.MainAxisAlignment.CENTER
