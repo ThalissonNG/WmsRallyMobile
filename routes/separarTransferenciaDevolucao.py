@@ -34,7 +34,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         color=colorVariaveis['titulo']
     )
 
-    def envio_resumo(dados_resumo):
+    def envio_resumo(dados_resumo, page, navigate_to):
         try:
             response = requests.post(
                 f"{base_url}/finalizar_transferencia_devolucao",
@@ -44,15 +44,29 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     "codfilial": codfilial
                 }
             )
+            dados = response.json()
+            mensagem = dados.get("mensagem", "Sem mensagem da API.")
+
+            snackbar = ft.SnackBar(
+                content=ft.Text(mensagem, color="white"),
+                bgcolor=colorVariaveis['sucesso'] if response.status_code == 200 else colorVariaveis['erro']
+            )
+            page.snack_bar = snackbar
+            snackbar.open = True
+            page.update()
+
             if response.status_code == 200:
-                print("Resumo enviado com sucesso")
-            else:
-                dados = response.json()
-                mensagem = dados.get("mensagem")
-                print(mensagem)
-                print("Erro ao enviar o resumo")
+                navigate_to("/buscar_transferencia_devolucao")
+
         except Exception as exc:
-            print(f"Erro: {exc}")
+            snackbar = ft.SnackBar(
+                content=ft.Text(f"Erro ao enviar o resumo: {str(exc)}", color="white"),
+                bgcolor=colorVariaveis['erro']
+            )
+            page.snack_bar = snackbar
+            snackbar.open = True
+            page.update()
+
 
     def atualizar_tab_separar():
     # Verifica se ainda há produtos para separar
@@ -268,7 +282,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                 print("Finalização confirmada, mesmo com divergências.")
                 e.page.dialog.open = False
                 e.page.update()
-                envio_resumo(dados_resumo)
+                envio_resumo(dados_resumo, e.page, navigate_to)
                 # Aqui você pode inserir a lógica final de finalização
             
             # Cria o AlertDialog com os botões de ação
@@ -285,7 +299,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             e.page.update()
         else:
             print("Nenhuma divergência encontrada, finalizando...")
-            envio_resumo(dados_resumo)
+            envio_resumo(dados_resumo, e.page, navigate_to)
             # Prossegue com a finalização normalmente
 
 
