@@ -37,8 +37,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "O.S Abastecimento",
-                                    expand=True
+                                    "Inventário",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/contagem_inventario")
                                     ),
                                 ft.ElevatedButton(
                                     "Armazenar Bônus", 
