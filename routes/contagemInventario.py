@@ -9,24 +9,65 @@ def contagem_inventario(e, navigate_to, header):
     # Cria uma referência dinâmica para os elementos que mudam
     conteudo_dinamico = ft.Column()
 
-    def mostrar_campos_endereco(e):
+    def mostrar_campos_endereco(e, dados_os):
+        # Limpa o conteúdo dinâmico
         conteudo_dinamico.controls.clear()
+
+        # Cria o campo de texto para o endereço e guarda a referência
+        campo_endereco = ft.TextField(label="Endereço")
+
+        # Função para fechar o dialog
+        def fechar_dialog(e):
+            e.page.dialog.open = False
+            e.page.update()
+
+        # Função para confirmar e validar o endereço
+        def confirmar_endereco(e):
+            campo_codbarra = ft.TextField(label="Código de Barras")
+            # Considerando que o código esperado está na posição 3 do primeiro item de dados_os
+            codigo_esperado = str(dados_os[0][2])
+            if campo_endereco.value == codigo_esperado:
+                # Se estiver correto, cria um dialog informando sucesso
+                dialog = ft.AlertDialog(
+                    title=ft.Text("Sucesso"),
+                    content=ft.Column(
+                        [
+                            ft.Text(f"Endereço: {campo_endereco.value}"),
+                            campo_codbarra
+                        ]
+                    ),    
+                    actions=[
+                        ft.TextButton("Cancelar", on_click=fechar_dialog),
+                        ft.TextButton("OK", lambda e: print("Código de barras:", campo_codbarra.value)) 
+                    ]
+                )
+                e.page.dialog = dialog
+                dialog.open = True
+                e.page.update()
+            else:
+                # Se estiver incorreto, mostra um snackbar com a mensagem
+                e.page.snack_bar = ft.SnackBar(ft.Text("Endereço incorreto"))
+                e.page.snack_bar.open = True
+                e.page.update()
+
+        # Adiciona os controles à tela, incluindo os textos, o campo de entrada e o botão de confirmação
         conteudo_dinamico.controls.append(
             ft.Container(
                 content=ft.Column(
                     controls=[
-                        ft.Text(f"Nº Inventário: 001"),
-                        ft.Text("Nº OS: 7"),
-                        ft.TextField(label="Endereço"),
+                        ft.Text(f"Nº Inventário: {dados_os[0][0]}"),
+                        ft.Text(f"Nº OS: {dados_os[0][1]}"),
+                        campo_endereco,
                         ft.ElevatedButton(
                             "Confirmar Endereço",
-                            on_click=lambda e: print("Clicou confirmar")
+                            on_click=confirmar_endereco
                         )
                     ]
                 )
             )
         )
         e.page.update()
+
 
     def buscar_os(e, codfilial, matricula):
         try:
@@ -37,14 +78,20 @@ def contagem_inventario(e, navigate_to, header):
                     "matricula": matricula
                 }
             )
-            if response.status_code == 200:
-                print("Iniciada contagem")
+            if response.status_code in [200, 202]:
                 dados = response.json()
                 dados_os = dados.get("dados_os", [])
-                print(dados_os)
-                mostrar_campos_endereco(e)
+                mensagem = dados.get("mensagem")
+                print(f"Dados os: {dados_os}")
+                print(f"Mensagem: {mensagem}")
+                mostrar_campos_endereco(e, dados_os)
             else:
-                print("Nao iniciou contagem")
+                dados = response.json()
+                dados_os = dados.get("dados_os", [])
+                mensagem = dados.get("mensagem")
+                print("Não iniciou contagem")
+                print(f"Dados os: {dados_os}")
+                print(f"Mensagem: {mensagem}")
 
         except Exception as exc:
             print(exc)
