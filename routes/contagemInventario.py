@@ -13,50 +13,93 @@ def contagem_inventario(e, navigate_to, header):
         # Limpa o conteúdo dinâmico
         conteudo_dinamico.controls.clear()
 
-        # Cria o campo de texto para o endereço e guarda a referência
+        # Campo para o usuário digitar o endereço
         campo_endereco = ft.TextField(label="Endereço")
 
-        # Função para fechar o dialog
+        # Lista para armazenar os produtos inseridos
+        produtos = []  # Cada item será uma tupla: (codendereco, codbarra, quantidade)
+
+        # Função para fechar um dialog aberto
         def fechar_dialog(e):
             e.page.dialog.open = False
             e.page.update()
 
-        # Função para confirmar e validar o endereço
-        def confirmar_endereco(e):
+        # Função para abrir o dialog de inserção do produto (código de barras e quantidade)
+        def abrir_dialog_produto(e):
             campo_codbarra = ft.TextField(label="Código de Barras")
-            # Considerando que o código esperado está na posição 3 do primeiro item de dados_os
+            campo_quantidade = ft.TextField(label="Quantidade", keyboard_type=ft.KeyboardType.NUMBER)
+
+            def confirmar_produto(e):
+                # Adiciona o produto na lista utilizando o endereço digitado
+                produtos.append((campo_endereco.value, campo_codbarra.value, campo_quantidade.value))
+                fechar_dialog(e)  # Fecha o dialog de inserção do produto
+                abrir_dialog_confirmacao(e)  # Abre o dialog para perguntar se há mais produtos
+
+            dialog_produto = ft.AlertDialog(
+                title=ft.Text("Adicionar Produto"),
+                content=ft.Column(
+                    controls=[
+                        ft.Text(f"Endereço: {campo_endereco.value}"),
+                        campo_codbarra,
+                        campo_quantidade
+                    ]
+                ),
+                actions=[
+                    ft.TextButton("Cancelar", on_click=fechar_dialog),
+                    ft.TextButton("OK", on_click=confirmar_produto)
+                ]
+            )
+            e.page.dialog = dialog_produto
+            dialog_produto.open = True
+            e.page.update()
+
+        # Função para abrir o dialog que pergunta se há mais produtos nesse endereço
+        def abrir_dialog_confirmacao(e):
+            def adicionar_mais(e):
+                fechar_dialog(e)
+                abrir_dialog_produto(e)  # Reabre o dialog para inserir outro produto
+
+            def finalizar(e):
+                fechar_dialog(e)
+                # Aqui você pode, por exemplo, atualizar a interface com a lista ou enviar para backend
+                print("Lista de produtos:", produtos)
+                e.page.snack_bar = ft.SnackBar(ft.Text("Produtos adicionados com sucesso!"))
+                e.page.snack_bar.open = True
+                conteudo_dinamico.controls.clear()  # Limpa o conteúdo dinâmico
+                conteudo_dinamico.controls.append(botao_iniciar)
+                e.page.update()
+
+            dialog_confirmacao = ft.AlertDialog(
+                title=ft.Text("Confirmação"),
+                content=ft.Text("Tem mais produtos nesse endereço?"),
+                actions=[
+                    ft.TextButton("Sim", on_click=adicionar_mais),
+                    ft.TextButton("Não", on_click=finalizar)
+                ]
+            )
+            e.page.dialog = dialog_confirmacao
+            dialog_confirmacao.open = True
+            e.page.update()
+
+        # Função para confirmar o endereço informado
+        def confirmar_endereco(e):
             codigo_esperado = str(dados_os[0][2])
             if campo_endereco.value == codigo_esperado:
-                # Se estiver correto, cria um dialog informando sucesso
-                dialog = ft.AlertDialog(
-                    title=ft.Text("Sucesso"),
-                    content=ft.Column(
-                        [
-                            ft.Text(f"Endereço: {campo_endereco.value}"),
-                            campo_codbarra
-                        ]
-                    ),    
-                    actions=[
-                        ft.TextButton("Cancelar", on_click=fechar_dialog),
-                        ft.TextButton("OK", lambda e: print("Código de barras:", campo_codbarra.value)) 
-                    ]
-                )
-                e.page.dialog = dialog
-                dialog.open = True
-                e.page.update()
+                # Endereço correto: abre o dialog para inserir o produto
+                abrir_dialog_produto(e)
             else:
-                # Se estiver incorreto, mostra um snackbar com a mensagem
                 e.page.snack_bar = ft.SnackBar(ft.Text("Endereço incorreto"))
                 e.page.snack_bar.open = True
                 e.page.update()
 
-        # Adiciona os controles à tela, incluindo os textos, o campo de entrada e o botão de confirmação
+        # Adiciona os controles iniciais para entrada do endereço
         conteudo_dinamico.controls.append(
             ft.Container(
                 content=ft.Column(
                     controls=[
                         ft.Text(f"Nº Inventário: {dados_os[0][0]}"),
                         ft.Text(f"Nº OS: {dados_os[0][1]}"),
+                        ft.Text(f"Endereço: {dados_os[0][2]}"),
                         campo_endereco,
                         ft.ElevatedButton(
                             "Confirmar Endereço",
@@ -67,7 +110,6 @@ def contagem_inventario(e, navigate_to, header):
             )
         )
         e.page.update()
-
 
     def buscar_os(e, codfilial, matricula):
         try:
