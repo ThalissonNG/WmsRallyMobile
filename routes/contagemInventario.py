@@ -60,6 +60,21 @@ def contagem_inventario(e, navigate_to, header):
                 abrir_dialog_produto(e)  # Reabre o dialog para inserir outro produto
 
             def finalizar(e):
+                try:
+                    response = requests.post(
+                        f"{base_url}/finalizar_contagem",
+                        json={
+                            "codfilial": codfilial,
+                            "matricula": matricula,
+                            "produtos": produtos
+                        }
+                    )
+                    if response.status_code == 200:
+                        print("Contagem finalizada com sucesso")
+                    else:
+                        print("Erro ao finalizar contagem")
+                except Exception as exc:
+                    print(exc)
                 fechar_dialog(e)
                 # Aqui você pode, por exemplo, atualizar a interface com a lista ou enviar para backend
                 print("Lista de produtos:", produtos)
