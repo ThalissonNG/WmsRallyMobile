@@ -11,6 +11,7 @@ from routes.separarPedido import separar_pedido
 from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 from routes.contagemInventario import contagem_inventario
+from routes.cadastrarCodbarra import cadastrar_codbarra
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -73,6 +74,8 @@ def main(page: ft.Page):
             page.views.append(separar_transferencia_devolucao(page, navigate_to, create_header()))
         elif route == "/contagem_inventario":
             page.views.append(contagem_inventario(page, navigate_to, create_header()))
+        elif route == "/cadastrar_codbarra":
+            page.views.append(cadastrar_codbarra(page, navigate_to, create_header()))
         page.update()
 
     # Tela de login

@@ -52,8 +52,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "O.S Avulsa",
-                                    expand=True
+                                    "Cadastrar codbarra",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/cadastrar_codbarra")
                                     ),
                                 ft.ElevatedButton(
                                     "Transferir Produto",
