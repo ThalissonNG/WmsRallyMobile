@@ -66,23 +66,25 @@ def contagem_inventario(e, navigate_to, header):
                         json={
                             "codfilial": codfilial,
                             "matricula": matricula,
-                            "produtos": produtos
+                            "produtos": produtos,
+                            "dados_os": dados_os
                         }
                     )
                     if response.status_code == 200:
-                        print("Contagem finalizada com sucesso")
+                        dados = response.json()
+                        mensagens = dados.get("mensagens")
+                        # Abre o dialog com as mensagens e os botões
+                        abrir_dialog_mensagens(e, mensagens)
                     else:
                         print("Erro ao finalizar contagem")
+                        e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao finalizar contagem"))
+                        e.page.snack_bar.open = True
+                        e.page.update()
                 except Exception as exc:
                     print(exc)
-                fechar_dialog(e)
-                # Aqui você pode, por exemplo, atualizar a interface com a lista ou enviar para backend
-                print("Lista de produtos:", produtos)
-                e.page.snack_bar = ft.SnackBar(ft.Text("Produtos adicionados com sucesso!"))
-                e.page.snack_bar.open = True
-                conteudo_dinamico.controls.clear()  # Limpa o conteúdo dinâmico
-                conteudo_dinamico.controls.append(botao_iniciar)
-                e.page.update()
+                    e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao finalizar contagem"))
+                    e.page.snack_bar.open = True
+                    e.page.update()
 
             dialog_confirmacao = ft.AlertDialog(
                 title=ft.Text("Confirmação"),
@@ -94,6 +96,35 @@ def contagem_inventario(e, navigate_to, header):
             )
             e.page.dialog = dialog_confirmacao
             dialog_confirmacao.open = True
+            e.page.update()
+
+        # Nova função: abre um dialog exibindo as mensagens retornadas e dois botões
+        def abrir_dialog_mensagens(e, mensagens):
+            mensagem_controls = [ft.Text(msg) for msg in mensagens]
+
+            def finalizar_endereco(e):
+                # Aqui você pode implementar a lógica para finalizar o endereço
+                e.page.dialog.open = False
+                e.page.snack_bar = ft.SnackBar(ft.Text("Endereço finalizado."))
+                e.page.snack_bar.open = True
+                e.page.update()
+
+            def cadastrar_codbarra(e):
+                # Reabre o dialog para inserir um novo produto
+                e.page.dialog.open = False
+                e.page.update()
+                abrir_dialog_produto(e)
+
+            dialog_mensagens = ft.AlertDialog(
+                title=ft.Text("Contagem Finalizada"),
+                content=ft.Column(controls=mensagem_controls),
+                actions=[
+                    ft.TextButton("Finalizar Endereço", on_click=finalizar_endereco),
+                    ft.TextButton("Cadastrar Codbarra", on_click=cadastrar_codbarra)
+                ]
+            )
+            e.page.dialog = dialog_mensagens
+            dialog_mensagens.open = True
             e.page.update()
 
         # Função para confirmar o endereço informado
@@ -116,10 +147,7 @@ def contagem_inventario(e, navigate_to, header):
                         ft.Text(f"Nº OS: {dados_os[0][1]}"),
                         ft.Text(f"Endereço: {dados_os[0][2]}"),
                         campo_endereco,
-                        ft.ElevatedButton(
-                            "Confirmar Endereço",
-                            on_click=confirmar_endereco
-                        )
+                        ft.ElevatedButton("Confirmar Endereço", on_click=confirmar_endereco)
                     ]
                 )
             )
@@ -130,10 +158,7 @@ def contagem_inventario(e, navigate_to, header):
         try:
             response = requests.post(
                 f"{base_url}/contagem_inventario",
-                json={
-                    "codfilial": codfilial,
-                    "matricula": matricula
-                }
+                json={"codfilial": codfilial, "matricula": matricula}
             )
             if response.status_code in [200, 202]:
                 dados = response.json()
@@ -149,7 +174,6 @@ def contagem_inventario(e, navigate_to, header):
                 print("Não iniciou contagem")
                 print(f"Dados os: {dados_os}")
                 print(f"Mensagem: {mensagem}")
-
         except Exception as exc:
             print(exc)
 
@@ -169,9 +193,5 @@ def contagem_inventario(e, navigate_to, header):
 
     return ft.View(
         route="/contagem_inventario",
-        controls=[
-            header,
-            title,
-            conteudo_dinamico
-        ]
+        controls=[header, title, conteudo_dinamico]
     )
