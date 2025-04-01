@@ -6,7 +6,7 @@ def contagem_inventario(e, navigate_to, header):
     matricula = user_info.get('matricula')
     codfilial = user_info.get('codfilial')
 
-    # Cria uma referência dinâmica para os elementos que mudam
+    # Área dinâmica para atualizar a tela
     conteudo_dinamico = ft.Column()
 
     def mostrar_campos_endereco(e, dados_os):
@@ -16,129 +16,18 @@ def contagem_inventario(e, navigate_to, header):
         # Campo para o usuário digitar o endereço
         campo_endereco = ft.TextField(label="Endereço")
 
-        # Lista para armazenar os produtos inseridos
-        produtos = []  # Cada item será uma tupla: (codendereco, codbarra, quantidade)
-
-        # Função para fechar um dialog aberto
-        def fechar_dialog(e):
-            e.page.dialog.open = False
-            e.page.update()
-
-        # Função para abrir o dialog de inserção do produto (código de barras e quantidade)
-        def abrir_dialog_produto(e):
-            campo_codbarra = ft.TextField(label="Código de Barras")
-            campo_quantidade = ft.TextField(label="Quantidade", keyboard_type=ft.KeyboardType.NUMBER)
-
-            def confirmar_produto(e):
-                # Adiciona o produto na lista utilizando o endereço digitado
-                produtos.append((campo_endereco.value, campo_codbarra.value, campo_quantidade.value))
-                fechar_dialog(e)  # Fecha o dialog de inserção do produto
-                abrir_dialog_confirmacao(e)  # Abre o dialog para perguntar se há mais produtos
-
-            dialog_produto = ft.AlertDialog(
-                title=ft.Text("Adicionar Produto"),
-                content=ft.Column(
-                    controls=[
-                        ft.Text(f"Endereço: {campo_endereco.value}"),
-                        campo_codbarra,
-                        campo_quantidade
-                    ]
-                ),
-                actions=[
-                    ft.TextButton("Cancelar", on_click=fechar_dialog),
-                    ft.TextButton("OK", on_click=confirmar_produto)
-                ]
-            )
-            e.page.dialog = dialog_produto
-            dialog_produto.open = True
-            e.page.update()
-
-        # Função para abrir o dialog que pergunta se há mais produtos nesse endereço
-        def abrir_dialog_confirmacao(e):
-            def adicionar_mais(e):
-                fechar_dialog(e)
-                abrir_dialog_produto(e)  # Reabre o dialog para inserir outro produto
-
-            def finalizar(e):
-                try:
-                    response = requests.post(
-                        f"{base_url}/finalizar_contagem",
-                        json={
-                            "codfilial": codfilial,
-                            "matricula": matricula,
-                            "produtos": produtos,
-                            "dados_os": dados_os
-                        }
-                    )
-                    if response.status_code == 200:
-                        dados = response.json()
-                        mensagens = dados.get("mensagens")
-                        # Abre o dialog com as mensagens e os botões
-                        abrir_dialog_mensagens(e, mensagens)
-                    else:
-                        print("Erro ao finalizar contagem")
-                        e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao finalizar contagem"))
-                        e.page.snack_bar.open = True
-                        e.page.update()
-                except Exception as exc:
-                    print(exc)
-                    e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao finalizar contagem"))
-                    e.page.snack_bar.open = True
-                    e.page.update()
-
-            dialog_confirmacao = ft.AlertDialog(
-                title=ft.Text("Confirmação"),
-                content=ft.Text("Tem mais produtos nesse endereço?"),
-                actions=[
-                    ft.TextButton("Sim", on_click=adicionar_mais),
-                    ft.TextButton("Não", on_click=finalizar)
-                ]
-            )
-            e.page.dialog = dialog_confirmacao
-            dialog_confirmacao.open = True
-            e.page.update()
-
-        # Nova função: abre um dialog exibindo as mensagens retornadas e dois botões
-        def abrir_dialog_mensagens(e, mensagens):
-            mensagem_controls = [ft.Text(msg) for msg in mensagens]
-
-            def finalizar_endereco(e):
-                # Aqui você pode implementar a lógica para finalizar o endereço
-                e.page.dialog.open = False
-                e.page.snack_bar = ft.SnackBar(ft.Text("Endereço finalizado."))
-                e.page.snack_bar.open = True
-                e.page.update()
-
-            def cadastrar_codbarra(e):
-                # Reabre o dialog para inserir um novo produto
-                e.page.dialog.open = False
-                e.page.update()
-                abrir_dialog_produto(e)
-
-            dialog_mensagens = ft.AlertDialog(
-                title=ft.Text("Contagem Finalizada"),
-                content=ft.Column(controls=mensagem_controls),
-                actions=[
-                    ft.TextButton("Finalizar Endereço", on_click=finalizar_endereco),
-                    ft.TextButton("Cadastrar Codbarra", on_click=cadastrar_codbarra)
-                ]
-            )
-            e.page.dialog = dialog_mensagens
-            dialog_mensagens.open = True
-            e.page.update()
-
         # Função para confirmar o endereço informado
         def confirmar_endereco(e):
             codigo_esperado = str(dados_os[0][2])
             if campo_endereco.value == codigo_esperado:
-                # Endereço correto: abre o dialog para inserir o produto
-                abrir_dialog_produto(e)
+                # Endereço correto: abre o dialog para inserir apenas o código de barras
+                abrir_dialog_codbarra(e, dados_os)
             else:
                 e.page.snack_bar = ft.SnackBar(ft.Text("Endereço incorreto"))
                 e.page.snack_bar.open = True
                 e.page.update()
 
-        # Adiciona os controles iniciais para entrada do endereço
+        # Adiciona os controles para entrada do endereço
         conteudo_dinamico.controls.append(
             ft.Container(
                 content=ft.Column(
@@ -154,6 +43,37 @@ def contagem_inventario(e, navigate_to, header):
         )
         e.page.update()
 
+    def abrir_dialog_codbarra(e, dados_os):
+        # Cria o campo para inserir o código de barras
+        campo_codbarra = ft.TextField(label="Código de Barras")
+        
+        # Função para confirmar o código de barras
+        def confirmar_codbarra(e, codbarra):
+            response = requests.post(
+                f"{base_url}/contagem_inventario",
+                json={
+                    "codbarra": codbarra,
+                    "action": "validar_codbarra",
+                    "dados_os": dados_os
+                }
+            )
+            if response.status_code == 200:
+                print("Código de barras válido")
+            else:
+                print("Código de barras inválido")
+            
+            e.page.dialog.open = False
+            e.page.update()
+        
+        dialog_codbarra = ft.AlertDialog(
+            title=ft.Text("Inserir Código de Barras"),
+            content=ft.Column(controls=[campo_codbarra]),
+            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))],
+        )
+        e.page.dialog = dialog_codbarra
+        dialog_codbarra.open = True
+        e.page.update()
+
     def buscar_os(e, codfilial, matricula):
         try:
             response = requests.post(
@@ -163,17 +83,9 @@ def contagem_inventario(e, navigate_to, header):
             if response.status_code in [200, 202]:
                 dados = response.json()
                 dados_os = dados.get("dados_os", [])
-                mensagem = dados.get("mensagem")
-                print(f"Dados os: {dados_os}")
-                print(f"Mensagem: {mensagem}")
                 mostrar_campos_endereco(e, dados_os)
             else:
-                dados = response.json()
-                dados_os = dados.get("dados_os", [])
-                mensagem = dados.get("mensagem")
-                print("Não iniciou contagem")
-                print(f"Dados os: {dados_os}")
-                print(f"Mensagem: {mensagem}")
+                print("Erro ao buscar OS")
         except Exception as exc:
             print(exc)
 
