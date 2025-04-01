@@ -59,19 +59,65 @@ def contagem_inventario(e, navigate_to, header):
             )
             if response.status_code == 200:
                 print("Código de barras válido")
+                # Se a validação retornar 200, abre o dialog para inserir a quantidade
+                abrir_dialog_quantidade(e, codbarra, dados_os)
+            elif response.status_code == 500:
+                print("Código de barras não cadastrado")
+                # Abre o dialog informando que o código não está cadastrado
+                abrir_dialog_codbarra_nao_cadastrado(e)
             else:
-                print("Código de barras inválido")
-            
-            e.page.dialog.open = False
-            e.page.update()
+                print("Resposta inesperada:", response.status_code)
+            # Removemos o fechamento aqui para não fechar o dialog de quantidade que foi aberto
+            # e.page.dialog.open = False
+            # e.page.update()
         
         dialog_codbarra = ft.AlertDialog(
             title=ft.Text("Inserir Código de Barras"),
             content=ft.Column(controls=[campo_codbarra]),
-            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))],
+            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))]
         )
         e.page.dialog = dialog_codbarra
         dialog_codbarra.open = True
+        e.page.update()
+
+    def abrir_dialog_quantidade(e, codbarra, dados_os):
+        # Cria o campo para inserir a quantidade
+        campo_quantidade = ft.TextField(label="Quantidade")
+        
+        # Função para confirmar a quantidade
+        def confirmar_quantidade(e):
+            # Aqui você insere o código para realizar a requisição com a quantidade,
+            # código de barras e dados_os.
+            # Exemplo:
+            # response = requests.post(
+            #     f"{base_url}/seu_endpoint",
+            #     json={
+            #         "codbarra": codbarra,
+            #         "quantidade": campo_quantidade.value,
+            #         "dados_os": dados_os
+            #     }
+            # )
+            print("Quantidade confirmada:", campo_quantidade.value)
+            e.page.dialog.open = False
+            e.page.update()
+        
+        dialog_quantidade = ft.AlertDialog(
+            title=ft.Text("Inserir Quantidade"),
+            content=ft.Column(controls=[campo_quantidade]),
+            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
+        )
+        e.page.dialog = dialog_quantidade
+        dialog_quantidade.open = True
+        e.page.update()
+
+    def abrir_dialog_codbarra_nao_cadastrado(e):
+        # Dialog para código de barras não cadastrado
+        dialog_nao_cadastrado = ft.AlertDialog(
+            title=ft.Text("Código de Barras não cadastrado"),
+            actions=[ft.TextButton("Cadastrar", on_click=lambda e: navigate_to("/cadastrar_codbarra"))]
+        )
+        e.page.dialog = dialog_nao_cadastrado
+        dialog_nao_cadastrado.open = True
         e.page.update()
 
     def buscar_os(e, codfilial, matricula):
