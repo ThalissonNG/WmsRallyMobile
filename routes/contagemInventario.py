@@ -60,6 +60,10 @@ def contagem_inventario(e, navigate_to, header):
             if response.status_code == 200:
                 print("Código de barras válido")
                 # Se a validação retornar 200, abre o dialog para inserir a quantidade
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                produto = dados.get("produto")
+                print(produto)
                 abrir_dialog_quantidade(e, codbarra, dados_os)
             elif response.status_code == 500:
                 print("Código de barras não cadastrado")
