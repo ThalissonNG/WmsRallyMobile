@@ -64,7 +64,7 @@ def contagem_inventario(e, navigate_to, header):
                 mensagem = dados.get("mensagem")
                 produto = dados.get("produto")
                 print(produto)
-                abrir_dialog_quantidade(e, codbarra, dados_os)
+                abrir_dialog_quantidade(e, codbarra, dados_os, produto)
             elif response.status_code == 500:
                 print("Código de barras não cadastrado")
                 abrir_dialog_codbarra_nao_cadastrado(e)
@@ -81,7 +81,7 @@ def contagem_inventario(e, navigate_to, header):
         dialog_codbarra.open = True
         e.page.update()
     
-    def abrir_dialog_quantidade(e, codbarra, dados_os):
+    def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
         # Cria o campo para inserir a quantidade
         campo_quantidade = ft.TextField(label="Quantidade")
         
@@ -118,7 +118,14 @@ def contagem_inventario(e, navigate_to, header):
         
         dialog_quantidade = ft.AlertDialog(
             title=ft.Text("Inserir Quantidade"),
-            content=ft.Column(controls=[campo_quantidade]),
+            content=ft.Column(
+                controls=[
+                    ft.Text(f"CODPROD: {produto[0][0]}"),
+                    ft.Text(f"CODFAB: {produto[0][1]}"),
+                    ft.Text(f"DESCRIÇÃO: {produto[0][2]}"),
+                    campo_quantidade
+                ]
+            ),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
         )
         e.page.dialog = dialog_quantidade
