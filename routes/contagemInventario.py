@@ -53,8 +53,10 @@ def contagem_inventario(e, navigate_to, header):
                 f"{base_url}/contagem_inventario",
                 json={
                     "codbarra": codbarra,
+                    "matricula": matricula,
+                    "codfilial":codfilial,
+                    "dados_os": dados_os,
                     "action": "validar_codbarra",
-                    "dados_os": dados_os
                 }
             )
             if response.status_code == 200:
