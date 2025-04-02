@@ -86,17 +86,24 @@ def contagem_inventario(e, navigate_to, header):
         
         # Função para confirmar a quantidade
         def confirmar_quantidade(e):
-            # Aqui você insere o código para realizar a requisição com a quantidade,
-            # código de barras e dados_os.
-            # Exemplo:
-            # response = requests.post(
-            #     f"{base_url}/seu_endpoint",
-            #     json={
-            #         "codbarra": codbarra,
-            #         "quantidade": campo_quantidade.value,
-            #         "dados_os": dados_os
-            #     }
-            # )
+            response = requests.post(
+                f"{base_url}/contagem_inventario",
+                json={
+                    "codbarra": codbarra,
+                    "quantidade": campo_quantidade.value,
+                    "dados_os": dados_os,
+                    "action": "confirmar_quantidade"
+                }
+            )
+            if response.status_code == 200:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                print(mensagem)
+            else:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                print(mensagem)
+                print("Erro ao confirmar quantidade:", response.status_code)
             print("Quantidade confirmada:", campo_quantidade.value)
             e.page.dialog.open = False
             e.page.update()
