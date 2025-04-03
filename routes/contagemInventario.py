@@ -34,6 +34,13 @@ def contagem_inventario(e, navigate_to, header):
                         ]
                     )
                     resumo_container.controls.append(row)
+                finalizar_btn = ft.ElevatedButton(
+                    text="Finalizar",
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    color=colorVariaveis['texto'],
+                    on_click=lambda e: finalizar(e, dados_os)
+                )
+                resumo_container.controls.append(finalizar_btn)
                 e.page.update()
             else:
                 print("Erro ao buscar resumo:", response.status_code)
