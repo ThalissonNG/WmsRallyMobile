@@ -280,5 +280,6 @@ def contagem_inventario(e, navigate_to, header):
     
     return ft.View(
         route="/contagem_inventario",
+        scroll=True,
         controls=[header, title, conteudo_dinamico]
     )
