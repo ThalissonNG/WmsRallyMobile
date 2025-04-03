@@ -24,14 +24,56 @@ def contagem_inventario(e, navigate_to, header):
                 resumo_container.controls.clear()
                 resumo_container.controls.append(ft.Text("Resumo de Contagem:"))
                 for item in resumo:
-                    # Supondo que cada item tem o formato [codprod, descrição, codfab, quantidade]
+                    # Cada item tem o formato: [codprod, descrição, codfab, quantidade]
                     texto_item = f"Produto: {item[0]} | Descrição: {item[1]} | CodFab: {item[2]} | Quantidade: {item[3]}"
-                    resumo_container.controls.append(ft.Text(texto_item))
+                    # Cria uma linha com o texto e o botão de editar
+                    row = ft.Column(
+                        controls=[
+                            ft.Text(texto_item),
+                            ft.TextButton("Editar", on_click=lambda e, item=item: editar_item(e, item, dados_os))
+                        ]
+                    )
+                    resumo_container.controls.append(row)
                 e.page.update()
             else:
                 print("Erro ao buscar resumo:", response.status_code)
         except Exception as exc:
             print("Erro ao atualizar resumo:", exc)
+    
+    def editar_item(e, item, dados_os):
+        """Abre um diálogo para editar a quantidade de um item do resumo."""
+        novo_qt = ft.TextField(label="Nova Quantidade", value=str(item[3]))
+    
+        def confirmar_edicao(e):
+            # Realiza uma requisição para atualizar a quantidade (endpoint '/editar_contagem' é um exemplo)
+            response = requests.post(
+                f"{base_url}/contagem_inventario",
+                json={
+                    "codprod": item[0],
+                    "nova_quantidade": novo_qt.value,
+                    "dados_os": dados_os,
+                    "action": "editar_contagem"
+                }
+            )
+            if response.status_code == 200:
+                e.page.snack_bar = ft.SnackBar(ft.Text("Quantidade atualizada"), bgcolor=colorVariaveis['sucesso'])
+                e.page.snack_bar.open = True
+                dialog_edicao.open = False
+                atualizar_resumo(e, dados_os)
+            else:
+                e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao atualizar quantidade"), bgcolor=colorVariaveis['erro'])
+                e.page.snack_bar.open = True
+            # e.page.dialog.open = False
+            # e.page.update()
+    
+        dialog_edicao = ft.AlertDialog(
+            title=ft.Text("Editar Quantidade"),
+            content=ft.Column(controls=[novo_qt]),
+            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_edicao(e))]
+        )
+        e.page.dialog = dialog_edicao
+        dialog_edicao.open = True
+        e.page.update()
     
     def mostrar_campos_endereco(e, dados_os):
         conteudo_dinamico.controls.clear()
@@ -119,7 +161,6 @@ def contagem_inventario(e, navigate_to, header):
                 e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['sucesso'])
                 e.page.snack_bar.open = True
                 e.page.update()
-                # Após confirmar a quantidade, atualiza o resumo fazendo uma nova requisição
                 atualizar_resumo(e, dados_os)
                 abrir_dialog_mais_produtos(e, dados_os)
             else:
