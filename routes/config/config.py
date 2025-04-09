@@ -1,4 +1,4 @@
-base_url = "http://192.168.1.100:8440/wmsMobile"
+base_url = "http://192.168.1.100:5000/wmsMobile"
 user_info = {}
 colorVariaveis = {
     'botaoAcao': "#0366FF",

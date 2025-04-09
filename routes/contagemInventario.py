@@ -1,5 +1,6 @@
 import flet as ft
 import requests
+import datetime
 from routes.config.config import base_url, colorVariaveis, user_info
 
 def contagem_inventario(e, navigate_to, header):
@@ -49,7 +50,33 @@ def contagem_inventario(e, navigate_to, header):
     
     def editar_item(e, item, dados_os):
         """Abre um diálogo para editar a quantidade de um item do resumo."""
+        def apenas_numeros(valor: str) -> str:
+            # Remove qualquer caractere que não seja dígito e limita a 8 caracteres.
+            return "".join(filter(str.isdigit, valor))[:8]
+
+        def validar_data(e):
+            # Valida se o campo tem exatamente 8 caracteres (mínimo)
+            if len(e.control.value) < 8:
+                e.control.error_text = "Digite 8 dígitos (DDMMYYYY)"
+            else:
+                e.control.error_text = None
+            e.control.update()
+        
         novo_qt = ft.TextField(label="Nova Quantidade", value=str(item[3]))
+        default_date = datetime.date.today() + datetime.timedelta(days=365)
+        formatted_date = default_date.strftime("%d%m%Y")
+
+        campo_validade = ft.TextField(
+            label="Data de Validade (DDMMYYYY)",
+            value=formatted_date,
+            max_length=8,
+            hint_text="Ex: 25062025",
+            on_change=lambda e: (
+                setattr(e.control, "value", apenas_numeros(e.control.value)),
+                validar_data(e)
+            ),
+            on_blur=validar_data  # Validação extra quando o campo perde o foco.
+        )
     
         def confirmar_edicao(e):
             # Realiza uma requisição para atualizar a quantidade (endpoint '/editar_contagem' é um exemplo)
@@ -59,6 +86,7 @@ def contagem_inventario(e, navigate_to, header):
                     "codprod": item[0],
                     "nova_quantidade": novo_qt.value,
                     "dados_os": dados_os,
+                    "validade": campo_validade.value,
                     "action": "editar_contagem"
                 }
             )
@@ -75,7 +103,11 @@ def contagem_inventario(e, navigate_to, header):
     
         dialog_edicao = ft.AlertDialog(
             title=ft.Text("Editar Quantidade"),
-            content=ft.Column(controls=[novo_qt]),
+            content=ft.Column(
+                controls=[
+                    novo_qt,
+                    campo_validade
+            ]),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_edicao(e))]
         )
         e.page.dialog = dialog_edicao
@@ -151,6 +183,32 @@ def contagem_inventario(e, navigate_to, header):
     
     def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
         campo_quantidade = ft.TextField(label="Quantidade")
+        def apenas_numeros(valor: str) -> str:
+            # Remove qualquer caractere que não seja dígito e limita a 8 caracteres.
+            return "".join(filter(str.isdigit, valor))[:8]
+
+        def validar_data(e):
+            # Valida se o campo tem exatamente 8 caracteres (mínimo)
+            if len(e.control.value) < 8:
+                e.control.error_text = "Digite 8 dígitos (DDMMYYYY)"
+            else:
+                e.control.error_text = None
+            e.control.update()
+
+        default_date = datetime.date.today() + datetime.timedelta(days=365)
+        formatted_date = default_date.strftime("%d%m%Y")
+
+        campo_validade = ft.TextField(
+            label="Data de Validade (DDMMYYYY)",
+            value=formatted_date,
+            max_length=8,
+            hint_text="Ex: 25062025",
+            on_change=lambda e: (
+                setattr(e.control, "value", apenas_numeros(e.control.value)),
+                validar_data(e)
+            ),
+            on_blur=validar_data  # Validação extra quando o campo perde o foco.
+        )
         
         def confirmar_quantidade(e):
             response = requests.post(
@@ -159,6 +217,7 @@ def contagem_inventario(e, navigate_to, header):
                     "codbarra": codbarra,
                     "quantidade": campo_quantidade.value,
                     "dados_os": dados_os,
+                    "validade": campo_validade.value,
                     "action": "confirmar_quantidade"
                 }
             )
@@ -186,7 +245,8 @@ def contagem_inventario(e, navigate_to, header):
                     ft.Text(f"CODPROD: {produto[0][0]}"),
                     ft.Text(f"DESCRIÇÃO: {produto[0][1]}"),
                     ft.Text(f"CODFAB: {produto[0][2]}"),
-                    campo_quantidade
+                    campo_quantidade,
+                    campo_validade
                 ]
             ),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
