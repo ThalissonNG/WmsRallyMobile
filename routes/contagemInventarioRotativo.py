@@ -4,18 +4,344 @@ import datetime
 from routes.config.config import base_url, colorVariaveis, user_info
 
 def contagem_inventario_rotativo(e, navigate_to, header):
-    titulo = ft.Text(
-        "Inventario Rotativo",
+    matricula = user_info.get('matricula')
+    codfilial = user_info.get('codfilial')
+    
+    # Container principal e container de resumo
+    conteudo_dinamico = ft.Column()
+    resumo_container = ft.Column(controls=[ft.Text("Resumo de Contagem:")])
+    
+    def atualizar_resumo(e, dados_os):
+        """Faz uma requisição para o endpoint /resumo_contagem e atualiza o container de resumo."""
+        try:
+            response = requests.post(
+                f"{base_url}/resumo_contagem",
+                json={
+                    "dados_os": dados_os
+                }
+            )
+            if response.status_code == 200:
+                resumo = response.json().get("resumo", [])
+                resumo_container.controls.clear()
+                resumo_container.controls.append(ft.Text("Resumo de Contagem:"))
+                for item in resumo:
+                    # Cada item tem o formato: [codprod, descrição, codfab, quantidade]
+                    texto_item = f"Produto: {item[0]} | Descrição: {item[1]} | CodFab: {item[2]} | Quantidade: {item[3]}"
+                    # Cria uma linha com o texto e o botão de editar
+                    row = ft.Column(
+                        controls=[
+                            ft.Text(texto_item),
+                            ft.TextButton("Editar", on_click=lambda e, item=item: editar_item(e, item, dados_os))
+                        ]
+                    )
+                    resumo_container.controls.append(row)
+                finalizar_btn = ft.ElevatedButton(
+                    text="Finalizar",
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    color=colorVariaveis['texto'],
+                    on_click=lambda e: finalizar(e, dados_os)
+                )
+                resumo_container.controls.append(finalizar_btn)
+                e.page.update()
+            else:
+                print("Erro ao buscar resumo:", response.status_code)
+        except Exception as exc:
+            print("Erro ao atualizar resumo:", exc)
+    
+    def editar_item(e, item, dados_os):
+        """Abre um diálogo para editar a quantidade de um item do resumo."""
+        def apenas_numeros(valor: str) -> str:
+            # Remove qualquer caractere que não seja dígito e limita a 8 caracteres.
+            return "".join(filter(str.isdigit, valor))[:8]
+
+        def validar_data(e):
+            # Valida se o campo tem exatamente 8 caracteres (mínimo)
+            if len(e.control.value) < 8:
+                e.control.error_text = "Digite 8 dígitos (DDMMYYYY)"
+            else:
+                e.control.error_text = None
+            e.control.update()
+        
+        novo_qt = ft.TextField(label="Nova Quantidade", value=str(item[3]))
+        default_date = datetime.date.today() + datetime.timedelta(days=365)
+        formatted_date = default_date.strftime("%d%m%Y")
+
+        campo_validade = ft.TextField(
+            label="Data de Validade (DDMMYYYY)",
+            value=formatted_date,
+            max_length=8,
+            hint_text="Ex: 25062025",
+            on_change=lambda e: (
+                setattr(e.control, "value", apenas_numeros(e.control.value)),
+                validar_data(e)
+            ),
+            on_blur=validar_data  # Validação extra quando o campo perde o foco.
+        )
+    
+        def confirmar_edicao(e):
+            # Realiza uma requisição para atualizar a quantidade (endpoint '/editar_contagem' é um exemplo)
+            response = requests.post(
+                f"{base_url}/inventario_rotativo",
+                json={
+                    "codprod": item[0],
+                    "nova_quantidade": novo_qt.value,
+                    "dados_os": dados_os,
+                    "validade": campo_validade.value,
+                    "action": "editar_contagem"
+                }
+            )
+            if response.status_code == 200:
+                e.page.snack_bar = ft.SnackBar(ft.Text("Quantidade atualizada"), bgcolor=colorVariaveis['sucesso'])
+                e.page.snack_bar.open = True
+                dialog_edicao.open = False
+                atualizar_resumo(e, dados_os)
+            else:
+                e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao atualizar quantidade"), bgcolor=colorVariaveis['erro'])
+                e.page.snack_bar.open = True
+            # e.page.dialog.open = False
+            # e.page.update()
+    
+        dialog_edicao = ft.AlertDialog(
+            title=ft.Text("Editar Quantidade"),
+            content=ft.Column(
+                controls=[
+                    novo_qt,
+                    campo_validade
+            ]),
+            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_edicao(e))]
+        )
+        e.page.dialog = dialog_edicao
+        dialog_edicao.open = True
+        e.page.update()
+    
+    def mostrar_campos_endereco(e, dados_os):
+        conteudo_dinamico.controls.clear()
+    
+        campo_endereco = ft.TextField(label="Endereço")
+    
+        def confirmar_endereco(e):
+            codigo_esperado = str(dados_os[0][2])
+            if campo_endereco.value == codigo_esperado:
+                abrir_dialog_codbarra(e, dados_os)
+            else:
+                e.page.snack_bar = ft.SnackBar(ft.Text("Endereço incorreto"))
+                e.page.snack_bar.open = True
+                e.page.update()
+    
+        conteudo_dinamico.controls.append(
+            ft.Container(
+                content=ft.Column(
+                    controls=[
+                        ft.Text(f"Nº Inventário: {dados_os[0][0]}"),
+                        ft.Text(f"Nº OS: {dados_os[0][1]}"),
+                        ft.Text(f"Endereço: {dados_os[0][2]}"),
+                        campo_endereco,
+                        ft.ElevatedButton("Confirmar Endereço", on_click=confirmar_endereco)
+                    ]
+                )
+            )
+        )
+        # Adiciona o container de resumo à tela
+        conteudo_dinamico.controls.append(resumo_container)
+        e.page.update()
+    
+    def abrir_dialog_codbarra(e, dados_os):
+        campo_codbarra = ft.TextField(label="Código de Barras")
+        print(f"Dados da os: abrir dialog codbarra: {dados_os}")
+        
+        def confirmar_codbarra(e, codbarra):
+            response = requests.post(
+                f"{base_url}/inventario_rotativo",
+                json={
+                    "codbarra": codbarra,
+                    "matricula": matricula,
+                    "codfilial": codfilial,
+                    "dados_os": dados_os,
+                    "action": "validar_codbarra"
+                }
+            )
+            if response.status_code == 200:
+                print("Código de barras válido")
+                dados = response.json()
+                produto = dados.get("produto")  # Ex.: [[codprod, descrição, codfab, None]]
+                abrir_dialog_quantidade(e, codbarra, dados_os, produto)
+            elif response.status_code == 500:
+                print("Código de barras não cadastrado")
+                abrir_dialog_codbarra_nao_cadastrado(e)
+            else:
+                print("Resposta inesperada:", response.status_code)
+            # e.page.dialog.open = False
+            # e.page.update()
+        
+        dialog_codbarra = ft.AlertDialog(
+            title=ft.Text("Inserir Código de Barras"),
+            content=ft.Column(controls=[campo_codbarra]),
+            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))]
+        )
+        e.page.dialog = dialog_codbarra
+        dialog_codbarra.open = True
+        e.page.update()
+    
+    def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
+        campo_quantidade = ft.TextField(label="Quantidade")
+        def apenas_numeros(valor: str) -> str:
+            # Remove qualquer caractere que não seja dígito e limita a 8 caracteres.
+            return "".join(filter(str.isdigit, valor))[:8]
+
+        def validar_data(e):
+            # Valida se o campo tem exatamente 8 caracteres (mínimo)
+            if len(e.control.value) < 8:
+                e.control.error_text = "Digite 8 dígitos (DDMMYYYY)"
+            else:
+                e.control.error_text = None
+            e.control.update()
+
+        default_date = datetime.date.today() + datetime.timedelta(days=365)
+        formatted_date = default_date.strftime("%d%m%Y")
+
+        campo_validade = ft.TextField(
+            label="Data de Validade (DDMMYYYY)",
+            value=formatted_date,
+            max_length=8,
+            hint_text="Ex: 25062025",
+            on_change=lambda e: (
+                setattr(e.control, "value", apenas_numeros(e.control.value)),
+                validar_data(e)
+            ),
+            on_blur=validar_data  # Validação extra quando o campo perde o foco.
+        )
+        
+        def confirmar_quantidade(e):
+            response = requests.post(
+                f"{base_url}/inventario_rotativo",
+                json={
+                    "codbarra": codbarra,
+                    "quantidade": campo_quantidade.value,
+                    "dados_os": dados_os,
+                    "validade": campo_validade.value,
+                    "matricula": matricula,
+                    "action": "confirmar_quantidade"
+                }
+            )
+            if response.status_code == 200:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['sucesso'])
+                e.page.snack_bar.open = True
+                e.page.update()
+                atualizar_resumo(e, dados_os)
+                abrir_dialog_mais_produtos(e, dados_os)
+            else:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['erro'])
+                e.page.snack_bar.open = True
+                e.page.update()
+            # e.page.dialog.open = False
+            # e.page.update()
+        
+        dialog_quantidade = ft.AlertDialog(
+            title=ft.Text("Inserir Quantidade"),
+            content=ft.Column(
+                controls=[
+                    ft.Text(f"CODPROD: {produto[0][0]}"),
+                    ft.Text(f"DESCRIÇÃO: {produto[0][1]}"),
+                    ft.Text(f"CODFAB: {produto[0][2]}"),
+                    campo_quantidade,
+                    campo_validade
+                ]
+            ),
+            actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
+        )
+        e.page.dialog = dialog_quantidade
+        dialog_quantidade.open = True
+        e.page.update()
+    
+    def abrir_dialog_mais_produtos(e, dados_os):
+        def on_sim(e):
+            e.page.dialog.open = False
+            e.page.update()
+            abrir_dialog_codbarra(e, dados_os)
+        def on_nao(e):
+            e.page.dialog.open = False
+            e.page.update()
+            finalizar(e, dados_os)
+        dialog_mais = ft.AlertDialog(
+            title=ft.Text("Tem mais algum produto nesse endereço?"),
+            actions=[
+                ft.TextButton("Sim", on_click=lambda e: on_sim(e)),
+                ft.TextButton("Não", on_click=lambda e: on_nao(e))
+            ]
+        )
+        e.page.dialog = dialog_mais
+        dialog_mais.open = True
+        e.page.update()
+    
+    def finalizar(e, dados_os):
+        response = requests.post(
+            f"{base_url}/inventario_rotativo",
+            json={
+                "dados_os": dados_os,
+                "matricula": matricula,
+                "codfilial": codfilial,
+                "action": "finalizar_contagem"
+            }
+        )
+        if response.status_code == 200:
+            dados = response.json()
+            mensagem = dados.get("mensagem")
+            e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['sucesso'])
+            e.page.snack_bar.open = True
+            navigate_to("/contagem_inventario_rotativo")
+            e.page.update()
+        else:
+            dados = response.json()
+            mensagem = dados.get("mensagem")
+            e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['erro'])
+            e.page.snack_bar.open = True
+            e.page.update()
+    
+    def abrir_dialog_codbarra_nao_cadastrado(e):
+        dialog_nao_cadastrado = ft.AlertDialog(
+            title=ft.Text("Código de Barras não encontrado no endereço"),
+            actions=[ft.TextButton("Cadastrar", on_click=lambda e: navigate_to("/cadastrar_codbarra"))]
+        )
+        e.page.dialog = dialog_nao_cadastrado
+        dialog_nao_cadastrado.open = True
+        e.page.update()
+    
+    def buscar_os(e, codfilial, matricula):
+        try:
+            response = requests.post(
+                f"{base_url}/inventario_rotativo",
+                json={"codfilial": codfilial, "matricula": matricula}
+            )
+            if response.status_code in [200, 202]:
+                dados = response.json()
+                dados_os = dados.get("dados_os", [])
+                atualizar_resumo(e, dados_os)
+                mostrar_campos_endereco(e, dados_os)
+            else:
+                print("Erro ao buscar OS")
+        except Exception as exc:
+            print(exc)
+    
+    title = ft.Text(
+        "Buscar Inventário Rotativo",
         size=24,
         weight="bold",
         color=colorVariaveis['titulo']
     )
-
+    
+    botao_iniciar = ft.ElevatedButton(
+        "Iniciar Inventário",
+        on_click=lambda e: buscar_os(e, codfilial, matricula)
+    )
+    
+    conteudo_dinamico.controls.append(botao_iniciar)
+    
     return ft.View(
         route="/contagem_inventario_rotativo",
-        scroll= True,
-        controls=[
-            header,
-            titulo
-        ]
+        scroll=True,
+        controls=[header, title, conteudo_dinamico]
     )

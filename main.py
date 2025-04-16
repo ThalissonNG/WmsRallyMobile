@@ -12,7 +12,7 @@ from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 from routes.contagemInventario import contagem_inventario
 from routes.cadastrarCodbarra import cadastrar_codbarra
-from routes.contagemInventarioRotativo import contagem_inventario_rotativo
+from routes.contagemInventarioRotativo import contagem_inventario_rotativo 
 
 def main(page: ft.Page):
     page.title = "Login"
