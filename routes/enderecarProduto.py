@@ -15,32 +15,22 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     print(f"Bônus: {numbonus} - Produto: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Quantidade: {qt}")
     print(f"Informações do arquivo config: Matricula: {matricula} - codfilial: {codfilial}")
 
-    def guardar_produto(page, codbarra, codendereco, qtGuardar, numbonus):
+    def guardar_produto(page, codendereco, numbonus):
         try:
             response = requests.post(
                 f"{base_url}/guardarProduto",
-                json={"codbarra": codbarra,
-                        "codendereco": codendereco,
-                        "qt": qtGuardar,
-                        "matricula": matricula,
-                        "codfilial": codfilial,
-                        "numbonus": numbonus,
-                        "codetiqueta": codetiqueta,
-                    }
+                json={
+                    "codendereco": codendereco,
+                    "matricula": matricula,
+                    "codfilial": codfilial,
+                    "numbonus": numbonus,
+                    "codetiqueta": codetiqueta,
+                    "codprod": codprod,
+                    "qt": qt,
+                }
             )
-            if response.status_code == 400 or response.status_code == 500:
-                resposta = response.json()
-                print(resposta)
-                snackbar_sucess = ft.SnackBar(
-                    content=ft.Text("Informação incompleta", color="white"),
-                    bgcolor=ft.colors.RED,
-                    show_close_icon=True,
-                    duration=1000,
-                )
-                page.overlay.append(snackbar_sucess)
-                snackbar_sucess.open = True
-                page.update()
-            elif response.status_code == 200:
+
+            if response.status_code == 200:
                 print("Produto guardado com sucesso")
                 snackbar_sucess = ft.SnackBar(
                     content=ft.Text("Produto guardado com sucesso"),
@@ -50,34 +40,28 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                 )
                 page.overlay.append(snackbar_sucess)
                 snackbar_sucess.open = True
-                
-                nonlocal qt  # Permite modificar a variável `qt` definida fora do escopo da função
-                qt -= int(qtGuardar)  # Atualiza a quantidade
-
-                # Atualiza o texto da tabela na tela
-                infosProduto.controls[0].rows[0].cells[1].content.value = str(qt)
-                infosProduto.update()
+                navigate_to("/armazenar_bonus")
+                page.update()
+            elif response.status_code == 400 or response.status_code == 500:
+                resposta = response.json()
+                mensagem = resposta.get("mensagem")
+                print(f"Erro: {mensagem}")
+                snackbar_sucess = ft.SnackBar(
+                    content=ft.Text(mensagem, color="white"),
+                    bgcolor=ft.colors.RED,
+                    show_close_icon=True,
+                    duration=1000,
+                )
+                page.overlay.append(snackbar_sucess)
+                snackbar_sucess.open = True
+                page.update()
 
                 page.update()
         except Exception as e:
             print(e)
 
-    codbarra = ft.TextField(
-        label="CODBARRA",
-        prefix_icon=ft.icons.BARCODE_READER,
-        border_radius=ft.border_radius.all(10),
-        border_color=colorVariaveis['bordarInput'],
-        border_width=2,
-    )
     codendereco = ft.TextField(
         label="CODENDERECO",
-        prefix_icon=ft.icons.STORAGE,
-        border_radius=ft.border_radius.all(10),
-        border_color=colorVariaveis['bordarInput'],
-        border_width=2,
-    )
-    qtEndereco = ft.TextField(
-        label="QUANTIDADE",
         prefix_icon=ft.icons.STORAGE,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
@@ -155,9 +139,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
         color=colorVariaveis['texto'],
         on_click=lambda e: guardar_produto(
             e.page,
-            codbarra.value,
             codendereco.value,
-            qtEndereco.value,
             numbonus,
             ) 
     )
@@ -172,9 +154,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                     controls=[
                         numbonus_container,
                         infosProduto,
-                        codbarra,
                         codendereco,
-                        qtEndereco,
                         buttonGuardar,
                     ],
                 )

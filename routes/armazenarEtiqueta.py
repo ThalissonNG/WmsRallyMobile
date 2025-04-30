@@ -40,7 +40,7 @@ def buscar_etiqueta(navigate_to, header):
                             }
                             )
             else:
-                print("Erro ao consultar o código de barras")
+                print("Erro ao consultar etiqueta")
                 snackbar_error = ft.SnackBar(
                         content=ft.Text(
                             f"Erro ao consultar o código de barras",
