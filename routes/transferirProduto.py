@@ -188,7 +188,11 @@ def transferir_produto(page, navigate, header):
         try:
             response = requests.post(
                 f"{base_url}/transferirProduto",
-                json={"codenderecoAtual": codenderecoAtual}
+                json={
+                    "codenderecoAtual": codenderecoAtual,
+                    "codfilial": codfilial,
+                    "action": "consultarEndereco",
+                }
             )
             if response.status_code == 200:
                 dados = response.json()
@@ -199,12 +203,10 @@ def transferir_produto(page, navigate, header):
                     lista_produtos.controls.append(container_end)
                 abrir_dialogEndereco()
             elif response.status_code == 402:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
                 snackbar_error = ft.SnackBar(
-                    content=ft.Text(
-                        f"Endereço: {codenderecoAtual} não encontrado",
-                        color=colorVariaveis['texto'],
-                        size=20
-                    ),
+                    ft.Text(mensagem, color=colorVariaveis['texto'], size=20),
                     bgcolor=colorVariaveis['erro'],
                     show_close_icon=True,
                 )
@@ -220,7 +222,12 @@ def transferir_produto(page, navigate, header):
         try:
             response = requests.post(
                 f"{base_url}/transferirProduto",
-                json={"codbarra": codbarra, "codenderecoAtual": codenderecoAtual}
+                json={
+                    "codbarra": codbarra,
+                    "codenderecoAtual": codenderecoAtual,
+                    "codfilial": codfilial,
+                    "action": "consultarProduto"
+                }
             )
             if response.status_code == 201:
                 dados = response.json()
@@ -234,12 +241,10 @@ def transferir_produto(page, navigate, header):
                     quantidadeField.value = str(row[2])
                     abrir_dialogProduto()
             elif response.status_code == 403:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
                 snackbar_error = ft.SnackBar(
-                    content=ft.Text(
-                        f"Produto: {codbarra} não encontrado no endereço: {codenderecoAtual}",
-                        color=colorVariaveis['texto'],
-                        size=20,
-                    ),
+                    ft.Text(mensagem, color=colorVariaveis['texto'], size=20),
                     bgcolor=colorVariaveis['erro'],
                     show_close_icon=True,
                 )
