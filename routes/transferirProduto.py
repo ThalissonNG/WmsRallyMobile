@@ -263,17 +263,28 @@ def transferir_produto(page, navigate, header):
                 json={"codbarra": codbarra,
                     "codenderecoAtual": codenderecoAtual,
                     "codenderecoNovo": codenderecoNovo,
-                    "quantidade": quantidade
+                    "quantidade": quantidade,
+                    "codfilial": codfilial,
+                    "action": "transferir",
                 }
             )
             if response.status_code == 202:
                 print("Atualizado com sucesso")
+                fechar_dialogProduto(e)
             elif response.status_code == 405:
-                print("Erro na atualização")
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                snackbar_error = ft.SnackBar(
+                    ft.Text(mensagem, color=colorVariaveis['texto'], size=20),
+                    bgcolor=colorVariaveis['erro'],
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_error)
+                snackbar_error.open = True
         except Exception as exc:
             print("Erro na requisição (produto):", exc)
         e.page.update()
-        fechar_dialogProduto(e)
+        
     
     # Como a tela sempre consulta o endereço, usamos apenas um tab (de Endereço)
     tabs = ft.Tabs(
