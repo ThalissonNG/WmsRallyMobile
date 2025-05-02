@@ -27,28 +27,22 @@ def main(page: ft.Page):
         # Importa o módulo config para acessar as informações atualizadas
         import routes.config.config as config
         return ft.AppBar(
+            ft.ElevatedButton(
+                icon=ft.icons.HOME,
+                text="Menu",
+                on_click=lambda e: navigate_to("/menu"),
+            ),
             title=ft.Text(f"{config.user_info.get('matricula', '')} - {config.user_info.get('usuario', '')}"),
-            bgcolor=colorVariaveis['botaoAcao'],
             actions=[
-                ft.PopupMenuButton(
-                    icon=ft.icons.MENU,
-                    icon_size=40,
-                    icon_color=colorVariaveis['icones'],
-                    items=[
-                        ft.ElevatedButton(
-                            icon=ft.icons.HOME,
-                            text="Menu",
-                            on_click=lambda e: navigate_to("/menu"),
-                        ),
-                        ft.ElevatedButton(
-                            icon=ft.icons.LOGOUT,
-                            text="Sair",
-                            on_click=lambda e: navigate_to("/login"),
-                        ),
-                    ]
-                ),
-            ]
+                ft.ElevatedButton(
+                    icon=ft.icons.LOGOUT,
+                    text="Sair",
+                    on_click=lambda e: navigate_to("/login"),
+                )
+            ],
+            bgcolor=colorVariaveis['botaoAcao'],
         )
+
 
     # Função de navegação entre rotas
     def navigate_to(route, arguments=None):
