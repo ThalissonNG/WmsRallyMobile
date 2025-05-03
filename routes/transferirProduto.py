@@ -2,7 +2,7 @@ import flet as ft
 import requests
 from routes.config.config import base_url, user_info, colorVariaveis
 
-def transferir_produto(page, navigate, header):
+def transferir_produto(page, navigate_to, header):
     # Container para os resultados da consulta de endereço
     lista_produtos = ft.Column(scroll=ft.ScrollMode.AUTO)
     matricula = user_info.get("matricula")
@@ -35,7 +35,7 @@ def transferir_produto(page, navigate, header):
     )
     
     # Campo para inserir o endereço atual
-    codenderecoAtual = ft.TextField(
+    codenderecoAtual_campo = ft.TextField(
         label="CODENDERECO",
         prefix_icon=ft.icons.BARCODE_READER,
         border_radius=ft.border_radius.all(10),
@@ -47,7 +47,7 @@ def transferir_produto(page, navigate, header):
         text="Consultar",
         color=colorVariaveis['texto'],
         bgcolor=colorVariaveis['botaoAcao'],
-        on_click=lambda e: consultar_endereco(codenderecoAtual.value, e),
+        on_click=lambda e: consultar_endereco(codenderecoAtual_campo.value, e),
     )
     
     # Campo para inserir o código de barras no diálogo de endereço
@@ -64,7 +64,7 @@ def transferir_produto(page, navigate, header):
         text="Transferir",
         color=colorVariaveis['texto'],
         bgcolor=colorVariaveis['botaoAcao'],
-        on_click=lambda e: consultar_codbarra(codbarra_dialog.value, codenderecoAtual.value, e)
+        on_click=lambda e: consultar_codbarra(codbarra_dialog.value, codenderecoAtual_campo.value, e)
     )
     
     # Dialog de Endereço: exibe os produtos do endereço e permite digitar o CODBARRA
@@ -99,7 +99,7 @@ def transferir_produto(page, navigate, header):
                 "Confirmar",
                 color=colorVariaveis['texto'],
                 bgcolor=colorVariaveis['botaoAcao'],
-                on_click=lambda e: confirmar_transferencia(codbarra_dialog.value, codenderecoAtual.value, enderecoDestinoField.value, quantidadeField.value, e))
+                on_click=lambda e: confirmar_transferencia(codbarra_dialog.value, codenderecoAtual_campo.value, enderecoDestinoField.value, quantidadeField.value, e))
         ],
         scroll=ft.ScrollMode.AUTO
     )
@@ -271,7 +271,27 @@ def transferir_produto(page, navigate, header):
             if response.status_code == 202:
                 print("Atualizado com sucesso")
                 fechar_dialogProduto(e)
+                codenderecoAtual_campo.value = ""
+                page.update()
+                snackbar_error = ft.SnackBar(
+                    ft.Text("Atualizado com sucesso", color=colorVariaveis['texto'], size=20),
+                    bgcolor=colorVariaveis['sucesso'],
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_error)
+                snackbar_error.open = True
+
             elif response.status_code == 405:
+                dados = response.json()
+                mensagem = dados.get("mensagem")
+                snackbar_error = ft.SnackBar(
+                    ft.Text(mensagem, color=colorVariaveis['texto'], size=20),
+                    bgcolor=colorVariaveis['erro'],
+                    show_close_icon=True,
+                )
+                page.overlay.append(snackbar_error)
+                snackbar_error.open = True
+            elif response.status_code == 407:
                 dados = response.json()
                 mensagem = dados.get("mensagem")
                 snackbar_error = ft.SnackBar(
@@ -297,7 +317,7 @@ def transferir_produto(page, navigate, header):
                 content=ft.Column(
                     [
                         ft.Text("Informe o código de barras do endereço", size=16),
-                        codenderecoAtual,
+                        codenderecoAtual_campo,
                         buttonConsultarEndereco,
                     ]
                 ),
