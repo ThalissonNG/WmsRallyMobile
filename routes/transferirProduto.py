@@ -111,24 +111,24 @@ def transferir_produto(page, navigate_to, header):
             )
             if resp.status_code == 200:
                 dados = resp.json().get("dados_endereco", [])
-                endereco_completo = resp.json().get("endereco_completo", "")
-                print(f"Endereço completo: {endereco_completo}")
+                # endereco_completo = resp.json().get("endereco_completo", "")
+                # print(f"Endereço completo: {endereco_completo}")
 
-                mod, rua, edf, niv, apt = endereco_completo[0]  # ajuste de acordo com seu JSON
+                # mod, rua, edf, niv, apt = endereco_completo[0]  # ajuste de acordo com seu JSON
 
-                # monta o row dinamicamente dentro do handler
-                endereco_lista.controls.clear()
-                endereco_lista = ft.Row(
-                    controls=[
-                        ft.Column(controls=[ft.Text("MOD", weight="BOLD"), ft.Text(str(mod))]),
-                        ft.Column(controls=[ft.Text("RUA", weight="BOLD"), ft.Text(str(rua))]),
-                        ft.Column(controls=[ft.Text("EDF", weight="BOLD"), ft.Text(str(edf))]),
-                        ft.Column(controls=[ft.Text("NIV", weight="BOLD"), ft.Text(str(niv))]),
-                        ft.Column(controls=[ft.Text("APT", weight="BOLD"), ft.Text(str(apt))]),
-                    ],
-                    alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                    expand=True,
-                )
+                # # monta o row dinamicamente dentro do handler
+                # endereco_lista.controls.clear()
+                # endereco_lista = ft.Row(
+                #     controls=[
+                #         ft.Column(controls=[ft.Text("MOD", weight="BOLD"), ft.Text(str(mod))]),
+                #         ft.Column(controls=[ft.Text("RUA", weight="BOLD"), ft.Text(str(rua))]),
+                #         ft.Column(controls=[ft.Text("EDF", weight="BOLD"), ft.Text(str(edf))]),
+                #         ft.Column(controls=[ft.Text("NIV", weight="BOLD"), ft.Text(str(niv))]),
+                #         ft.Column(controls=[ft.Text("APT", weight="BOLD"), ft.Text(str(apt))]),
+                #     ],
+                #     alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                #     expand=True,
+                # )
 
                 if not dados:
                     show_snack("Nenhum produto neste endereço", error=True)
@@ -140,7 +140,7 @@ def transferir_produto(page, navigate_to, header):
 
                 main_container.controls = [
                     ft.Text(f"Endereço:", size=16, weight="BOLD"),
-                    endereco_lista,
+                    # endereco_lista,
                     ft.Divider(),
                     lista_produtos,
                     ft.Divider(),
