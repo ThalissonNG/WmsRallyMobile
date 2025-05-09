@@ -2,55 +2,14 @@ import flet as ft
 import requests
 from routes.config.config import base_url, colorVariaveis, user_info
 
-def buscar_pedido(e, navigate_to, header):
-    matricula = user_info.get('matricula')
-    print(matricula)
+def buscar_pedido(page: ft.Page, navigate_to, header):
+    matricula = user_info.get("matricula")
 
-    def pedidoManual(numped):
-        try:
-            response = requests.post(
-                f"{base_url}/buscarPedido",
-                json={"numped": numped,
-                        "matricula": matricula}
-            )
-            if response.status_code == 200:
-                print("Tem pedido manual")
-                navigate_to("/separar_pedido")
-            elif response.status_code == 201:
-                navigate_to("/separar_pedido")
-            else:
-                print("Não tem pedido")
-        except Exception as exc:
-            print(exc)
+    # 1) Lista que vai acumulando todos os números de pedido
+    pedidos: list[str] = []
 
-    def pedidoAutomatico():
-        try:
-            response = requests.post(
-                f"{base_url}/buscarPedido",
-                json={"numped": None,
-                        "matricula": matricula}
-            )
-            if response.status_code == 200:
-                print("Tem pedido automatico")
-                navigate_to("/separar_pedido")
-            elif response.status_code == 201:
-                navigate_to("/separar_pedido")
-            else:
-                print("Não tem pedido")
-        except Exception as exc:
-            print(exc)
-    title = ft.Text(
-        "Buscar Pedido",
-        size=24,
-        weight="bold",
-        color=colorVariaveis['titulo']
-    )
-    buscaManual = ft.Text(
-        "Busca Manual",
-        size=18,
-        weight="bold",
-    )
-    inputNumped = ft.TextField(
+    # 2) Componentes de UI
+    input_numped = ft.TextField(
         label="Número do pedido",
         prefix_icon=ft.icons.INSERT_DRIVE_FILE,
         border_radius=ft.border_radius.all(10),
@@ -59,41 +18,128 @@ def buscar_pedido(e, navigate_to, header):
         width=300,
         keyboard_type=ft.KeyboardType.NUMBER,
     )
-    buttonBuscarPedido = ft.ElevatedButton(
-        text="Buscar",
+    button_buscar_manual = ft.ElevatedButton(
+        text="Buscar Pedido Manual",
         bgcolor=colorVariaveis['botaoAcao'],
         color=colorVariaveis['texto'],
         width=600,
-        on_click=lambda e: pedidoManual(inputNumped.value)
+        on_click=lambda e: abrir_dialog_manual(e),
     )
-    buscaAutomatica = ft.Text(
-        "Busca Automatica",
-        size=18,
-        weight="bold",
-    )
-    buttonBuscarAutomatico = ft.ElevatedButton(
-        text="Buscar",
+    button_buscar_automatico = ft.ElevatedButton(
+        text="Buscar Pedido Automático",
         bgcolor=colorVariaveis['botaoAcao'],
         color=colorVariaveis['texto'],
         width=600,
-        height=70,
-        style=ft.ButtonStyle(
-            text_style=ft.TextStyle(size=20)
-        ),
-        on_click=lambda e: pedidoAutomatico()
+        on_click=lambda e: pedido_automatico(),
     )
+
+    # 3) Função auxiliar para snackbars
+    def show_snack(message: str, error: bool = False):
+        page.snack_bar = ft.SnackBar(
+            content=ft.Text(message),
+            bgcolor=colorVariaveis['erro'] if error else colorVariaveis['sucesso'],
+            action=ft.IconButton(
+                icon=ft.icons.CLOSE,
+                on_click=lambda ev: setattr(page.snack_bar, "open", False) or page.update()
+            )
+        )
+        page.snack_bar.open = True
+        page.update()
+
+    # 4) Requisição manual: envia lista de pedidos
+    def pedido_manual(lista_de_pedidos: list[str]):
+        try:
+            resp = requests.post(
+                f"{base_url}/buscarPedido",
+                json={
+                    "action": "manual",
+                    "numped": lista_de_pedidos,
+                    "matricula": matricula
+                }
+            )
+            if resp.status_code == 200:
+                show_snack("Pedidos manuais encontrados")
+                navigate_to("/separar_pedido")
+            elif resp.status_code == 201:
+                show_snack("Pedidos manuais processados")
+                navigate_to("/separar_pedido")
+            else:
+                show_snack("Nenhum pedido manual encontrado", error=True)
+        except Exception as exc:
+            print("Erro na requisição manual:", exc)
+            show_snack("Erro na requisição manual", error=True)
+
+    # 5) Requisição automática
+    def pedido_automatico():
+        try:
+            resp = requests.post(
+                f"{base_url}/buscarPedido",
+                json={
+                    "action": "automatico",
+                    "matricula": matricula
+                }
+            )
+            if resp.status_code == 200:
+                show_snack("Pedido automático encontrado")
+                navigate_to("/separar_pedido")
+            elif resp.status_code == 201:
+                show_snack("Pedido automático processado")
+                navigate_to("/separar_pedido")
+            else:
+                show_snack("Nenhum pedido automático encontrado", error=True)
+        except Exception as exc:
+            print("Erro na requisição automática:", exc)
+            show_snack("Erro na requisição automática", error=True)
+
+    # 6) Dialog para pergunta “Mais algum pedido?”
+    def abrir_dialog_manual(e):
+        numped = input_numped.value.strip()
+        if not numped:
+            show_snack("Digite um número de pedido antes", error=True)
+            return
+
+        dialog = ft.AlertDialog(
+            title=ft.Text("Mais pedidos?"),
+            content=ft.Text("Deseja consultar outro pedido manualmente?"),
+            actions=[
+                ft.TextButton(
+                    "Sim",
+                    on_click=lambda ev: (
+                        pedidos.append(numped),               # guarda o pedido atual
+                        setattr(input_numped, "value", ""),   # limpa o campo
+                        setattr(dialog, "open", False),       # fecha o dialog
+                        page.update()
+                    )
+                ),
+                ft.TextButton(
+                    "Não",
+                    on_click=lambda ev: (
+                        pedidos.append(numped),               # guarda o último pedido
+                        setattr(dialog, "open", False),
+                        page.update(),
+                        pedido_manual(pedidos)                # chama a requisição com toda a lista
+                    )
+                ),
+            ]
+        )
+        page.dialog = dialog
+        dialog.open = True
+        page.update()
+
+    # 7) Montagem da View
     return ft.View(
         route="/buscar_pedido",
         controls=[
             header,
-            title,
+            ft.Text("Buscar Pedido", size=24, weight="bold", color=colorVariaveis['titulo']),
             ft.Container(height=20),
-            buscaManual,
-            inputNumped,
-            buttonBuscarPedido,
-            ft.Container(height=20),
-            buscaAutomatica,
-            buttonBuscarAutomatico
+            ft.Text("Busca Manual", size=18, weight="bold"),
+            input_numped,
+            button_buscar_manual,
+            ft.Container(height=40),
+            ft.Text("Busca Automática", size=18, weight="bold"),
+            button_buscar_automatico,
         ],
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        scroll=ft.ScrollMode.AUTO,
     )
