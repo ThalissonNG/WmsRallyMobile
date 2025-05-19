@@ -41,11 +41,35 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             )
             if response.status_code == 200:
                 show_snack("Etiquetas atribuídas com sucesso!")
+                print("Etiquetas atribuídas com sucesso!")
             else:
                 show_snack("Erro ao atribuir etiquetas!", error=True)
         except Exception as e:
-            print(f"Erro ao atribuir etiquetas: {e}")
+            print(f"Except Erro ao atribuir etiquetas: {e}")
             show_snack("Erro ao atribuir etiquetas!", error=True)
+
+    def buscar_itens():
+
+        print(f"Buscando itens do pedido... {numped_lista}")
+        try:
+            response = requests.post(
+                f"{base_url}/separarPedido",
+                json={
+                    "action": "buscar_dados",
+                    "matricula": matricula,
+                    "numped": numped_lista
+                }
+            )
+            if response.status_code == 200:
+                dados = response.json()
+                # Processar os dados recebidos
+                # print(dados)
+                return dados
+            else:
+                show_snack("Erro ao buscar itens!", error=True)
+        except Exception as e:
+            print(f"Erro ao buscar itens: {e}")
+            show_snack("Erro ao buscar itens!", error=True)
 
     # 1) Buscar lista de pedidos via API
     try:
@@ -107,18 +131,32 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         mostrar_proximo()
 
     # 7) Quando todas as etiquetas forem atribuídas
+        # 7) Quando todas as etiquetas forem atribuídas
     def finalizar_etiquetas():
-        # TODO: Chamar atribuir_etiqueta() para enviar ao backend
-        print("Etiquetas atribuídas:", etiquetas)
-        print("Lista de pedidos:", numped_lista_global)
+        # Chama função que atribui etiquetas no backend
         atribuir_etiqueta()
+        # Limpa o container dinâmico
         container_dinamico.controls.clear()
-        mensagem_final = ft.Text("Todas as etiquetas foram atribuídas!", size=18, weight="bold")
-        container_dinamico.controls.append(mensagem_final)
-        # show_snack("Processo concluído com sucesso")
+        # Chama função buscar_itens para obter dados do próximo fluxo
+        dados = buscar_itens()
+        dados_itens = dados.get("dados_itens", [])
+        dados_resumo = dados.get("dados_resumo", {})
+        dados_codbarras = dados.get("dados_codbarras", [])
+        # TODO: montar a interface de separação de pedido usando dados_itens_pedido
+        # Placeholder enquanto implementa
+        container_dinamico.controls.append(
+            ft.Text(
+                "Carregando itens do pedido...",
+                size=18,
+                italic=True
+            )
+        )
         page.update()
 
     # 8) Carregar o primeiro pedido ao iniciar
+    mostrar_proximo()
+
+    # 9) Montar e retornar a View
     mostrar_proximo()
 
     # 9) Montar e retornar a View
