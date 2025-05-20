@@ -7,5 +7,6 @@ colorVariaveis = {
     'icones': "#ffffff",
     'titulo': "#4f4ce5",
     'sucesso': "#10b650",
-    'erro': "#ff0000"
+    'erro': "#ff0000",
+    'restante': "#ffb300"
 }

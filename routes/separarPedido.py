@@ -49,9 +49,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     separar_tab = ft.Tab(
         text="Separar",
         content=ft.Column(
-            controls=[
-                ft.Text("Implementar fluxo de escaneamento aqui."),
-            ],
+            controls=[ft.Text("Implementar fluxo de escaneamento aqui.")],
             expand=True
         )
     )
@@ -60,9 +58,27 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     resumo_items = []
     for grupo in dados_resumo:
         for item in grupo:
+            # Se não iniciou (restante == 0), não aplica cor; caso contrário, define conforme status
+            if item[6] == 0:
+                linha_cor = None
+                text_color = None
+            elif item[5] == item[4]:
+                linha_cor = colorVariaveis['sucesso']
+                text_color = ft.colors.BLACK
+            elif item[5] > item[4]:
+                linha_cor = colorVariaveis['erro']
+                text_color = ft.colors.WHITE
+            else:
+                linha_cor = colorVariaveis.get('restante', None)
+                text_color = ft.colors.WHITE
+
+            # Define cor do texto: branco em caso de erro, preto caso contrário
+            # text_color = ft.colors.WHITE if linha_cor == colorVariaveis['erro'] else ft.colors.BLACK
+
             resumo_items.append(
                 ft.Container(
                     padding=ft.padding.all(8),
+                    bgcolor=linha_cor,
                     content=ft.Column(
                         spacing=4,
                         controls=[
@@ -70,27 +86,30 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                             ft.Row(
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 controls=[
-                                    ft.Text(f"CODPROD: {str(item[0])}", width=80),  # codprod
-                                    ft.Text(f"CODFAV: {str(item[1])}", width=60),                 # codfab
-                                    ft.Text(f"ORIGEM: {str(item[3])}", width=60),  # origem
+                                    ft.Text(f"CODPROD: {item[0]}", width=80, color=text_color),
+                                    ft.Text(f"CODFAB: {item[1]}", width=60, color=text_color),
+                                    ft.Text(
+                                        f"ORIGEM: {item[3]}" if item[3] is not None else "ORIGEM:",
+                                        width=60,
+                                        color=text_color
+                                    ),
                                 ]
                             ),
-                            # Linha 2: descricao (auto-wrap)
-                            ft.Text(f"DESCRICAO: {item[2]}"),
+                            # Linha 2: descricao
+                            ft.Text(f"DESCRICAO: {item[2]}", color=text_color),
                             # Linha 3: ped, sep, rest
                             ft.Row(
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 controls=[
-                                    ft.Text(f"P:{item[4]}", width=50, weight="bold"),
-                                    ft.Text(f"S:{item[5]}", width=50, weight="bold"),
-                                    ft.Text(f"R:{item[6]}", width=50, weight="bold"),
+                                    ft.Text(f"P:{item[4]}", width=50, weight="bold", color=text_color),
+                                    ft.Text(f"S:{item[5]}", width=50, weight="bold", color=text_color),
+                                    ft.Text(f"R:{item[6]}", width=50, weight="bold", color=text_color),
                                 ]
                             ),
                         ]
                     )
                 )
             )
-            # Adiciona divisor entre itens
             resumo_items.append(ft.Divider())
 
     # Aba "Resumo"
@@ -99,7 +118,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         content=ft.Column(
             expand=True,
             controls=[
-                ft.Text("Resumo do pedido:"),
+                ft.Text("Resumo do pedido:", color=colorVariaveis['titulo']),
                 ft.ListView(
                     expand=True,
                     spacing=4,
@@ -114,9 +133,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     finalizar_tab = ft.Tab(
         text="Finalizar",
         content=ft.Column(
-            controls=[
-                ft.Text("Tela de finalização: implementar resumo e botão concluir."),
-            ],
+            controls=[ft.Text("Tela de finalização: implementar resumo e botão concluir.", color=colorVariaveis['titulo'])],
             expand=True
         )
     )
@@ -131,10 +148,6 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     # Retorna a View com abas
     return ft.View(
         route="/separar_pedido",
-        controls=[
-            header,
-            title,
-            tabs
-        ],
+        controls=[header, title, tabs],
         scroll=ft.ScrollMode.AUTO
     )
