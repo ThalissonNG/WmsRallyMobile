@@ -7,6 +7,7 @@ from routes.enderecarProduto import enderecar_produto
 from routes.consultarProdutoEndereco import consultar_produto_endereco
 from routes.transferirProduto import transferir_produto
 from routes.buscarPedido import buscar_pedido
+from routes.atribuirEtiqueta import atribuir_etiqueta
 from routes.separarPedido import separar_pedido
 from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
@@ -61,6 +62,8 @@ def main(page: ft.Page):
             page.views.append(transferir_produto(page, navigate_to, create_header()))
         elif route == "/buscar_pedido":
             page.views.append(buscar_pedido(page, navigate_to, create_header()))
+        elif route == "/atribuir_etiqueta":
+            page.views.append(atribuir_etiqueta(page, navigate_to, create_header()))
         elif route == "/separar_pedido":
             page.views.append(separar_pedido(page, navigate_to, create_header()))
         elif route == "/buscar_transferencia_devolucao":

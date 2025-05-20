@@ -59,10 +59,10 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
             )
             if resp.status_code == 200:
                 show_snack("Pedidos manuais encontrados")
-                navigate_to("/separar_pedido")
+                navigate_to("/atribuir_etiqueta")
             elif resp.status_code == 201:
                 show_snack("Pedidos manuais processados")
-                navigate_to("/separar_pedido")
+                navigate_to("/atribuir_etiqueta")
             else:
                 show_snack("Nenhum pedido manual encontrado", error=True)
         except Exception as exc:
@@ -81,10 +81,10 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
             )
             if resp.status_code == 200:
                 show_snack("Pedido automático encontrado")
-                navigate_to("/separar_pedido")
+                navigate_to("/atribuir_etiqueta")
             elif resp.status_code == 201:
                 show_snack("Pedido automático processado")
-                navigate_to("/separar_pedido")
+                navigate_to("/atribuir_etiqueta")
             else:
                 show_snack("Nenhum pedido automático encontrado", error=True)
         except Exception as exc:
