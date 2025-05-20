@@ -8,7 +8,7 @@ numped_lista_global = []
 etiquetas = []
 
 
-def atribuir_etiqueta(page: ft.Page, navigate_to, header):
+def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
     global current_tag_index, numped_lista_global, etiquetas
 
     # Recupera a matrícula do usuário logado
@@ -122,6 +122,7 @@ def atribuir_etiqueta(page: ft.Page, navigate_to, header):
             container_dinamico.controls.extend([texto_pedido, campo_etiqueta, botao_salvar])
         else:
             finalizar_etiquetas()
+            navigate_to("/separar_pedido")
         page.update()
 
     # 6) Salvar etiqueta e avançar para o próximo pedido
@@ -137,19 +138,9 @@ def atribuir_etiqueta(page: ft.Page, navigate_to, header):
         # Chama função que atribui etiquetas no backend
         atribuir_etiqueta()
         # Limpa o container dinâmico
-        container_dinamico.controls.clear()
-        # Chama função buscar_itens para obter dados do próximo fluxo
-        
-        # TODO: montar a interface de separação de pedido usando dados_itens_pedido
-        # Placeholder enquanto implementa
-        container_dinamico.controls.append(
-            ft.Text(
-                "Carregando itens do pedido...",
-                size=18,
-                italic=True
-            )
-        )
-        
+        container_dinamico.controls.clear()        
+
+        navigate_to("/separar_pedido")
         page.update()
 
     # 8) Carregar o primeiro pedido ao iniciar
