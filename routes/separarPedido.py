@@ -82,6 +82,18 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                     content=ft.Column(
                         spacing=4,
                         controls=[
+                            # Linha 0: numpedido
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Text(
+                                        f"PEDIDO: {item[7]}",
+                                        width=80,
+                                        color=text_color,
+                                        weight="bold"
+                                    ),
+                                ]
+                            ),
                             # Linha 1: codprod, codfab, origem
                             ft.Row(
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
