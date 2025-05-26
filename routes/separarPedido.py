@@ -174,7 +174,30 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             )
         separar_body.controls.extend([address_field, validate_address_btn])
 
-        separar_tab = ft.Tab(text="Separar", content=separar_body)    # Aba Finalizar
+    separar_tab = ft.Tab(text="Separar", content=separar_body)
+
+            # Aba Resumo - primeiro teste: exibir apenas código do produto
+    resumo_items = []
+    for grupo in dados_resumo:
+        print("Entrou aqui no grupo:", grupo)
+        for item in grupo:
+            print("Item do grupo:", item)
+            # mostrar só o código do produto (índice 0)
+            resumo_items.append(
+                ft.Text(f"CodProd: {item[0]}", color=colorVariaveis['titulo'])
+            )
+            resumo_items.append(ft.Divider())
+    resumo_tab = ft.Tab(
+        text="Resumo",
+        content=ft.ListView(
+            expand=True,
+            spacing=4,
+            padding=ft.padding.symmetric(vertical=8),
+            controls=resumo_items
+        )
+    )
+
+        # Aba Finalizar
     finalizar_tab = ft.Tab(
         text="Finalizar",
         content=ft.Column(
@@ -189,11 +212,15 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     # Componente de abas
     tabs = ft.Tabs(
         selected_index=0,
-        tabs=[separar_tab, finalizar_tab],
+        tabs=[separar_tab, resumo_tab, finalizar_tab],
         expand=True
     )
 
     return ft.View(
         route="/separar_pedido",
         controls=[header, title, tabs],
+        scroll=ft.ScrollMode.AUTO
     )
+
+if __name__ == "__main__":
+    ft.app(target=separar_pedido)
