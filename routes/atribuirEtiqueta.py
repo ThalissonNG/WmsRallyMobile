@@ -3,13 +3,13 @@ import requests
 from routes.config.config import base_url, colorVariaveis, user_info
 
 # Variáveis globais para gerenciar etiquetas de cada pedido
-current_tag_index = 0
+digit_index = 0
 numped_lista_global = []
 etiquetas = []
 
 
 def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
-    global current_tag_index, numped_lista_global, etiquetas
+    global digit_index, numped_lista_global, etiquetas
 
     # Recupera a matrícula do usuário logado
     matricula = user_info.get('matricula')
@@ -41,60 +41,28 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
             )
             if response.status_code == 201:
                 show_snack("Etiquetas atribuídas com sucesso!")
-                print("Etiquetas atribuídas com sucesso!")
                 navigate_to("/separar_pedido")
             else:
                 show_snack("Erro ao atribuir etiquetas!", error=True)
-        except Exception as e:
-            print(f"Except Erro ao atribuir etiquetas: {e}")
+        except Exception:
             show_snack("Erro ao atribuir etiquetas!", error=True)
-
-    def buscar_itens():
-
-        print(f"Buscando itens do pedido... {numped_lista}")
-        try:
-            response = requests.post(
-                f"{base_url}/separarPedido",
-                json={
-                    "action": "buscar_dados",
-                    "matricula": matricula,
-                    "numped": numped_lista
-                }
-            )
-            if response.status_code == 200:
-                dados = response.json()
-                # Processar os dados recebidos
-                # print(dados)
-                return dados
-            else:
-                show_snack("Erro ao buscar itens!", error=True)
-        except Exception as e:
-            print(f"Erro ao buscar itens: {e}")
-            show_snack("Erro ao buscar itens!", error=True)
 
     # 1) Buscar lista de pedidos via API
     try:
-        response = requests.post(
+        resp = requests.post(
             f"{base_url}/separarPedido",
-            json={
-                "action": "buscar_pedidos",
-                "matricula": matricula,
-            }
+            json={"action": "buscar_pedidos", "matricula": matricula}
         )
-        if response.status_code == 200:
-            dados = response.json()
-            numped_lista = dados.get("numped_lista", [])
-        else:
-            numped_lista = []
-    except Exception as e:
-        print(f"Erro ao buscar pedidos: {e}")
+        dados = resp.json() if resp.status_code == 200 else {}
+        numped_lista = dados.get("numped_lista", [])
+    except Exception:
         numped_lista = []
 
     # 2) Inicializar variáveis globais na primeira execução
     if not numped_lista_global:
         numped_lista_global = numped_lista
         etiquetas = [None] * len(numped_lista_global)
-        current_tag_index = 0
+        digit_index = 0
 
     # 3) Título da tela
     title = ft.Text(
@@ -108,11 +76,11 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
     # 4) Container dinâmico para exibir cada pedido e campo de entrada
     container_dinamico = ft.Column(expand=True, alignment=ft.MainAxisAlignment.CENTER)
 
-    # 5) Exibir próximo pedido e campo para inserir etiqueta
+    # 5) Função para exibir próximo pedido
     def mostrar_proximo():
         container_dinamico.controls.clear()
-        if current_tag_index < len(numped_lista_global):
-            numped = numped_lista_global[current_tag_index]
+        if digit_index < len(numped_lista_global):
+            numped = numped_lista_global[digit_index]
             texto_pedido = ft.Text(f"Pedido: {numped}", size=18)
             campo_etiqueta = ft.TextField(label="Etiqueta", width=300)
             botao_salvar = ft.ElevatedButton(
@@ -121,35 +89,20 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
             )
             container_dinamico.controls.extend([texto_pedido, campo_etiqueta, botao_salvar])
         else:
-            finalizar_etiquetas()
-            navigate_to("/separar_pedido")
+            atribuir_etiqueta()
         page.update()
 
-    # 6) Salvar etiqueta e avançar para o próximo pedido
+    # 6) Salvar etiqueta e avançar
     def salvar_etiqueta(e, valor: str):
-        global etiquetas, current_tag_index
-        etiquetas[current_tag_index] = valor
-        current_tag_index += 1
+        global etiquetas, digit_index
+        etiquetas[digit_index] = valor
+        digit_index += 1
         mostrar_proximo()
 
-    # 7) Quando todas as etiquetas forem atribuídas
-        # 7) Quando todas as etiquetas forem atribuídas
-    def finalizar_etiquetas():
-        # Chama função que atribui etiquetas no backend
-        atribuir_etiqueta()
-        # Limpa o container dinâmico
-        container_dinamico.controls.clear()        
-
-        navigate_to("/separar_pedido")
-        page.update()
-
-    # 8) Carregar o primeiro pedido ao iniciar
+    # 7) Carregar o primeiro pedido ao iniciar
     mostrar_proximo()
 
-    # 9) Montar e retornar a View
-    mostrar_proximo()
-
-    # 9) Montar e retornar a View
+    # 8) Retornar a view
     return ft.View(
         route="/atribuir_etiqueta",
         controls=[
@@ -160,3 +113,8 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
         ],
         scroll=ft.ScrollMode.AUTO
     )
+
+
+# Execução standalone
+if __name__ == "__main__":
+    ft.app(target=atribuir_etiqueta_pedido)
