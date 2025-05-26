@@ -21,7 +21,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         page.snack_bar.open = True
         page.update()
 
-    # Requisição para buscar dados da separação
+    # Busca dados da API
     def buscar_itens():
         try:
             resp = requests.post(
@@ -36,7 +36,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
 
     dados = buscar_itens()
 
-    # Extrai dados_codigo de barras: lista de tuplas (codprod, codbarra, codendereco)
+    # Processa dados_codbarra
     raw_codbarra = dados.get("dados_codbarras", [])
     dados_codbarra = []
     for grupo in raw_codbarra:
@@ -45,7 +45,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                 if isinstance(tup, (list, tuple)) and len(tup) >= 3:
                     dados_codbarra.append(tuple(tup))
 
-    # Extrai e achata dados_itens
+    # Processa dados_itens
     raw_itens = dados.get("dados_itens", [])
     dados_itens = []
     for grp in raw_itens:
@@ -56,10 +56,10 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     if not dados_itens and isinstance(raw_itens, list) and raw_itens and isinstance(raw_itens[0], dict):
         dados_itens = raw_itens
 
-    # Extrai dados_resumo
+    # Processa dados_resumo
     dados_resumo = dados.get("dados_resumo", [])
 
-    # Determina produto, fábrica, descrição e detalhes de endereços
+    # Identifica produto e endereços
     produto_atual = None
     codfab_atual = None
     desc_atual = None
@@ -67,103 +67,131 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     detalhes = []
     if dados_itens:
         primeiro = dados_itens[0]
-        if isinstance(primeiro, (list, tuple)):
-            produto_atual, codfab_atual, desc_atual = primeiro[2], primeiro[3], primeiro[4]
-            seen = set()
-            for it in dados_itens:
-                if it[2] == produto_atual and len(it) > 12:
-                    addr = it[7]
-                    if addr not in seen:
-                        seen.add(addr)
-                        enderecos.append(addr)
-                        detalhes.append({
-                            'mod': it[8], 'rua': it[9], 'edi': it[10],
-                            'niv': it[11], 'apt': it[12]
-                        })
-        else:
-            produto_atual = primeiro.get('codprod')
-            codfab_atual = primeiro.get('codfab')
-            desc_atual = primeiro.get('descricao')
-            seen = set()
-            for it in dados_itens:
-                if it.get('codprod') == produto_atual:
-                    addr = it.get('codendereco')
-                    if addr not in seen:
-                        seen.add(addr)
-                        enderecos.append(addr)
-                        detalhes.append({
-                            'mod': it.get('modulo'), 'rua': it.get('rua'),
-                            'edi': it.get('edificio'), 'niv': it.get('nivel'),
-                            'apt': it.get('apto')
-                        })
+        produto_atual, codfab_atual, desc_atual = primeiro[2], primeiro[3], primeiro[4]
+        seen = set()
+        for it in dados_itens:
+            if it[2] == produto_atual and len(it) > 12:
+                addr = it[7]
+                if addr not in seen:
+                    seen.add(addr)
+                    enderecos.append(addr)
+                    detalhes.append({
+                        'mod': it[8], 'rua': it[9], 'edi': it[10],
+                        'niv': it[11], 'apt': it[12]
+                    })
 
-    # Estado de endereço selecionado
+    # Estados de interface
     current_endereco = None
+    current_pedido = None
 
-    # Componentes para as abas
+    # Título
     title = ft.Text(
         "Separar Pedido", size=24, weight="bold",
         color=colorVariaveis['titulo'], text_align="center"
     )
 
-    # Aba "Separar"
+    # Componentes da aba "Separar"
     separar_body = ft.Column(spacing=10, expand=True)
     address_field = ft.TextField(label="Endereço", autofocus=True)
     validate_address_btn = ft.ElevatedButton(text="Validar Endereço")
+    pedido_field = ft.TextField(label="Código Etiqueta (Pedido)")
+    expected_label_text = ft.Text("")
+    validate_pedido_btn = ft.ElevatedButton(text="Validar Etiqueta")
     barcode_field = ft.TextField(label="Código de Barras")
-    validate_barcode_btn = ft.ElevatedButton(text="Validar Código")
+    validate_barcode_btn = ft.ElevatedButton(text="Validar Produto")
 
+    # Valida endereço
     def validar_endereco(e):
         nonlocal current_endereco
         v = address_field.value
         if v and v in [str(x) for x in enderecos]:
-            current_endereco = v
+            current_endereco = int(v)
             show_snack(f"Endereço {v} validado!", error=False)
+            # Exibe etiqueta
             separar_body.controls.clear()
-            separar_body.controls.append(ft.Text(f"Cód: {produto_atual} | Fab: {codfab_atual}", weight="bold"))
-            separar_body.controls.append(ft.Text(desc_atual or ""))
-            separar_body.controls.append(ft.Text("Digite ou bipar o código de barras:"))
-            separar_body.controls.append(barcode_field)
-            separar_body.controls.append(validate_barcode_btn)
+            valid_pedidos = [str(it[1]) for it in dados_itens if it[7] == current_endereco]
+            first_label = valid_pedidos[0] if valid_pedidos else ''
+            expected_label_text.value = f"Etiqueta esperada: {first_label}"
+            pedido_field.value = ''
+            separar_body.controls.extend([
+                ft.Text("Digite o código da etiqueta (pedido):"),
+                expected_label_text,
+                pedido_field,
+                validate_pedido_btn
+            ])
             page.update()
         else:
             show_snack("Endereço incorreto!", error=True)
 
+    # Valida etiqueta
+    def validar_pedido(e):
+        nonlocal current_pedido
+        v = pedido_field.value
+        valid_pedidos = [str(it[1]) for it in dados_itens if it[7] == current_endereco]
+        if v and v in valid_pedidos:
+            current_pedido = int(v)
+            show_snack(f"Etiqueta {v} validada!", error=False)
+            # Exibe produto e barcode
+            separar_body.controls.clear()
+            separar_body.controls.extend([
+                ft.Text(f"ETIQUETA: {current_pedido}", weight="bold"),
+                ft.Text(f"Cód: {produto_atual} | Fab: {codfab_atual}", weight="bold"),
+                ft.Text(desc_atual or ''),
+                ft.Text("Bipar o código de barras:"),
+                barcode_field,
+                validate_barcode_btn
+            ])
+            page.update()
+        else:
+            show_snack("Etiqueta inválida para este endereço!", error=True)
+            # Mantém tela de etiqueta para reentrada
+            separar_body.controls.clear()
+            expected_label_text.value = f"Etiqueta esperada: {valid_pedidos[0] if valid_pedidos else ''}"
+            separar_body.controls.extend([
+                ft.Text("Digite o código da etiqueta (pedido):"),
+                expected_label_text,
+                pedido_field,
+                validate_pedido_btn
+            ])
+            page.update()
+
+    # Valida barcode
     def validar_barcode(e):
         codigo = barcode_field.value
         validos = [str(tup[1]) for tup in dados_codbarra
-                   if str(tup[0]) == str(produto_atual) and str(tup[2]) == str(current_endereco)]
-        show_snack(
-            f"Código de barras {codigo} validado!" if codigo in validos else "Código de barras inválido!",
-            error=not (codigo in validos)
-        )
+                   if tup[0] == produto_atual and tup[2] == current_endereco]
+        print(f"Validando código: {codigo} contra {validos}")
+        if codigo in validos:
+            show_snack(f"Produto bipado! Código {codigo} válido.", error=False)
+        else:
+            show_snack("Código de barras inválido para este produto!", error=True)
 
+    # Associa callbacks
     validate_address_btn.on_click = validar_endereco
+    validate_pedido_btn.on_click = validar_pedido
     validate_barcode_btn.on_click = validar_barcode
 
+    # Monta UI inicial
     if produto_atual is None:
         separar_body.controls.append(ft.Text("Nenhum item a separar"))
     else:
+        separar_body.controls.append(ft.Text("Selecione o endereço:"))
         if detalhes:
-            separar_body.controls.append(ft.Text("Endereços:", weight="bold"))
             separar_body.controls.append(
                 ft.DataTable(
-                    columns=[ft.DataColumn(ft.Text(h)) for h in ["MOD", "RUA", "EDI", "NIV", "APT"]],
+                    columns=[ft.DataColumn(ft.Text(h)) for h in ["MOD","RUA","EDI","NIV","APT"]],
                     rows=[
                         ft.DataRow(cells=[ft.DataCell(ft.Text(str(d[col]))) for col in ['mod','rua','edi','niv','apt']])
                         for d in detalhes
                     ], expand=True
                 )
             )
-            separar_body.controls.append(ft.Divider())
-        separar_body.controls.append(ft.Text("Digite ou bipar o endereço:"))
-        separar_body.controls.append(address_field)
-        separar_body.controls.append(validate_address_btn)
+        separar_body.controls.extend([address_field, validate_address_btn])
 
     separar_tab = ft.Tab(text="Separar", content=separar_body)
 
-    # Aba "Resumo"
-    resumo_items = []
+    # Aba Resumo
+    resumo_controls = []
     for grupo in dados_resumo:
         for item in grupo:
             if item[6] == 0:
@@ -174,57 +202,46 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                 bg, fg = colorVariaveis['erro'], ft.colors.WHITE
             else:
                 bg, fg = colorVariaveis.get('restante'), ft.colors.BLACK
-            resumo_items.append(
+            resumo_controls.append(
                 ft.Container(
                     padding=ft.padding.all(8), bgcolor=bg,
-                    content=ft.Column(
-                        spacing=4,
-                        controls=[
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text(str(item[0]), color=fg),
-                                    ft.Text(str(item[1]), color=fg),
-                                    ft.Text(str(item[3]) if item[3] is not None else '', color=fg),
-                                ]
-                            ),
-                            ft.Text(item[2], color=fg),
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text(str(item[4]), color=fg),
-                                    ft.Text(str(item[5]), color=fg),
-                                    ft.Text(str(item[6]), color=fg),
-                                ]
-                            ),
-                        ]
-                    )
+                    content=ft.Column(spacing=4, controls=[
+                        ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN, controls=[
+                            ft.Text(str(item[0]), color=fg),
+                            ft.Text(str(item[1]), color=fg),
+                            ft.Text(str(item[3]) if item[3] else '', color=fg),
+                        ]),
+                        ft.Text(item[2], color=fg),
+                        ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN, controls=[
+                            ft.Text(str(item[4]), color=fg),
+                            ft.Text(str(item[5]), color=fg),
+                            ft.Text(str(item[6]), color=fg),
+                        ])
+                    ])
                 )
             )
-            resumo_items.append(ft.Divider())
+            resumo_controls.append(ft.Divider())
     resumo_tab = ft.Tab(
         text="Resumo",
         content=ft.Column(expand=True, controls=[
             ft.Text("Resumo do pedido:", color=colorVariaveis['titulo']),
-            ft.ListView(expand=True, spacing=4,
-                padding=ft.padding.symmetric(vertical=8), controls=resumo_items)
+            ft.ListView(expand=True, spacing=4, padding=ft.padding.symmetric(vertical=8), controls=resumo_controls)
         ])
     )
 
-    # Aba "Finalizar"
+    # Aba Finalizar
     finalizar_tab = ft.Tab(
         text="Finalizar",
-        content=ft.Column(
-            controls=[
-                ft.Text("Concluir separação", color=colorVariaveis['titulo']),
-                ft.ElevatedButton(text="Finalizar", on_click=lambda e: navigate_to("/finalizar"))
-            ], expand=True
-        )
+        content=ft.Column(controls=[
+            ft.Text("Concluir separação", color=colorVariaveis['titulo']),
+            ft.ElevatedButton(text="Finalizar", on_click=lambda e: navigate_to("/finalizar"))
+        ], expand=True)
     )
 
-    tabs = ft.Tabs(selected_index=0,
-                   tabs=[separar_tab, resumo_tab, finalizar_tab], expand=True)
+    # View completa
+    tabs = ft.Tabs(selected_index=0, tabs=[separar_tab, resumo_tab, finalizar_tab], expand=True)
     return ft.View(route="/separar_pedido", controls=[header, title, tabs], scroll=ft.ScrollMode.AUTO)
+
 
 if __name__ == "__main__":
     ft.app(target=separar_pedido)
