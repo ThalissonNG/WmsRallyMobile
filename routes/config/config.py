@@ -3,6 +3,7 @@ user_info = {}
 colorVariaveis = {
     'botaoAcao': "#0366FF",
     'texto': "#ffffff",
+    'textoPreto': "#000000",
     'bordarInput': "#0a0a0a",
     'icones': "#ffffff",
     'titulo': "#4f4ce5",

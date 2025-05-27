@@ -180,24 +180,51 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     resumo_items = []
     for grupo in dados_resumo:
         for item in grupo:
-            # 1º controle
+            codprod, codfab, descricao, origem, total, sep, rest, numped, etiqueta = item
+
+            # Escolhe cor de fundo e texto
+            if sep == total:
+                bg, fg = colorVariaveis['sucesso'], colorVariaveis['textoPreto']
+            elif sep == 0:
+                bg, fg = None, colorVariaveis['texto']
+            elif sep > total:
+                bg, fg = colorVariaveis['erro'], colorVariaveis['texto']
+            else:
+                bg, fg = colorVariaveis.get('restante'), colorVariaveis['textoPreto']
+
             resumo_items.append(
-                ft.Text(f"Pedido: {item[7]} - Etiqueta: {item[8]}")
+                ft.Container(
+                    padding=ft.padding.all(12),
+                    bgcolor=bg,
+                    content=ft.Column(spacing=6, controls=[
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text(f"Pedido: {numped}",  color=fg),
+                                ft.Text(f"Etiqueta: {etiqueta}",  color=fg),
+                            ]
+                        ),
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text(f"Cód: {codprod}", color=fg),
+                                ft.Text(f"Fab: {codfab}", color=fg),
+                                ft.Text(f"Origem: {origem}", color=fg),
+                            ]
+                        ),
+                        ft.Text(descricao, color=fg),
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text(f"Total: {total}", color=fg),
+                                ft.Text(f"Sep: {sep}", color=fg),
+                                ft.Text(f"Rest: {rest}", color=fg),
+                            ]
+                        ),
+                        ft.Divider(),
+                    ])
+                )
             )
-            # 2º controle
-            resumo_items.append(
-                ft.Text(f"Codprod: {item[0]} - codfab: {item[1]} - origem:{item[3]}")
-            )
-            # 3º controle
-            resumo_items.append(
-                ft.Text(f"Descrição: {item[2]}")
-            )
-            # 4º controle
-            resumo_items.append(
-                ft.Text(f"QT: {item[4]} - Sep: {item[5]} - Rest: {item[6]}")
-            )
-            # divisor
-            resumo_items.append(ft.Divider())
     resumo_tab = ft.Tab(
         text="Resumo",
         content=ft.ListView(
