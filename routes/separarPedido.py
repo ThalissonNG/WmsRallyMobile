@@ -179,13 +179,24 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             # Aba Resumo - primeiro teste: exibir apenas código do produto
     resumo_items = []
     for grupo in dados_resumo:
-        print("Entrou aqui no grupo:", grupo)
         for item in grupo:
-            print("Item do grupo:", item)
-            # mostrar só o código do produto (índice 0)
+            # 1º controle
             resumo_items.append(
-                ft.Text(f"CodProd: {item[0]}", color=colorVariaveis['titulo'])
+                ft.Text(f"Pedido: {item[7]} - Etiqueta: {item[8]}")
             )
+            # 2º controle
+            resumo_items.append(
+                ft.Text(f"Codprod: {item[0]} - codfab: {item[1]} - origem:{item[3]}")
+            )
+            # 3º controle
+            resumo_items.append(
+                ft.Text(f"Descrição: {item[2]}")
+            )
+            # 4º controle
+            resumo_items.append(
+                ft.Text(f"QT: {item[4]} - Sep: {item[5]} - Rest: {item[6]}")
+            )
+            # divisor
             resumo_items.append(ft.Divider())
     resumo_tab = ft.Tab(
         text="Resumo",
@@ -218,8 +229,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
 
     return ft.View(
         route="/separar_pedido",
-        controls=[header, title, tabs],
-        scroll=ft.ScrollMode.AUTO
+        controls=[header, title, tabs]
     )
 
 if __name__ == "__main__":
