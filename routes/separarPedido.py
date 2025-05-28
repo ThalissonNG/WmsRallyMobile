@@ -36,8 +36,9 @@ def separar_pedido(page: ft.Page, navigate_to, header):
 
     dados = buscar_itens()
 
-    dados_resumo = dados.get("dados_resumo", [])
-    print(f"Dados resumo: {dados_resumo}")
+    # Dados resumo mutáveis
+    raw_resumo = dados.get("dados_resumo", [])
+    dados_resumo = [[list(item) for item in grupo] for grupo in raw_resumo]
 
     # Processa dados_codbarras
     raw_codbarra = dados.get("dados_codbarras", [])
@@ -58,11 +59,8 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     if not dados_itens and isinstance(raw_itens, list) and raw_itens and isinstance(raw_itens[0], dict):
         dados_itens = raw_itens
 
-        # Processa dados_resumo
-
     # Identifica produto e endereços
-    produto_atual = None
-    codfab_atual = None
+    produto_atual = codfab_atual = None
     desc_atual = None
     enderecos = []
     detalhes = []
@@ -91,9 +89,6 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         color=colorVariaveis['titulo'], text_align="center"
     )
 
-    # Função para reconstruir aba Resumo
-    resumo_listview = ft.ListView(expand=True, spacing=4, padding=ft.padding.symmetric(vertical=8))
-
     # Componentes aba Separar
     separar_body = ft.Column(spacing=10, expand=True)
     address_field = ft.TextField(label="Endereço", autofocus=True)
@@ -103,6 +98,55 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     validate_pedido_btn = ft.ElevatedButton(text="Validar Etiqueta")
     barcode_field = ft.TextField(label="Código de Barras")
     validate_barcode_btn = ft.ElevatedButton(text="Bipar Produto")
+
+    # Função para gerar lista de containers (idêntica ao original)
+    def gerar_resumo_list():
+        controls = []
+        for grupo in dados_resumo:
+            for item in grupo:
+                codprod, codfab, descricao, origem, total, sep, rest, numped, etiqueta = item
+                if sep == total:
+                    bg, fg = colorVariaveis['sucesso'], colorVariaveis['textoPreto']
+                elif sep == 0:
+                    bg, fg = None, colorVariaveis['texto']
+                elif sep > total:
+                    bg, fg = colorVariaveis['erro'], colorVariaveis['texto']
+                else:
+                    bg, fg = colorVariaveis.get('restante'), colorVariaveis['textoPreto']
+                controls.append(
+                    ft.Container(
+                        padding=ft.padding.all(12),
+                        bgcolor=bg,
+                        content=ft.Column(spacing=6, controls=[
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Text(f"Pedido: {numped}", color=fg),
+                                    ft.Text(f"Etiqueta: {etiqueta}", color=fg),
+                                ]
+                            ),
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Text(f"Cód: {codprod}", color=fg),
+                                    ft.Text(f"Fab: {codfab}", color=fg),
+                                    ft.Text(f"Origem: {origem}", color=fg),
+                                ]
+                            ),
+                            ft.Text(descricao, color=fg),
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Text(f"Total: {total}", color=fg),
+                                    ft.Text(f"Sep: {sep}", color=fg),
+                                    ft.Text(f"Rest: {rest}", color=fg),
+                                ]
+                            ),
+                            ft.Divider(),
+                        ])
+                    )
+                )
+        return controls
 
     # Validações
     def validar_endereco(e):
@@ -145,18 +189,42 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             show_snack("Etiqueta inválida!", error=True)
 
     def validar_barcode(e):
+        nonlocal dados_resumo
         codigo = barcode_field.value
         validos = [str(t[1]) for t in dados_codbarra if t[0] == produto_atual and t[2] == current_endereco]
-        if codigo in validos:
-            show_snack(f"Bipado {codigo}! separados.", error=False)
+        if codigo in validos and current_pedido is not None:
+            # Incrementa apenas no item correto (mesmo codprod e mesma etiqueta)
+            for grupo in dados_resumo:
+                for item in grupo:
+                    codprod, _, _, _, total, sep, rest, numped, etiqueta = item
+                    if etiqueta == current_pedido and codprod == produto_atual:
+                        item[5] += 1
+                        item[6] = total - item[5]
+            # Limpa e foca o campo para novo bip
+            barcode_field.value = ""
+            barcode_field.focus()
+            show_snack(f"Bipado {codigo}! total separados atualizado.", error=False)
+            print(f"dados_resumo atualizado: {dados_resumo}")
+            # Reconstrói a aba Resumo
+            resumo_tab.content = ft.ListView(
+                expand=True,
+                spacing=4,
+                padding=ft.padding.symmetric(vertical=8),
+                controls=gerar_resumo_list()
+            )
+            page.update()
         else:
+            # Limpa o campo mesmo em erro
+            barcode_field.value = ""
+            barcode_field.focus()
             show_snack("Código de barras inválido!", error=True)
+            page.update()
 
     validate_address_btn.on_click = validar_endereco
     validate_pedido_btn.on_click = validar_pedido
     validate_barcode_btn.on_click = validar_barcode
 
-        # UI inicial
+    # UI inicial Separar
     if not produto_atual:
         separar_body.controls.append(ft.Text("Nenhum item a separar"))
     else:
@@ -168,82 +236,32 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                     rows=[
                         ft.DataRow(cells=[ft.DataCell(ft.Text(str(d[c]))) for c in ['mod', 'rua', 'edi', 'niv', 'apt']])
                         for d in detalhes
-                    ],
-                    expand=True
+                    ], expand=True
                 )
             )
         separar_body.controls.extend([address_field, validate_address_btn])
 
     separar_tab = ft.Tab(text="Separar", content=separar_body)
 
-            # Aba Resumo - primeiro teste: exibir apenas código do produto
-    resumo_items = []
-    for grupo in dados_resumo:
-        for item in grupo:
-            codprod, codfab, descricao, origem, total, sep, rest, numped, etiqueta = item
-
-            # Escolhe cor de fundo e texto
-            if sep == total:
-                bg, fg = colorVariaveis['sucesso'], colorVariaveis['textoPreto']
-            elif sep == 0:
-                bg, fg = None, colorVariaveis['texto']
-            elif sep > total:
-                bg, fg = colorVariaveis['erro'], colorVariaveis['texto']
-            else:
-                bg, fg = colorVariaveis.get('restante'), colorVariaveis['textoPreto']
-
-            resumo_items.append(
-                ft.Container(
-                    padding=ft.padding.all(12),
-                    bgcolor=bg,
-                    content=ft.Column(spacing=6, controls=[
-                        ft.Row(
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            controls=[
-                                ft.Text(f"Pedido: {numped}",  color=fg),
-                                ft.Text(f"Etiqueta: {etiqueta}",  color=fg),
-                            ]
-                        ),
-                        ft.Row(
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            controls=[
-                                ft.Text(f"Cód: {codprod}", color=fg),
-                                ft.Text(f"Fab: {codfab}", color=fg),
-                                ft.Text(f"Origem: {origem}", color=fg),
-                            ]
-                        ),
-                        ft.Text(descricao, color=fg),
-                        ft.Row(
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            controls=[
-                                ft.Text(f"Total: {total}", color=fg),
-                                ft.Text(f"Sep: {sep}", color=fg),
-                                ft.Text(f"Rest: {rest}", color=fg),
-                            ]
-                        ),
-                        ft.Divider(),
-                    ])
-                )
-            )
+    # Aba Resumo inicial
     resumo_tab = ft.Tab(
         text="Resumo",
         content=ft.ListView(
             expand=True,
             spacing=4,
             padding=ft.padding.symmetric(vertical=8),
-            controls=resumo_items
+            controls=gerar_resumo_list()
         )
     )
 
-        # Aba Finalizar
+    # Aba Finalizar
     finalizar_tab = ft.Tab(
-        text="Finalizar",
+        text="Finalizar", 
         content=ft.Column(
             controls=[
                 ft.Text("Concluir separação", color=colorVariaveis['titulo']),
                 ft.ElevatedButton(text="Finalizar", on_click=lambda e: navigate_to("/finalizar"))
-            ],
-            expand=True
+            ], expand=True
         )
     )
 
@@ -258,6 +276,3 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         route="/separar_pedido",
         controls=[header, title, tabs]
     )
-
-if __name__ == "__main__":
-    ft.app(target=separar_pedido)
