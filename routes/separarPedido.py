@@ -11,10 +11,6 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         page.snack_bar = ft.SnackBar(
             content=ft.Text(message, color=text_color),
             bgcolor=colorVariaveis['erro'] if error else colorVariaveis['sucesso'],
-            action=ft.IconButton(
-                icon=ft.icons.CLOSE,
-                on_click=lambda e: setattr(page.snack_bar, "open", False) or page.update()
-            )
         )
         page.snack_bar.open = True
         page.update()
@@ -135,6 +131,9 @@ def separar_pedido(page: ft.Page, navigate_to, header):
 
     def construir_separar_ui():
         separar_body.controls.clear()
+        # limpa campos ao voltar
+        address_field.value = ""
+        pedido_field.value = ""
         separar_body.controls.append(ft.Text("Selecione o endereço:"))
         # sempre mostra tabela de detalhes de endereços
         if detalhes:
@@ -160,6 +159,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             show_snack(f"Endereço {v} válido!", False)
             separar_body.controls.clear()
             expected_label_text.value = f"Etiqueta esperada: {etiquetas[etiqueta_idx]}"
+            pedido_field.value = ""
             separar_body.controls.extend([
                 ft.Text("Digite o código da etiqueta (pedido):"),
                 expected_label_text,
@@ -274,6 +274,3 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         expand=True
     )
     return ft.View(route="/separar_pedido", controls=[header, title, tabs])
-
-if __name__ == "__main__":
-    ft.app(target=separar_pedido)
