@@ -219,21 +219,22 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                 padding=ft.padding.symmetric(vertical=8),
                 controls=gerar_resumo_list()
             )
-            # só volta para selecionar endereço se etiqueta finalizada
+            # só volta para selecionar endereço se etiqueta finalizada e houver próxima etiqueta/produto
             if item_concluido:
                 etiqueta_idx += 1
                 if etiqueta_idx < len(etiquetas):
                     current_pedido = etiquetas[etiqueta_idx]
                     show_snack(f"Próxima etiqueta {current_pedido}")
+                    construir_separar_ui()
                 else:
                     prod_idx += 1
                     etiqueta_idx = 0
                     if prod_idx < len(produtos):
                         load_context()
                         show_snack(f"Iniciando produto {produto_atual}")
+                        construir_separar_ui()
                     else:
                         show_snack("Separação concluída!", False)
-                construir_separar_ui()
             page.update()
         else:
             barcode_field.value = ""
