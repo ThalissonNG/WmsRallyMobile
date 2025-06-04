@@ -157,6 +157,12 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         if v and int(v) in enderecos:
             current_endereco = int(v)
             show_snack(f"Endereço {v} válido!", False)
+            # atualiza origem em dados_resumo para este produto/etiqueta
+            for grupo in dados_resumo:
+                for item in grupo:
+                    codprod, codfab, desc, orig, total, sep, rest, numped, etiqueta = item
+                    if etiqueta == etiquetas[etiqueta_idx] and codprod == produto_atual:
+                        item[3] = current_endereco  # preenche campo origem
             separar_body.controls.clear()
             expected_label_text.value = f"Etiqueta esperada: {etiquetas[etiqueta_idx]}"
             pedido_field.value = ""
