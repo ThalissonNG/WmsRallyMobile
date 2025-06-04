@@ -151,6 +151,10 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             validate_address_btn
         ])
 
+    def finalizar_separacao_ui():
+        separar_body.controls.clear()
+        separar_body.controls.append(ft.Text("Separação concluída!", weight="bold"))
+
     def validar_endereco(e):
         nonlocal current_endereco
         v = address_field.value
@@ -241,6 +245,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                         construir_separar_ui()
                     else:
                         show_snack("Separação concluída!", False)
+                        finalizar_separacao_ui()
             page.update()
         else:
             barcode_field.value = ""
