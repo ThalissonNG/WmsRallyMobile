@@ -253,6 +253,28 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             show_snack("Código de barras inválido!", True)
             page.update()
 
+    def finalizar(e):
+        print(dados_resumo)
+
+        try:
+            resp = requests.post(
+                f"{base_url}/separarPedido",
+                json={
+                    "action": "finalizar",
+                    "matricula": matricula,
+                    "dados_resumo": dados_resumo
+                }
+            )
+            if resp.status_code == 200:
+                show_snack("Separação finalizada com sucesso!")
+                navigate_to("/buscar_pedido")
+            else:
+                show_snack("Erro ao finalizar separação!", error=True)
+        except Exception:
+            print("Erro ao finalizar separação (requisicao):", e)
+            print(e)
+            show_snack("Erro ao finalizar separação! (requisicao)", error=True)
+
     validate_address_btn.on_click = validar_endereco
     validate_pedido_btn.on_click = validar_pedido
     validate_barcode_btn.on_click = validar_barcode
@@ -275,7 +297,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         content=ft.Column(
             controls=[
                 ft.Text("Concluir separação", color=colorVariaveis['titulo']),
-                ft.ElevatedButton(text="Finalizar", on_click=lambda e: navigate_to("/finalizar"))
+                ft.ElevatedButton(text="Finalizar", on_click=lambda e: finalizar(e))
             ],
             expand=True
         )
