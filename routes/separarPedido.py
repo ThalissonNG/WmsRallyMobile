@@ -4,6 +4,7 @@ from routes.config.config import base_url, colorVariaveis, user_info
 
 
 def separar_pedido(page: ft.Page, navigate_to, header):
+    print("Entrou na tela de separar pedido")
     matricula = user_info.get("matricula")
 
     def show_snack(message: str, error: bool = False):
@@ -22,6 +23,8 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                 json={"action": "buscar_dados", "matricula": matricula}
             )
             resp.raise_for_status()
+            print(f"Status code: {resp.status_code}")
+            print(f"Response: {resp.json()}")
             return resp.json()
         except Exception as e:
             show_snack(f"Erro ao buscar itens: {e}", error=True)

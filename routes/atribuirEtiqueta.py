@@ -10,6 +10,7 @@ etiquetas = []
 
 def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
     global digit_index, numped_lista_global, etiquetas
+    print("Entrou na tela de atribuir etiqueta")
 
     # Recupera a matrícula do usuário logado
     matricula = user_info.get('matricula')
