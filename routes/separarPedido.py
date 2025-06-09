@@ -89,6 +89,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     load_context()
     current_endereco = None
     current_pedido = None
+    barcode_valid = False
 
     title = ft.Text(
         "Separar Pedido", size=24, weight="bold",
@@ -103,6 +104,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     validate_pedido_btn = ft.ElevatedButton(text="Validar Etiqueta")
     barcode_field = ft.TextField(label="Código de Barras")
     validate_barcode_btn = ft.ElevatedButton(text="Bipar Produto")
+    skip_endereco_btn = ft.ElevatedButton(text="Pular Endereço")
 
     # Monta controles de resumo (sem alterações)
     def gerar_resumo_list():
@@ -140,6 +142,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         # limpa campos ao voltar
         address_field.value = ""
         pedido_field.value = ""
+        barcode_field.value = ""
         separar_body.controls.append(ft.Text("Selecione o endereço:"))
         # sempre mostra tabela de detalhes de endereços
         if detalhes:
@@ -157,15 +160,50 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             validate_address_btn
         ])
 
+    def mostrar_barcode_ui():
+        separar_body.controls.clear()
+        barcode_field.value = ""
+        separar_body.controls.extend([
+            ft.Text(f"Cód: {produto_atual} | Fab: {codfab_atual}", weight="bold"),
+            ft.Text(desc_atual),
+            ft.Text("Digite ou bipar produto (código de barras):"),
+            barcode_field,
+            validate_barcode_btn,
+            skip_endereco_btn
+        ])
+        page.update()
+
+    def mostrar_label_ui():
+        separar_body.controls.clear()
+        expected_label_text.value = f"Etiqueta esperada: {etiquetas[etiqueta_idx]}"
+        pedido_field.value = ""
+        separar_body.controls.extend([
+            ft.Text("Digite o código da etiqueta (pedido):"),
+            expected_label_text,
+            pedido_field,
+            validate_pedido_btn,
+            skip_endereco_btn
+        ])
+        page.update()
+
     def finalizar_separacao_ui():
         separar_body.controls.clear()
         separar_body.controls.append(ft.Text("Separação concluída!", weight="bold"))
 
+    def pular_endereco(e):
+        nonlocal current_endereco, current_pedido, barcode_valid
+        current_endereco = None
+        current_pedido = None
+        barcode_valid = False
+        show_snack("Endereço pulado. Selecione o próximo.")
+        construir_separar_ui()
+
     def validar_endereco(e):
-        nonlocal current_endereco
+        nonlocal current_endereco, barcode_valid
         v = address_field.value
         if v and int(v) in enderecos:
             current_endereco = int(v)
+            barcode_valid = False
             show_snack(f"Endereço {v} válido!", False)
             # atualiza origem em dados_resumo para este produto/etiqueta
             for grupo in dados_resumo:
@@ -173,45 +211,22 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                     codprod, codfab, desc, orig, total, sep, rest, numped, etiqueta = item
                     if etiqueta == etiquetas[etiqueta_idx] and codprod == produto_atual:
                         item[3] = current_endereco  # preenche campo origem
-            separar_body.controls.clear()
-            expected_label_text.value = f"Etiqueta esperada: {etiquetas[etiqueta_idx]}"
-            pedido_field.value = ""
-            separar_body.controls.extend([
-                ft.Text("Digite o código da etiqueta (pedido):"),
-                expected_label_text,
-                pedido_field,
-                validate_pedido_btn
-            ])
-            page.update()
+            mostrar_barcode_ui()
         else:
             show_snack("Endereço incorreto!", True)
 
     def validar_pedido(e):
-        nonlocal current_pedido
+        nonlocal current_pedido, etiqueta_idx, prod_idx, barcode_valid
         v = pedido_field.value
+        if not barcode_valid:
+            show_snack("Bipe um produto primeiro", True)
+            pedido_field.value = ""
+            page.update()
+            return
         if v and int(v) == etiquetas[etiqueta_idx]:
             current_pedido = int(v)
+            barcode_valid = False
             show_snack(f"Etiqueta {v} válida!", False)
-            separar_body.controls.clear()
-            separar_body.controls.extend([
-                ft.Text(f"Pedido: {current_pedido}", weight="bold"),
-                ft.Text(f"Cód: {produto_atual} | Fab: {codfab_atual}", weight="bold"),
-                ft.Text(desc_atual),
-                ft.Text("Digite ou bipar produto (código de barras):"),
-                barcode_field,
-                validate_barcode_btn
-            ])
-            page.update()
-        else:
-            show_snack("Etiqueta inválida!", True)
-
-    def validar_barcode(e):
-        nonlocal etiqueta_idx, prod_idx, current_pedido, current_endereco
-        codigo = barcode_field.value
-        validos = [str(t[1]) for t in dados_codbarra if t[0] == produto_atual and t[2] == current_endereco]
-        print(f"Códigos válidos para produto {produto_atual}, endereço {current_endereco}: {validos}")
-        if codigo in validos and current_pedido is not None:
-            # encontra item correspondente para atualizar
             item_concluido = False
             for grupo in dados_resumo:
                 for item in grupo:
@@ -225,17 +240,13 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                 if item_concluido:
                     break
 
-            # limpa campo bip
-            barcode_field.value = ""
-            barcode_field.focus()
-            # atualiza aba Resumo
             resumo_tab.content = ft.ListView(
                 expand=True,
                 spacing=4,
                 padding=ft.padding.symmetric(vertical=8),
-                controls=gerar_resumo_list()
+                controls=gerar_resumo_list(),
             )
-            # só volta para selecionar endereço se etiqueta finalizada e houver próxima etiqueta/produto
+            pedido_field.value = ""
             if item_concluido:
                 etiqueta_idx += 1
                 if etiqueta_idx < len(etiquetas):
@@ -252,12 +263,29 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                     else:
                         show_snack("Separação concluída!", False)
                         finalizar_separacao_ui()
+            else:
+                mostrar_barcode_ui()
             page.update()
+        else:
+            pedido_field.value = ""
+            show_snack("Etiqueta inválida!", True)
+            mostrar_label_ui()
+
+    def validar_barcode(e):
+        nonlocal barcode_valid
+        codigo = barcode_field.value
+        validos = [str(t[1]) for t in dados_codbarra if t[0] == produto_atual and t[2] == current_endereco]
+        print(f"Códigos válidos para produto {produto_atual}, endereço {current_endereco}: {validos}")
+        if codigo in validos:
+            barcode_valid = True
+            barcode_field.value = ""
+            show_snack("Produto válido! Bipe a etiqueta.")
+            mostrar_label_ui()
         else:
             barcode_field.value = ""
             barcode_field.focus()
             show_snack("Código de barras inválido!", True)
-            page.update()
+        page.update()
 
     def finalizar(e):
         print(dados_resumo)
@@ -284,6 +312,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     validate_address_btn.on_click = validar_endereco
     validate_pedido_btn.on_click = validar_pedido
     validate_barcode_btn.on_click = validar_barcode
+    skip_endereco_btn.on_click = pular_endereco
 
     # UI inicial de Separar
     construir_separar_ui()
