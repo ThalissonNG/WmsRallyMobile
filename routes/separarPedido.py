@@ -104,6 +104,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     validate_pedido_btn = ft.ElevatedButton(text="Validar Etiqueta")
     barcode_field = ft.TextField(label="Código de Barras")
     validate_barcode_btn = ft.ElevatedButton(text="Bipar Produto")
+    skip_prod_btn = ft.ElevatedButton(text="Pular Produto")
 
     # Monta controles de resumo (sem alterações)
     def gerar_resumo_list():
@@ -167,7 +168,8 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             ft.Text(desc_atual),
             ft.Text("Digite ou bipar produto (código de barras):"),
             barcode_field,
-            validate_barcode_btn
+            validate_barcode_btn,
+            skip_prod_btn
         ])
         page.update()
 
@@ -276,6 +278,17 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             show_snack("Código de barras inválido!", True)
         page.update()
 
+    def pular_produto(e):
+        nonlocal prod_idx, etiqueta_idx
+        produto_pulado = produtos.pop(prod_idx)
+        produtos.append(produto_pulado)
+        etiqueta_idx = 0
+        if prod_idx >= len(produtos):
+            prod_idx = len(produtos) - 1
+        load_context()
+        show_snack(f"Produto {produto_pulado} pulado!")
+        construir_separar_ui()
+
     def finalizar(e):
         print(dados_resumo)
 
@@ -301,6 +314,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     validate_address_btn.on_click = validar_endereco
     validate_pedido_btn.on_click = validar_pedido
     validate_barcode_btn.on_click = validar_barcode
+    skip_prod_btn.on_click = pular_produto
 
     # UI inicial de Separar
     construir_separar_ui()
