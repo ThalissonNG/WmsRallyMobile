@@ -23,8 +23,8 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                 json={"action": "buscar_dados", "matricula": matricula}
             )
             resp.raise_for_status()
-            print(f"Status code: {resp.status_code}")
-            print(f"Response: {resp.json()}")
+            # print(f"Status code: {resp.status_code}")
+            # print(f"Response: {resp.json()}")
             return resp.json()
         except Exception as e:
             show_snack(f"Erro ao buscar itens: {e}", error=True)
@@ -36,10 +36,13 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     raw_resumo = dados.get("dados_resumo", [])
     dados_resumo = [[list(item) for item in grupo] for grupo in raw_resumo]
     raw_itens = dados.get("dados_itens", [])
+    print(f"Dados de itens: {raw_itens}")
     dados_itens = []
     for grp in raw_itens:
         if isinstance(grp, (list, tuple)):
             dados_itens.extend(grp)
+    dados_itens.sort(key=lambda item: item[7])
+    print(f"Dados de itens ordenados: {dados_itens}")
     if not dados_itens and isinstance(raw_itens, list) and raw_itens and isinstance(raw_itens[0], dict):
         dados_itens = raw_itens
 
