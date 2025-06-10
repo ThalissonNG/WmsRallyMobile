@@ -124,9 +124,8 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
                 ),
             ]
         )
-        page.dialog = dialog
-        dialog.open = True
-        page.update()
+        page.open(dialog)
+        # page.update()
 
     # 7) Montagem da View
     return ft.View(

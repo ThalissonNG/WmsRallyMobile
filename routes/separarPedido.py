@@ -8,7 +8,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     matricula = user_info.get("matricula")
 
     def show_snack(message: str, error: bool = False):
-        text_color = ft.colors.WHITE if error else ft.colors.BLACK
+        text_color = ft.Colors.WHITE if error else ft.Colors.BLACK
         page.snack_bar = ft.SnackBar(
             content=ft.Text(message, color=text_color),
             bgcolor=colorVariaveis['erro'] if error else colorVariaveis['sucesso'],

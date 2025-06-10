@@ -17,8 +17,8 @@ from routes.contagemInventarioRotativo import contagem_inventario_rotativo
 
 def main(page: ft.Page):
     page.title = "Login"
-    page.window_width = 480
-    page.window_height = 800
+    page.window.width = 480
+    page.window.height = 800
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.padding = 20
