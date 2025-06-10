@@ -20,10 +20,10 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
         page.snack_bar = ft.SnackBar(
             content=ft.Text(message),
             bgcolor=colorVariaveis['erro'] if error else colorVariaveis['sucesso'],
-            action=ft.IconButton(
-                icon=ft.icons.CLOSE,
-                on_click=lambda ev: setattr(page.snack_bar, "open", False) or page.update()
-            )
+            # action=ft.IconButton(
+            #     icon=ft.icons.CLOSE,
+            #     on_click=lambda ev: setattr(page.snack_bar, "open", False) or page.update()
+            # )
         )
         page.snack_bar.open = True
         page.update()

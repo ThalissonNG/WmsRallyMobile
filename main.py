@@ -29,14 +29,14 @@ def main(page: ft.Page):
         import routes.config.config as config
         return ft.AppBar(
             ft.ElevatedButton(
-                icon=ft.icons.HOME,
+                # icon=ft.icons.HOME,
                 text="Menu",
                 on_click=lambda e: navigate_to("/menu"),
             ),
             title=ft.Text(f"{config.user_info.get('matricula', '')} - {config.user_info.get('usuario', '')}"),
             actions=[
                 ft.ElevatedButton(
-                    icon=ft.icons.LOGOUT,
+                    # icon=ft.icons.LOGOUT,
                     text="Sair",
                     on_click=lambda e: navigate_to("/login"),
                 )
@@ -168,7 +168,7 @@ def main(page: ft.Page):
 
         username = ft.TextField(
             label="Usuário",
-            prefix_icon=ft.icons.PERSON,
+            # prefix_icon=ft.icons.PERSON,
             border_radius=ft.border_radius.all(10),
             border_color=colorVariaveis['bordarInput'],
             border_width=2,
@@ -176,7 +176,7 @@ def main(page: ft.Page):
         )
         password = ft.TextField(
             label="Senha",
-            prefix_icon=ft.icons.PASSWORD,
+            # prefix_icon=ft.icons.PASSWORD,
             border_radius=ft.border_radius.all(10),
             border_color=colorVariaveis['bordarInput'],
             border_width=2,

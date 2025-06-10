@@ -12,7 +12,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     # 2) Componentes de UI
     input_numped = ft.TextField(
         label="Número do pedido",
-        prefix_icon=ft.icons.INSERT_DRIVE_FILE,
+        # prefix_icon=ft.icons.INSERT_DRIVE_FILE,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,
@@ -24,6 +24,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         bgcolor=colorVariaveis['botaoAcao'],
         color=colorVariaveis['texto'],
         width=600,
+        # on_click=lambda e: print("Botão Buscar Pedido Manual clicado"),
         on_click=lambda e: abrir_dialog_manual(e),
     )
     button_buscar_automatico = ft.ElevatedButton(
@@ -39,10 +40,10 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         page.snack_bar = ft.SnackBar(
             content=ft.Text(message),
             bgcolor=colorVariaveis['erro'] if error else colorVariaveis['sucesso'],
-            action=ft.IconButton(
-                icon=ft.icons.CLOSE,
-                on_click=lambda ev: setattr(page.snack_bar, "open", False) or page.update()
-            )
+            # action=ft.IconButton(
+            #     icon=ft.icons.CLOSE,
+            #     on_click=lambda ev: setattr(page.snack_bar, "open", False) or page.update()
+            # )
         )
         page.snack_bar.open = True
         page.update()

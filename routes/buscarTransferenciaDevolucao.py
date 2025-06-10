@@ -42,7 +42,7 @@ def buscar_transferencia_devolucao(e, navigate_to, header):
     )
     Numnota = ft.TextField(
         label="Número da Nota",
-        prefix_icon=ft.icons.INSERT_DRIVE_FILE,
+        # prefix_icon=ft.icons.INSERT_DRIVE_FILE,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,
@@ -51,7 +51,7 @@ def buscar_transferencia_devolucao(e, navigate_to, header):
     )
     codfornec = ft.TextField(
         label="Código fornecedor",
-        prefix_icon=ft.icons.INSERT_DRIVE_FILE,
+        # prefix_icon=ft.icons.INSERT_DRIVE_FILE,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,

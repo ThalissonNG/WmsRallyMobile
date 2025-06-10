@@ -64,7 +64,7 @@ def buscar_etiqueta(navigate_to, header):
     )
     inputEtiqueta = ft.TextField(
         label="Número Etiqueta",
-        prefix_icon=ft.icons.STICKY_NOTE_2,
+        # prefix_icon=ft.icons.STICKY_NOTE_2,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,

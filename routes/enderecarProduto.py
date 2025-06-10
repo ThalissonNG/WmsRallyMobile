@@ -62,7 +62,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
 
     codendereco = ft.TextField(
         label="CODENDERECO",
-        prefix_icon=ft.icons.STORAGE,
+        # prefix_icon=ft.icons.STORAGE,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,

@@ -12,7 +12,8 @@ def transferir_produto(page, navigate_to, header):
         color=colorVariaveis['titulo']
     )
     button_voltar = ft.IconButton(
-        icon=ft.icons.ARROW_BACK,
+        icon=ft.Icons.ARROW_BACK,
+        # icon=ft.icons.ARROW_BACK,
         icon_color=colorVariaveis['texto'],
         on_click=lambda e: navigate_to("/transferirProduto"),
     )
@@ -27,7 +28,7 @@ def transferir_produto(page, navigate_to, header):
     # --- 1) Cria todos os campos e botões usados na tela ---
     codenderecoAtual_field = ft.TextField(
         label="Endereço Atual",
-        prefix_icon=ft.icons.BARCODE_READER,
+        # prefix_icon=ft.icons.BARCODE_READER,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,
@@ -41,7 +42,7 @@ def transferir_produto(page, navigate_to, header):
 
     codbarra_field = ft.TextField(
         label="Código de Barras",
-        prefix_icon=ft.icons.BARCODE_READER,
+        # prefix_icon=ft.icons.BARCODE_READER,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
         border_width=2,
