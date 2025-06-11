@@ -116,7 +116,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
                 if sep == total:
                     bg, fg = colorVariaveis['sucesso'], colorVariaveis['textoPreto']
                 elif sep == 0:
-                    bg, fg = None, colorVariaveis['texto']
+                    bg, fg = None, None
                 elif sep > total:
                     bg, fg = colorVariaveis['erro'], colorVariaveis['texto']
                 else:
@@ -149,6 +149,8 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         if detalhes:
             separar_body.controls.append(
                 ft.DataTable(
+                    column_spacing=42,
+                    horizontal_margin=10,
                     columns=[ft.DataColumn(ft.Text(h)) for h in ["MOD", "RUA", "EDI", "NIV", "APT"]],
                     rows=[
                         ft.DataRow(cells=[ft.DataCell(ft.Text(str(d[c]))) for c in ['mod', 'rua', 'edi', 'niv', 'apt']])
