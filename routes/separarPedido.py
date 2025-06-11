@@ -6,6 +6,7 @@ from routes.config.config import base_url, colorVariaveis, user_info
 def separar_pedido(page: ft.Page, navigate_to, header):
     print("Entrou na tela de separar pedido")
     matricula = user_info.get("matricula")
+    codfilial = user_info.get("codfilial")
 
     def show_snack(message: str, error: bool = False):
         text_color = ft.Colors.WHITE if error else ft.Colors.BLACK
@@ -20,7 +21,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         try:
             resp = requests.post(
                 f"{base_url}/separarPedido",
-                json={"action": "buscar_dados", "matricula": matricula}
+                json={"action": "buscar_dados", "matricula": matricula, "codfilial": codfilial},
             )
             resp.raise_for_status()
             # print(f"Status code: {resp.status_code}")
