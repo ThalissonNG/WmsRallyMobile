@@ -44,7 +44,6 @@ def main(page: ft.Page):
             bgcolor=colorVariaveis['botaoAcao'],
         )
 
-
     # Função de navegação entre rotas
     def navigate_to(route, arguments=None):
         page.views.clear()

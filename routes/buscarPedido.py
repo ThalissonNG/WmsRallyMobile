@@ -5,6 +5,7 @@ from routes.config.config import base_url, colorVariaveis, user_info
 def buscar_pedido(page: ft.Page, navigate_to, header):
     print("Entrou na tela de buscar pedido")
     matricula = user_info.get("matricula")
+    codfilial = user_info.get("codfilial")
 
     # 1) Lista que vai acumulando todos os números de pedido
     pedidos: list[str] = []
@@ -40,13 +41,33 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         page.snack_bar = ft.SnackBar(
             content=ft.Text(message),
             bgcolor=colorVariaveis['erro'] if error else colorVariaveis['sucesso'],
-            # action=ft.IconButton(
-            #     icon=ft.icons.CLOSE,
-            #     on_click=lambda ev: setattr(page.snack_bar, "open", False) or page.update()
-            # )
         )
-        page.snack_bar.open = True
-        page.update()
+        page.open(page.snack_bar)
+        # page.snack_bar.open = True
+        # page.update()
+
+    def em_aberto(matricula, codfilial):
+        try:
+            resp = requests.post(
+                f"{base_url}/buscarPedido",
+                json={
+                    "action": "aberto",
+                    "matricula": matricula,
+                    "codfilial": codfilial
+                }
+            )
+            if resp.status_code == 201:
+                print("Pedidos em aberto encontrados")
+                dialog_em_aberto()
+                show_snack("Pedidos em aberto encontrados")
+            # elif resp.status_code == 200:
+            #     show_snack("Pedidos em aberto processados")
+            else:
+                pass
+                # show_snack("Nenhum pedido em aberto encontrado", error=True)
+        except Exception as exc:
+            print("Erro na requisição em aberto:", exc)
+            show_snack("Erro na requisição em aberto", error=True)
 
     # 4) Requisição manual: envia lista de pedidos
     def pedido_manual(lista_de_pedidos: list[str]):
@@ -126,6 +147,15 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         )
         page.open(dialog)
         # page.update()
+
+    def dialog_em_aberto():
+        dialog_aberto = ft.AlertDialog(
+            title=ft.Text("Você assim possui pedidos em aberto")
+        )
+        page.open(dialog_aberto)
+        # page.update() 
+
+    em_aberto(matricula, codfilial)
 
     # 7) Montagem da View
     return ft.View(
