@@ -7,6 +7,15 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     matricula = user_info.get("matricula")
     codfilial = user_info.get("codfilial")
 
+    def dialog_em_aberto():
+        print("Entrou em abrir dialog")
+        dialog_aberto = ft.AlertDialog(
+            title=ft.Text("Você assim possui pedidos em aberto"),
+            
+        )
+        page.open(dialog_aberto)
+        # page.update() 
+
     # 1) Lista que vai acumulando todos os números de pedido
     pedidos: list[str] = []
 
@@ -148,12 +157,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         page.open(dialog)
         # page.update()
 
-    def dialog_em_aberto():
-        dialog_aberto = ft.AlertDialog(
-            title=ft.Text("Você assim possui pedidos em aberto")
-        )
-        page.open(dialog_aberto)
-        # page.update() 
+    
 
     em_aberto(matricula, codfilial)
 
