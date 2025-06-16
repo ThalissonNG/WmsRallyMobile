@@ -110,16 +110,17 @@ def contagem_inventario(e, navigate_to, header):
             ]),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_edicao(e))]
         )
-        e.page.dialog = dialog_edicao
-        dialog_edicao.open = True
-        e.page.update()
-    
+        # e.page.dialog = dialog_edicao
+        # dialog_edicao.open = True
+        # e.page.update()
+        e.page.open(dialog_edicao)
     def mostrar_campos_endereco(e, dados_os):
         conteudo_dinamico.controls.clear()
     
         campo_endereco = ft.TextField(label="Endereço")
     
         def confirmar_endereco(e):
+            print("Endereço:", campo_endereco.value)
             codigo_esperado = str(dados_os[0][2])
             if campo_endereco.value == codigo_esperado:
                 abrir_dialog_codbarra(e, dados_os)
@@ -177,9 +178,10 @@ def contagem_inventario(e, navigate_to, header):
             content=ft.Column(controls=[campo_codbarra]),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))]
         )
-        e.page.dialog = dialog_codbarra
-        dialog_codbarra.open = True
-        e.page.update()
+        # e.page.dialog = dialog_codbarra
+        # dialog_codbarra.open = True
+        # e.page.update()
+        e.page.open(dialog_codbarra)
     
     def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
         campo_quantidade = ft.TextField(label="Quantidade")
@@ -251,19 +253,18 @@ def contagem_inventario(e, navigate_to, header):
             ),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
         )
-        e.page.dialog = dialog_quantidade
-        dialog_quantidade.open = True
-        e.page.update()
+        # e.page.dialog = dialog_quantidade
+        # dialog_quantidade.open = True
+        # e.page.update()
+        e.page.open(dialog_quantidade)
     
     def abrir_dialog_mais_produtos(e, dados_os):
-        def on_sim(e):
-            e.page.dialog.open = False
-            e.page.update()
-            abrir_dialog_codbarra(e, dados_os)
-        def on_nao(e):
-            e.page.dialog.open = False
-            e.page.update()
-            finalizar(e, dados_os)
+        def on_sim(evt):
+            evt.page.close(dialog_mais)           # fecha este diálogo
+            abrir_dialog_codbarra(evt, dados_os)  # segue para o próximo
+        def on_nao(evt):
+            evt.page.close(dialog_mais)           # fecha este diálogo
+            finalizar(evt, dados_os) 
         dialog_mais = ft.AlertDialog(
             title=ft.Text("Tem mais algum produto nesse endereço?"),
             actions=[
@@ -271,9 +272,10 @@ def contagem_inventario(e, navigate_to, header):
                 ft.TextButton("Não", on_click=lambda e: on_nao(e))
             ]
         )
-        e.page.dialog = dialog_mais
-        dialog_mais.open = True
-        e.page.update()
+        # e.page.dialog = dialog_mais
+        # dialog_mais.open = True
+        # e.page.update()
+        e.page.open(dialog_mais)
     
     def finalizar(e, dados_os):
         response = requests.post(
@@ -304,9 +306,10 @@ def contagem_inventario(e, navigate_to, header):
             title=ft.Text("Código de Barras não cadastrado"),
             actions=[ft.TextButton("Cadastrar", on_click=lambda e: navigate_to("/cadastrar_codbarra"))]
         )
-        e.page.dialog = dialog_nao_cadastrado
-        dialog_nao_cadastrado.open = True
-        e.page.update()
+        # e.page.dialog = dialog_nao_cadastrado
+        # dialog_nao_cadastrado.open = True
+        # e.page.update()
+        e.page.open(dialog_nao_cadastrado)
     
     def buscar_os(e, codfilial, matricula):
         try:
