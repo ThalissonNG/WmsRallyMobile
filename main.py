@@ -13,7 +13,10 @@ from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 from routes.contagemInventario import contagem_inventario
 from routes.cadastrarCodbarra import cadastrar_codbarra
-from routes.contagemInventarioRotativo import contagem_inventario_rotativo 
+from routes.contagemInventarioRotativo import contagem_inventario_rotativo
+from routes.osAvulsa import os_avulsa
+from routes.osAvulsaSaida import os_avulsa_saida
+from routes.osAvulsaEntrada import os_avulsa_entrada
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -75,6 +78,13 @@ def main(page: ft.Page):
             page.views.append(cadastrar_codbarra(page, navigate_to, create_header()))
         elif route == "/contagem_inventario_rotativo":
             page.views.append(contagem_inventario_rotativo(page, navigate_to, create_header()))
+        elif route == "/os_avulsa":
+            page.views.append(os_avulsa(page, navigate_to, create_header()))
+        elif route == "/os_avulsa_saida":
+            page.views.append(os_avulsa_saida(page, navigate_to, create_header()))
+        elif route == "/os_avulsa_entrada":
+            page.views.append(os_avulsa_entrada(page, navigate_to, create_header()))
+
         page.update()
 
     # Tela de login

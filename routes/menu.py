@@ -79,6 +79,21 @@ def menu_page(page: ft.Page, navigate_to, header):
                             ],
                             spacing=10,
                         ),
+                        ft.Row(
+                            controls=[
+                                ft.ElevatedButton(
+                                    "Os Avulsa",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/os_avulsa")
+                                ),
+                                ft.ElevatedButton(
+                                    "------------",
+                                    expand=True,
+                                    # on_click=lambda e: navigate_to("/atribuir_etiqueta")
+                                ),
+                            ],
+                            spacing=10,
+                        ),
                     ],
                     spacing=10,
                 ),
