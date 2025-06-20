@@ -1,0 +1,22 @@
+# pyproject.toml
+
+[project]
+name        = "Wms Mobile"
+version     = "1.0.1"
+description = "App móvel do WMS Rally"
+authors     = ["Thalisson Manoel <seu@email.com>"]
+readme      = "README.md"
+license     = { file = "LICENSE" }
+
+[project.urls]
+"Homepage"    = "https://github.com/seuusuario/wmsrallymobile"
+"Bug Tracker" = "https://github.com/seuusuario/wmsrallymobile/issues"
+
+[tool.flet.android]
+versionCode = 1
+splitPerAbi = false
+icon = "assets/icon.png"
+
+[tool.flet.flutter.dependencies]
+window_to_front = "0.0.3"
+# Adicione outras dependências Flutter/Dart aqui, se necessário
