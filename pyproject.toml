@@ -4,7 +4,7 @@
 name        = "Wms Mobile"
 version     = "1.0.1"
 description = "App móvel do WMS Rally"
-authors     = ["Thalisson Manoel <seu@email.com>"]
+authors     = ["Thalisson Manoel", "Joab Moura"]
 readme      = "README.md"
 license     = { file = "LICENSE" }
 
