@@ -175,6 +175,17 @@ def main(page: ft.Page):
                 snackbar_error.open = True
             page.update()
 
+        def validar_versao():
+            try:
+                response = requests.get(
+                    f"{base_url}/verificarVersao",
+                    json={"versao": app_version}
+                )
+                print(f"Status code: {response.status_code}")
+            except Exception as exc:
+                print(exc)
+
+        validar_versao()
         username = ft.TextField(
             label="Usuário",
             # prefix_icon=ft.icons.PERSON,
