@@ -1,6 +1,6 @@
 import flet as ft
 import requests
-from routes.config.config import base_url, colorVariaveis
+from routes.config.config import base_url, colorVariaveis, app_version
 from routes.menu import menu_page
 from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
@@ -200,13 +200,16 @@ def main(page: ft.Page):
             width=300,
             on_click=login,
         )
+        versao = ft.Text(
+            f"Versão: {app_version}" 
+        )
 
         return ft.View(
             route="/login",
             controls=[
                 ft.Container(
                     content=ft.Column(
-                        controls=[username, password, button_login],
+                        controls=[username, password, button_login, versao],
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
