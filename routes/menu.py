@@ -87,9 +87,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     on_click=lambda e: navigate_to("/os_avulsa")
                                 ),
                                 ft.ElevatedButton(
-                                    "------------",
+                                    "Separar pedido - Dist",
                                     expand=True,
-                                    # on_click=lambda e: navigate_to("/atribuir_etiqueta")
+                                    on_click=lambda e: navigate_to("/separar_pedido_dist")
                                 ),
                             ],
                             spacing=10,
