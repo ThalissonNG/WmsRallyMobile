@@ -161,13 +161,15 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                 content=ft.Text("Código de barras incorreto!", color="white"),
                 bgcolor=colorVariaveis['erro']
             )
-            e.page.snack_bar = snack
-            snack.open = True
-            e.page.update()
+            # e.page.snack_bar = snack
+            # snack.open = True
+            # e.page.update()
+            e.page.open(snack)
         
         def fechar_dialogo(e):
-            e.page.dialog.open = False
-            e.page.update()
+            # e.page.dialog.open = False
+            # e.page.update()
+            e.page.close(dialog)
         
         dialog = ft.AlertDialog(
             title=ft.Text("Confirmação de Produto"),
@@ -185,9 +187,10 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                 ft.TextButton("Cancelar", on_click=fechar_dialogo),
             ],
         )
-        e.page.dialog = dialog
-        dialog.open = True
-        e.page.update()
+        # e.page.dialog = dialog
+        # dialog.open = True
+        # e.page.update()
+        e.page.open(dialog)
 
     if dados_itens:
         item = dados_itens[0]
