@@ -185,6 +185,24 @@ def main(page: ft.Page):
                     json={"versao": app_version}
                 )
                 print(f"Status code: {response.status_code}")
+
+                if response.status_code == 200:
+                    print("Versão atualizada")
+                    pass
+                elif response.status_code == 404:
+                    dialog_nova_versao = ft.AlertDialog(
+                        title=ft.Text("Nova versão disponível"),
+                        content=ft.Text("Deseja atualizar a versão?"),
+                        actions=[
+                            ft.TextButton(
+                                "Sim",
+                                on_click=lambda e: page.launch_url(
+                                    "https://www.dropbox.com/t/IgN7zw2BLx7lC9Sh"
+                                )
+                                ),
+                        ]
+                    )
+                    page.open(dialog_nova_versao)
             except Exception as exc:
                 print(exc)
 
