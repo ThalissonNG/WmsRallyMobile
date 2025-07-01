@@ -157,7 +157,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         qt_separada = ft.Text(f"Quantidade Separada: {resumo_item[5]}/{resumo_item[4]}")
         qt_endereco = ft.Text(f"Disponível neste endereço: {endereco_item[5]}")
         input_codbarra = ft.TextField(label="Código de Barras")
-        input_qt_total = ft.TextField(label="Quantidade Total", value=str(resumo_item[5]))
+        input_qt_total = ft.TextField(label="Quantidade Total")
 
         def validar_codbarra(evt):
             codbarra_digitado = input_codbarra.value.strip()
@@ -175,19 +175,46 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                         )
                         evt.page.open(snack)
                         return
-                    adicional = nova_qt - resumo_item[5]
-                    if adicional <= 0 or adicional > endereco_item[5]:
-                        snack = ft.SnackBar(
-                            content=ft.Text("Quantidade maior que disponível!", color="white"),
-                            bgcolor=colorVariaveis['erro']
-                        )
-                        evt.page.open(snack)
+                    qtrestante = resumo_item[4] - resumo_item[5]
+                    adicional = qtrestante - nova_qt 
+                    # adicioanl = adicional * -1
+                    # adicional = quantidade digitada - qt_separada resumo
+                    # if adicional <= 0 or adicional > endereco_item[5]:
+                    #     print(f"Adicional: {adicional}, Disponível: {endereco_item[5]}")
+                    #     snack = ft.SnackBar(
+                    #         content=ft.Text("Quantidade maior que disponível!", color="white"),
+                    #         bgcolor=colorVariaveis['erro']
+                    #     )
+                    #     evt.page.open(snack)
+                    #     return
+                    # resumo_item[5] = qtrestante - adicional
+                    resumo_item[6] = resumo_item[6] - nova_qt 
+                    print(f"Quantidade separada validacao1: {resumo_item[6]}")
+
+                    if resumo_item[6] < 0:
+                        print(f"Quantidade maior que a solciitada")
+                        resumo_item[6] = resumo_item[6] + nova_qt
+                        print(f"Quantidade separada validacao2: {resumo_item[6]}")
+                        # print(f"Quantidade separada validacao: {resumo_item[5]}")
+                        # resumo_item[5] = 0
+                        # print(f"Quantidade separada validacao: {resumo_item[5]}")
                         return
-                    resumo_item[5] = nova_qt
+
+                    resumo_item[5] = resumo_item[4] - resumo_item[6]
+                    # resumo_item[5] = 99999
+
+                    if resumo_item[5] > resumo_item[4]:
+                        print(f"Quantidade maior que a solciitada")
+                        print(f"Quantidade separada validacao3: {resumo_item[5]}")
+                        # resumo_item[5] = resu
+                        print(f"Quantidade separada validacao4: {resumo_item[5]}")
+                        return
+
                     if len(resumo_item) > 6:
-                        resumo_item[6] = resumo_item[4] - resumo_item[5]
+                        pass
                     endereco_item[5] -= adicional
                     # Atualiza textos
+                    print(f"Quantidade separada: {resumo_item[5]}")
                     qt_separada.value = f"Quantidade Separada: {resumo_item[5]}/{resumo_item[4]}"
                     qt_separada.update()
                     qt_endereco.value = f"Disponível neste endereço: {endereco_item[5]}"
@@ -204,6 +231,8 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                             dados_itens.remove(endereco_item)
                     if resumo_item[5] >= resumo_item[4]:
                         dados_itens[:] = [it for it in dados_itens if it[1] != resumo_item[0]]
+                    
+                    print(f"dados itens0: {dados_itens}")
                     atualizar_tab_separar()
                     evt.page.close(dialog)
                     return
@@ -350,7 +379,8 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             e.page.update()
         else:
             print("Nenhuma divergência encontrada, finalizando...")
-            envio_resumo(dados_resumo, e.page, navigate_to)
+            print(f"dados resumo : {dados_resumo}")
+            # envio_resumo(dados_resumo, e.page, navigate_to)
             # Prossegue com a finalização normalmente
 
 
