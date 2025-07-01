@@ -99,11 +99,11 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                         ft.Row(
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             controls=[
-                                ft.Column(controls=[ft.Text("MOD", weight="bold"), ft.Text(str(next_item[7]))]),
-                                ft.Column(controls=[ft.Text("RUA", weight="bold"), ft.Text(str(next_item[8]))]),
-                                ft.Column(controls=[ft.Text("EDI", weight="bold"), ft.Text(str(next_item[9]))]),
-                                ft.Column(controls=[ft.Text("NIV", weight="bold"), ft.Text(str(next_item[10]))]),
-                                ft.Column(controls=[ft.Text("APT", weight="bold"), ft.Text(str(next_item[11]))]),
+                                ft.Column(controls=[ft.Text("MOD", weight="bold"), ft.Text(str(next_item[8]))]),
+                                ft.Column(controls=[ft.Text("RUA", weight="bold"), ft.Text(str(next_item[9]))]),
+                                ft.Column(controls=[ft.Text("EDI", weight="bold"), ft.Text(str(next_item[10]))]),
+                                ft.Column(controls=[ft.Text("NIV", weight="bold"), ft.Text(str(next_item[11]))]),
+                                ft.Column(controls=[ft.Text("APT", weight="bold"), ft.Text(str(next_item[12]))]),
                             ]
                         ),
                         novo_input_endereco,
@@ -120,8 +120,10 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             tabsSeparar.update()
 
     def validar_endereco(e, endereco_digitado, item):
+        print({item[7]})
         for item in dados_itens:
-            if int(endereco_digitado) == item[6]:
+            if int(endereco_digitado) == item[7]:
+                print(f"Endereço correto {item[7]}")
                 for resumo_item in dados_resumo:
                     if resumo_item[0] == item[1]:  # Verifica se o produto no resumo é o mesmo de dados_itens
                         abrir_dialogo_produto(e, resumo_item)
@@ -130,47 +132,61 @@ def separar_transferencia_devolucao(e, navigate_to, header):
             content=ft.Text("Endereço incorreto!", color="white"),
             bgcolor=colorVariaveis['erro']
         )
-        e.page.snack_bar = snack
-        snack.open = True
-        e.page.update()
+        # e.page.snack_bar = snack
+        # snack.open = True
+        # e.page.update()
+        e.page.open(snack)
     
     def abrir_dialogo_produto(e, item):
-        qt_separada = ft.Text(f"Quantidade Separada: {item[5]}")
+        # Texto que mostra quantidade separada e total
+        qt_separada = ft.Text(f"Quantidade Separada: {item[5]}/{item[4]}")
         input_codbarra = ft.TextField(label="Código de Barras")
-        
-        def validar_codbarra(e):
-            codbarra_digitado = input_codbarra.value
+        input_qt_total = ft.TextField(label="Quantidade Total", value=str(item[5]))
+
+        def validar_codbarra(evt):
+            codbarra_digitado = input_codbarra.value.strip()
+            # Se válido, atualiza quantidade baseado no input_qt_total
             for cod in dados_codbarras:
                 if cod[0] == item[0] and cod[1] == codbarra_digitado:
-                    item[3] = cod[2]  # Atualiza codenderecoorigem
-                    item[5] += 1  # Atualiza qt separada
-                    item[6] = item[4] - item[5]  # Atualiza qt restante
-                    qt_separada.value = f"Quantidade Separada: {item[5]}"
+                    # Lê quantidade nova do campo, garantindo inteiro
+                    try:
+                        nova_qt = int(input_qt_total.value)
+                    except ValueError:
+                        # Mostra erro se não for número
+                        snack = ft.SnackBar(
+                            content=ft.Text("Informe um número válido!", color="white"),
+                            bgcolor=colorVariaveis['erro']
+                        )
+                        evt.page.open(snack)
+                        return
+                    # Atualiza item
+                    item[5] = nova_qt
+                    item[6] = item[4] - item[5]
+                    # Atualiza textos
+                    qt_separada.value = f"Quantidade Separada: {item[5]}/{item[4]}"
                     qt_separada.update()
                     input_codbarra.value = ""
                     input_codbarra.update()
+                    # Atualiza Resumo
                     tabsResumo.content = construir_tabs_resumo()
                     tabsResumo.update()
-                    e.page.update()
-                    if item[5] == item[4]:
+                    evt.page.update()
+                    # Se atingiu o pedido, remove e fecha
+                    if item[5] >= item[4]:
                         dados_itens.pop(0)
                         atualizar_tab_separar()
-                        fechar_dialogo(e)
+                        evt.page.close(dialog)
                     return
+            # Se não encontrou código
             snack = ft.SnackBar(
                 content=ft.Text("Código de barras incorreto!", color="white"),
                 bgcolor=colorVariaveis['erro']
             )
-            # e.page.snack_bar = snack
-            # snack.open = True
-            # e.page.update()
-            e.page.open(snack)
-        
-        def fechar_dialogo(e):
-            # e.page.dialog.open = False
-            # e.page.update()
-            e.page.close(dialog)
-        
+            evt.page.open(snack)
+
+        def fechar_dialogo(evt):
+            evt.page.close(dialog)
+
         dialog = ft.AlertDialog(
             title=ft.Text("Confirmação de Produto"),
             content=ft.Column(
@@ -178,18 +194,17 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     ft.Text(f"Código do Produto: {item[0]}"),
                     ft.Text(f"Descrição: {item[2]}"),
                     ft.Text(f"Quantidade Pedida: {item[4]}"),
+                    ft.Text(f"Qt Endereco: {item[5]}"),
                     qt_separada,
                     input_codbarra,
+                    input_qt_total
                 ]
             ),
             actions=[
                 ft.TextButton("Confirmar", on_click=validar_codbarra),
-                ft.TextButton("Cancelar", on_click=fechar_dialogo),
-            ],
+                ft.TextButton("Cancelar", on_click=fechar_dialogo)
+            ]
         )
-        # e.page.dialog = dialog
-        # dialog.open = True
-        # e.page.update()
         e.page.open(dialog)
 
     if dados_itens:
@@ -221,11 +236,11 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     ft.Row(
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                         controls=[
-                            ft.Column(controls=[ft.Text("MOD", weight="bold"), ft.Text(str(item[7]))]),
-                            ft.Column(controls=[ft.Text("RUA", weight="bold"), ft.Text(str(item[8]))]),
-                            ft.Column(controls=[ft.Text("EDI", weight="bold"), ft.Text(str(item[9]))]),
-                            ft.Column(controls=[ft.Text("NIV", weight="bold"), ft.Text(str(item[10]))]),
-                            ft.Column(controls=[ft.Text("APT", weight="bold"), ft.Text(str(item[11]))]),
+                            ft.Column(controls=[ft.Text("MOD", weight="bold"), ft.Text(str(item[8]))]),
+                            ft.Column(controls=[ft.Text("RUA", weight="bold"), ft.Text(str(item[9]))]),
+                            ft.Column(controls=[ft.Text("EDI", weight="bold"), ft.Text(str(item[10]))]),
+                            ft.Column(controls=[ft.Text("NIV", weight="bold"), ft.Text(str(item[11]))]),
+                            ft.Column(controls=[ft.Text("APT", weight="bold"), ft.Text(str(item[12]))]),
                         ]
                     ),
                     input_endereco,
