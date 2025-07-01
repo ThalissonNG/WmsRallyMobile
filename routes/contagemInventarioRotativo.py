@@ -134,7 +134,8 @@ def contagem_inventario_rotativo(e, navigate_to, header):
                     controls=[
                         ft.Text(f"Nº Inventário: {dados_os[0][0]}"),
                         ft.Text(f"Nº OS: {dados_os[0][1]}"),
-                        ft.Text(f"Endereço: {dados_os[0][2]}"),
+                        ft.Text(f"Mod: {dados_os[0][3]}, Rua: {dados_os[0][4]}, Edi: {dados_os[0][5]}, Niv: {dados_os[0][6]}, APT: {dados_os[0][7]}"),
+                        # ft.Text(f"Endereço: {dados_os[0][2]}"),
                         campo_endereco,
                         ft.ElevatedButton("Confirmar Endereço", on_click=confirmar_endereco)
                     ]
