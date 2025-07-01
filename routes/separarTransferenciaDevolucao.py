@@ -5,6 +5,8 @@ from routes.config.config import base_url, colorVariaveis, user_info
 def separar_transferencia_devolucao(e, navigate_to, header):
     matricula = user_info.get('matricula')
     codfilial = user_info.get('codfilial')
+
+    itens_sucesso = []
     
     try:
         response = requests.post(
@@ -176,6 +178,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                         evt.page.open(snack)
                         return
                     qtrestante = resumo_item[4] - resumo_item[5]
+                    print(f"Qt Restante: {qtrestante}")
                     adicional = qtrestante - nova_qt 
                     # adicioanl = adicional * -1
                     # adicional = quantidade digitada - qt_separada resumo
@@ -192,7 +195,18 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     print(f"Quantidade separada validacao1: {resumo_item[6]}")
 
                     if resumo_item[6] < 0:
-                        print(f"Quantidade maior que a solciitada")
+                        # print(f"Quantidade maior que a solciitada")
+
+
+                        fechar_dialogo(evt)
+                        snack = ft.SnackBar(
+                            content=ft.Text("Quantidade maior que a solicitada!", color="white"),
+                            bgcolor=colorVariaveis['erro']
+                        )
+                        evt.page.open(snack)
+                        # print(f"Item removido do sucesso antes - mais que solicitada: {itens_sucesso}")
+                        # itens_sucesso.pop()
+                        # print(f"Item removido do sucesso depois - mais que solicitada: {itens_sucesso}")
                         resumo_item[6] = resumo_item[6] + nova_qt
                         print(f"Quantidade separada validacao2: {resumo_item[6]}")
                         # print(f"Quantidade separada validacao: {resumo_item[5]}")
@@ -201,6 +215,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                         return
 
                     resumo_item[5] = resumo_item[4] - resumo_item[6]
+                    print(f"Quantidade separada validacao AA: {resumo_item[5]}")
                     # resumo_item[5] = 99999
 
                     if resumo_item[5] > resumo_item[4]:
@@ -212,9 +227,18 @@ def separar_transferencia_devolucao(e, navigate_to, header):
 
                     if len(resumo_item) > 6:
                         pass
-                    endereco_item[5] -= adicional
+                    endereco_item[5] -= nova_qt
+                    print(f"Quantidade disponível negativo: {endereco_item[5]}")
+
+                    print(f"dados itens0: {dados_itens}")
+                    
+
                     # Atualiza textos
-                    print(f"Quantidade separada: {resumo_item[5]}")
+                    print(f"Quantidade separada aaqui: {resumo_item[5]}")
+                    # if resumo_item[5] > 0:
+                    #     resumo_item[5] = resumo_item[5] - nova_qt
+                    
+                    print(f"Quantidade separada aaqui novo: {resumo_item[5]}")
                     qt_separada.value = f"Quantidade Separada: {resumo_item[5]}/{resumo_item[4]}"
                     qt_separada.update()
                     qt_endereco.value = f"Disponível neste endereço: {endereco_item[5]}"
@@ -225,14 +249,59 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     tabsResumo.content = construir_tabs_resumo()
                     tabsResumo.update()
                     evt.page.update()
+
+                    itens_sucesso.append({
+                        "codendereco": endereco_item[7],
+                        "codprod":     endereco_item[1],
+                        "quantidade":  nova_qt
+                    })
+                    print(f"Item adicionado ao sucesso: {itens_sucesso}")
                     # Se atingiu o pedido, remove e fecha
-                    if endereco_item[5] <= 0:
-                        if endereco_item in dados_itens:
-                            dados_itens.remove(endereco_item)
+
+                    if endereco_item[5] < 0:
+                        atualizar_tab_separar()
+                        # print("Voc~e digitou a quantidade superior a disponivel")
+                        snack = ft.SnackBar(
+                            content=ft.Text("Você digitou a quantidade superior a disponivel!", color="white"),
+                            bgcolor=colorVariaveis['erro']
+                        )
+                        print(f"Item removido do sucesso antes - mais que o endereco: {itens_sucesso}")
+                        itens_sucesso.pop()
+                        print(f"Item removido do sucesso depois - mais que o endereco: {itens_sucesso}")
+
+                        evt.page.open(snack)
+                        endereco_item[5] += nova_qt
+                        resumo_item[5] = resumo_item[5] - nova_qt 
+                        resumo_item[6] = resumo_item[6] + nova_qt
+                        # Atualiza Resumo
+                        tabsResumo.content = construir_tabs_resumo()
+                        tabsResumo.update()
+                        evt.page.update()
+
+                        
+
+                        print(f"Quantidade se for maior que a disponivel: {resumo_item[5]}")
+                        print(f"Quantidade maior que a disponivel: {endereco_item[5]}")
+                    elif endereco_item[5] == 0:
+                        print(f"codendereco: {endereco_item[7]} | quantidade {endereco_item[5]} | produto {endereco_item[1]}")
+
+                        
+
+                        dados_itens.remove(endereco_item)
+
+                    # if endereco_item[5] == 0:
+                    #     dados_itens.remove(endereco_item)
+                    #     if endereco_item in dados_itens:
+                    #         print(f"Dados itens antes: {dados_itens}")
+                    #         print(f"Endereço a ser removido: {endereco_item}")
+                    #         atualizar_tab_separar()
+                            # dados_itens.remove(endereco_item)
                     if resumo_item[5] >= resumo_item[4]:
                         dados_itens[:] = [it for it in dados_itens if it[1] != resumo_item[0]]
+
+                        
                     
-                    print(f"dados itens0: {dados_itens}")
+                    
                     atualizar_tab_separar()
                     evt.page.close(dialog)
                     return
