@@ -190,15 +190,16 @@ def main(page: ft.Page):
                     print("Versão atualizada")
                     pass
                 elif response.status_code == 404:
+                    response_versao = response.json()
+                    link_download = response_versao.get('linkDownload')
+                    print(f"Response: {response_versao}")
                     dialog_nova_versao = ft.AlertDialog(
                         title=ft.Text("Nova versão disponível"),
                         content=ft.Text("Deseja atualizar a versão?"),
                         actions=[
                             ft.TextButton(
-                                "Sim",
-                                on_click=lambda e: page.launch_url(
-                                    "https://www.dropbox.com/t/IgN7zw2BLx7lC9Sh"
-                                )
+                                "Baixar Agora",
+                                on_click=lambda e: page.launch_url(link_download)
                                 ),
                         ]
                     )

@@ -178,9 +178,10 @@ def contagem_inventario_rotativo(e, navigate_to, header):
             content=ft.Column(controls=[campo_codbarra]),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))]
         )
-        e.page.dialog = dialog_codbarra
-        dialog_codbarra.open = True
-        e.page.update()
+        # e.page.dialog = dialog_codbarra
+        # dialog_codbarra.open = True
+        # e.page.update()
+        e.page.open(dialog_codbarra)
     
     def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
         campo_quantidade = ft.TextField(label="Quantidade")
@@ -253,15 +254,17 @@ def contagem_inventario_rotativo(e, navigate_to, header):
             ),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
         )
-        e.page.dialog = dialog_quantidade
-        dialog_quantidade.open = True
-        e.page.update()
+        # e.page.dialog = dialog_quantidade
+        # dialog_quantidade.open = True
+        # e.page.update()
+        e.page.open(dialog_quantidade)
     
     def abrir_dialog_mais_produtos(e, dados_os):
         def on_sim(e):
-            e.page.dialog.open = False
-            e.page.update()
-            abrir_dialog_codbarra(e, dados_os)
+            # e.page.dialog.open = False
+            # e.page.update()
+            # abrir_dialog_codbarra(e, dados_os)
+            e.page.open(abrir_dialog_codbarra(e, dados_os))
         def on_nao(e):
             e.page.dialog.open = False
             e.page.update()
@@ -273,9 +276,10 @@ def contagem_inventario_rotativo(e, navigate_to, header):
                 ft.TextButton("Não", on_click=lambda e: on_nao(e))
             ]
         )
-        e.page.dialog = dialog_mais
-        dialog_mais.open = True
-        e.page.update()
+        # e.page.dialog = dialog_mais
+        # dialog_mais.open = True
+        # e.page.update()
+        e.page.open(dialog_mais)
     
     def finalizar(e, dados_os):
         response = requests.post(

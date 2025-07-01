@@ -163,6 +163,8 @@ def contagem_inventario(e, navigate_to, header):
             )
             if response.status_code == 200:
                 print("Código de barras válido")
+                print("Resposta do servidor:", response.json())
+                print(response.status_code)
                 dados = response.json()
                 produto = dados.get("produto")  # Ex.: [[codprod, descrição, codfab, None]]
                 abrir_dialog_quantidade(e, codbarra, dados_os, produto)
@@ -175,7 +177,7 @@ def contagem_inventario(e, navigate_to, header):
             # e.page.update()
         
         dialog_codbarra = ft.AlertDialog(
-            title=ft.Text("Inserir Código de Barras"),
+            title=ft.Text("Inserir Código de Barras invent"),
             content=ft.Column(controls=[campo_codbarra]),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))]
         )
@@ -185,6 +187,7 @@ def contagem_inventario(e, navigate_to, header):
         e.page.open(dialog_codbarra)
     
     def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
+        print("abrir dialog_quantidade")
         campo_quantidade = ft.TextField(label="Quantidade")
         def apenas_numeros(valor: str) -> str:
             # Remove qualquer caractere que não seja dígito e limita a 8 caracteres.

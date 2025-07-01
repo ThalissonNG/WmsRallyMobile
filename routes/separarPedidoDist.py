@@ -11,16 +11,22 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header):
         size=24, weight="bold",
         color=colorVariaveis['titulo']
     )
+    tag = ft.Text(
+        "Atenção: Esta funcionalidade está em desenvolvimento e não está disponível no momento.",
+        size=16, weight="bold",
+        color=colorVariaveis['erro']
+    )
 
     return ft.View(
         route="/separar_pedido_dist",
         controls=[
             header,
             titulo,
+            tag,
             ft.Container(height=20),
             ft.ElevatedButton(
                 "Buscar Pedido",
-                expand=True,
+                # expand=True,
                 bgcolor=colorVariaveis['botaoAcao'],
                 color=colorVariaveis['texto']
             )

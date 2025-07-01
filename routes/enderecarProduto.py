@@ -34,21 +34,23 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                 print("Produto guardado com sucesso")
                 snackbar_sucess = ft.SnackBar(
                     content=ft.Text("Produto guardado com sucesso"),
-                    bgcolor=ft.colors.GREEN,
+                    # bgcolor=ft.Colors.GREEN,
                     show_close_icon=True,
                     duration=1000,
                 )
-                page.overlay.append(snackbar_sucess)
-                snackbar_sucess.open = True
-                navigate_to("/armazenar_bonus")
+                # page.overlay.append(snackbar_sucess)
+                # snackbar_sucess.open = True
+                page.open(snackbar_sucess)
                 page.update()
+                navigate_to("/armazenar_bonus")
+                
             elif response.status_code == 400 or response.status_code == 500:
                 resposta = response.json()
                 mensagem = resposta.get("mensagem")
                 print(f"Erro: {mensagem}")
                 snackbar_sucess = ft.SnackBar(
                     content=ft.Text(mensagem, color="white"),
-                    bgcolor=ft.colors.RED,
+                    # bgcolor=ft.Colors,
                     show_close_icon=True,
                     duration=1000,
                 )

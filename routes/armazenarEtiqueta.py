@@ -44,10 +44,10 @@ def buscar_etiqueta(navigate_to, header):
                 snackbar_error = ft.SnackBar(
                         content=ft.Text(
                             f"Erro ao consultar o código de barras",
-                            color=ft.colors.WHITE,
+                            color=ft.Colors.WHITE,
                             size=20,
                         ),
-                        bgcolor=ft.colors.RED,
+                        bgcolor=ft.Colors.RED,
                         show_close_icon=True,
                     )
                 page.snack_bar = snackbar_error
