@@ -330,7 +330,9 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     qt_falta,
                     input_codbarra,
                     input_qt_total
-                ]
+                ],
+                scroll=True,
+                spacing=10
             ),
             actions=[
                 ft.TextButton("Confirmar", on_click=validar_codbarra),
