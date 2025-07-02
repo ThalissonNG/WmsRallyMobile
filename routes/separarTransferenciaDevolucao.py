@@ -39,14 +39,15 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         color=colorVariaveis['titulo']
     )
 
-    def envio_resumo(dados_resumo, page, navigate_to):
+    def envio_resumo(dados_resumo, page, navigate_to, itens_sucesso):
         try:
             response = requests.post(
                 f"{base_url}/finalizar_transferencia_devolucao",
                 json={
                     "dados_resumo": dados_resumo,
                     "matricula": matricula,
-                    "codfilial": codfilial
+                    "codfilial": codfilial,
+                    "itens_sucesso": itens_sucesso
                 }
             )
             dados = response.json()
@@ -56,9 +57,10 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                 content=ft.Text(mensagem, color="white"),
                 bgcolor=colorVariaveis['sucesso'] if response.status_code == 200 else colorVariaveis['erro']
             )
-            page.snack_bar = snackbar
-            snackbar.open = True
-            page.update()
+            # page.snack_bar = snackbar
+            # snackbar.open = True
+            # page.update()
+            page.open(snackbar)
 
             if response.status_code == 200:
                 navigate_to("/buscar_transferencia_devolucao")
@@ -157,6 +159,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
     
     def abrir_dialogo_produto(e, resumo_item, endereco_item):
         qt_separada = ft.Text(f"Quantidade Separada: {resumo_item[5]}/{resumo_item[4]}")
+        qt_falta = ft.Text(f"Quantidade Faltante: {resumo_item[4] - resumo_item[5]}")
         qt_endereco = ft.Text(f"Disponível neste endereço: {endereco_item[5]}")
         input_codbarra = ft.TextField(label="Código de Barras")
         input_qt_total = ft.TextField(label="Quantidade Total")
@@ -324,6 +327,7 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                     ft.Text(f"Quantidade Pedida: {resumo_item[4]}"),
                     qt_endereco,
                     qt_separada,
+                    qt_falta,
                     input_codbarra,
                     input_qt_total
                 ]
@@ -395,9 +399,9 @@ def separar_transferencia_devolucao(e, navigate_to, header):
                             ]),
                             ft.Text(item[2], weight="bold"),
                             ft.Row([
-                                ft.Text(f"Qt Pedida: {item[4]}", weight="bold"),
-                                ft.Text(f"Qt Separada: {item[5]}", weight="bold"),
-                                ft.Text(f"Qt Restante: {item[4] - item[5]}", weight="bold"),
+                                ft.Text(f"Qt Ped: {item[4]}", weight="bold"),
+                                ft.Text(f"Qt Sep: {item[5]}", weight="bold"),
+                                ft.Text(f"Qt Rest: {item[4] - item[5]}", weight="bold"),
                             ]),
                             ft.Divider()
                         ])
@@ -449,7 +453,8 @@ def separar_transferencia_devolucao(e, navigate_to, header):
         else:
             print("Nenhuma divergência encontrada, finalizando...")
             print(f"dados resumo : {dados_resumo}")
-            # envio_resumo(dados_resumo, e.page, navigate_to)
+            print(f"resumo separado: {itens_sucesso}")
+            envio_resumo(dados_resumo, e.page, navigate_to, itens_sucesso)
             # Prossegue com a finalização normalmente
 
 
