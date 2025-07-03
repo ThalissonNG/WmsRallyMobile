@@ -18,7 +18,7 @@ from routes.osAvulsa import os_avulsa
 from routes.osAvulsaSaida import os_avulsa_saida
 from routes.osAvulsaEntrada import os_avulsa_entrada
 from routes.separarPedidoDist import separar_pedido_dist
-from routes.conferirBonus import conferir_bonus
+from routes.buscarBonus import buscar_bonus
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -88,8 +88,8 @@ def main(page: ft.Page):
             page.views.append(os_avulsa_entrada(page, navigate_to, create_header()))
         elif route == "/separar_pedido_dist":
             page.views.append(separar_pedido_dist(page, navigate_to, create_header()))
-        elif route == "/conferir_bonus":
-            page.views.append(conferir_bonus(page, navigate_to, create_header()))
+        elif route == "/buscar_bonus":
+            page.views.append(buscar_bonus(page, navigate_to, create_header()))
 
         page.update()
 
