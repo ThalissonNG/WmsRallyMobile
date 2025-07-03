@@ -89,7 +89,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                 ft.ElevatedButton(
                                     "Conferir Bonus",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/conferir_bonus")
+                                    on_click=lambda e: navigate_to("/buscar_bonus")
                                 ),
                             ],
                             spacing=10,
