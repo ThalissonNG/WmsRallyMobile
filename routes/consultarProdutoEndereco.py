@@ -9,8 +9,32 @@ def consultar_produto_endereco(navigate_to, header):
 
     lista_produtos_col = ft.Column(scroll=ft.ScrollMode.AUTO)
 
+    def snackbar(mensagem, bgcolor, e):
+        snack = ft.SnackBar(
+            content=ft.Text(
+                mensagem,
+                color="white"
+            ),
+            bgcolor=bgcolor)
+        e.page.open(snack)
+
+    def criar_container_total(row):
+        codprod, codfab, qt, descricao, modulo, rua, edificio, nivel, apto, tipoendereco, total = row
+
+        return ft.Container(
+            padding=10,
+            expand=True,
+            content=ft.Column(
+                controls=[
+                    ft.Text("TOTAL", weight="BOLD"),
+                    ft.Text(str(total)),
+                ]
+            ),
+            border=ft.border.all(1, colorVariaveis['bordarInput']),
+        )
+
     def criar_container_produto(row):
-        codprod, codfab, qt, descricao, modulo, rua, edificio, nivel, apto, tipoendereco = row
+        codprod, codfab, descricao = row
 
         return ft.Container(
             padding=10,
@@ -32,12 +56,6 @@ def consultar_produto_endereco(navigate_to, header):
                                     ft.Text(str(codfab)),
                                 ]
                             ),
-                            ft.Column(
-                                controls=[
-                                    ft.Text("QT", weight="BOLD"),
-                                    ft.Text(str(qt)),
-                                ]
-                            ),
                         ],
                     ),
                     ft.Divider(),
@@ -53,10 +71,28 @@ def consultar_produto_endereco(navigate_to, header):
                         ],
                     ),
                     ft.Divider(),
+                ]
+            ),
+            border=ft.border.all(1, colorVariaveis['bordarInput']),
+        )
+    
+    def criar_container_produto_filial(row):
+        codprod, codfab, qt, descricao, modulo, rua, edificio, nivel, apto, tipoendereco, total = row
+
+        return ft.Container(
+            padding=10,
+            content=ft.Column(
+                controls=[
                     ft.Row(
                         expand=True,
                         alignment=ft.MainAxisAlignment.SPACE_AROUND,
                         controls=[
+                            ft.Column(
+                                controls=[
+                                    ft.Text("QT", weight="BOLD"),
+                                    ft.Text(str(qt)),
+                                ]
+                            ),
                             ft.Column(
                                 controls=[
                                     ft.Text("MOD", weight="BOLD"),
@@ -75,6 +111,13 @@ def consultar_produto_endereco(navigate_to, header):
                                     ft.Text(str(edificio)),
                                 ]
                             ),
+                        ],
+                    ),
+                    ft.Divider(),
+                    ft.Row(
+                        expand=True,
+                        alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                        controls=[
                             ft.Column(
                                 controls=[
                                     ft.Text("NIV", weight="BOLD"),
@@ -93,8 +136,8 @@ def consultar_produto_endereco(navigate_to, header):
                                     ft.Text(str(tipoendereco)),
                                 ]
                             ),
-                        ],
-                    ),
+                        ]
+                    )
                 ]
             ),
             border=ft.border.all(1, colorVariaveis['bordarInput']),
@@ -110,16 +153,33 @@ def consultar_produto_endereco(navigate_to, header):
             if response.status_code == 200:
                 dados = response.json()
                 dados_produto = dados.get("dados_produto", [])
+                dados_produto_filial = dados.get("dados_produto_filial", [])
 
-                print("Recebido do backend:", dados_produto)
+                print("Dados do produto na filial:", dados_produto_filial)
+                print("Dados do produto", dados_produto)
 
                 lista_produtos_col.controls.clear()
+
+                if dados_produto_filial:
+                    linha1 = dados_produto_filial[0]
+                    print(f"Linha 1{linha1}")
+                    container_total = criar_container_total(linha1)
+                    lista_produtos_col.controls.append(container_total)
 
                 for row in dados_produto:
                     container_prod = criar_container_produto(row)
                     lista_produtos_col.controls.append(container_prod)
 
+                for row in dados_produto_filial:
+                    container_prod = criar_container_produto_filial(row)
+                    lista_produtos_col.controls.append(container_prod)
+
                 e.page.update()
+
+            elif response.status_code == 400:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                snackbar(mensagem, colorVariaveis['erro'], e)
 
             else:
                 print("Erro no backend:", response.status_code, response.text)
@@ -189,7 +249,7 @@ def consultar_produto_endereco(navigate_to, header):
                 dados = response.json()
                 dados_endereco = dados.get("dados_endereco", [])
 
-                print("Recebido do backend (endereços):", dados_endereco)
+                # print("Recebido do backend (endereços):", dados_endereco)
 
                 # Preenche com containers de endereço
                 for row in dados_endereco:
@@ -197,6 +257,10 @@ def consultar_produto_endereco(navigate_to, header):
                     lista_produtos_col.controls.append(container_end)
 
                 e.page.update()
+            elif response.status_code == 400:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                snackbar(mensagem, colorVariaveis['erro'], e)
             else:
                 print("Erro no backend (endereco):", response.status_code, response.text)
         except Exception as exc:
@@ -266,6 +330,10 @@ def consultar_produto_endereco(navigate_to, header):
             header,
             title,
             tabs,
-            lista_produtos_col,
+            ft.Container(
+                
+                content=lista_produtos_col,
+                expand=True,
+            ),
         ],
     )
