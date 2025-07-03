@@ -33,8 +33,10 @@ def buscar_bonus(page: ft.Page, navigate_to, header):
         print(mensagem)
         if response.status_code == 200:
             snackbar(mensagem, colorVariaveis['sucesso'], page)
+            navigate_to("/conferir_bonus")
         elif response.status_code == 201:
             snackbar(mensagem, colorVariaveis['restante'], page)
+            navigate_to("/conferir_bonus")
         elif response.status_code == 400:
             snackbar(mensagem, colorVariaveis['erro'], page)
 
