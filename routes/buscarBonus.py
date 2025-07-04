@@ -32,9 +32,13 @@ def buscar_bonus(page: ft.Page, navigate_to, header):
         mensagem = resposta.get("message")
         print(mensagem)
         if response.status_code == 200:
+            numbonus = resposta.get("numbonus")
+            print(numbonus)
             snackbar(mensagem, colorVariaveis['sucesso'], page)
             navigate_to("/conferir_bonus")
         elif response.status_code == 201:
+            numbonus = resposta.get("numbonus")
+            print(numbonus)
             snackbar(mensagem, colorVariaveis['restante'], page)
             navigate_to("/conferir_bonus")
         elif response.status_code == 400:

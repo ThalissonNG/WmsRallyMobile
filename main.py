@@ -51,7 +51,7 @@ def main(page: ft.Page):
         )
 
     # Função de navegação entre rotas
-    def navigate_to(route, arguments=None):
+    def navigate_to(route, arguments=None, numbonus=None):
         page.views.clear()
         if route == "/login":
             page.views.append(create_login_view())
