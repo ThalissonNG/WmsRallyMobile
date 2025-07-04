@@ -17,6 +17,10 @@ def buscar_bonus(page: ft.Page, navigate_to, header):
         page.open(snack)
 
     def consultar_bonus(numbonus, codfilial, matricula):
+        if not numbonus:
+            snackbar("Digite o numero do bonus", colorVariaveis['erro'], page)
+            return
+        
         response = requests.post(
             base_url + "/buscar_bonus",
             json={
