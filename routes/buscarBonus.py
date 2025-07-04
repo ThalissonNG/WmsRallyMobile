@@ -39,12 +39,16 @@ def buscar_bonus(page: ft.Page, navigate_to, header):
             numbonus = resposta.get("numbonus")
             print(numbonus)
             snackbar(mensagem, colorVariaveis['sucesso'], page)
-            navigate_to("/conferir_bonus")
+            navigate_to("/conferir_bonus", arguments={
+                "numbonus": numbonus
+            })
         elif response.status_code == 201:
             numbonus = resposta.get("numbonus")
             print(numbonus)
             snackbar(mensagem, colorVariaveis['restante'], page)
-            navigate_to("/conferir_bonus")
+            # navigate_to("/conferir_bonus", arguments={
+            #     "numbonus": numbonus
+            # })
         elif response.status_code == 400:
             snackbar(mensagem, colorVariaveis['erro'], page)
 

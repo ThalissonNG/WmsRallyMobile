@@ -92,7 +92,7 @@ def main(page: ft.Page):
         elif route == "/buscar_bonus":
             page.views.append(buscar_bonus(page, navigate_to, create_header()))
         elif route == "/conferir_bonus":
-            page.views.append(conferir_bonus(page, navigate_to, create_header()))
+            page.views.append(conferir_bonus(page, navigate_to, create_header(), arguments))
 
         page.update()
 
