@@ -44,7 +44,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
     itens_bonus = dados_bonus[0]
     itens_bonus_etiqueta = dados_bonus[1]
 
-    print(f"Itens: {itens_bonus} - Itens Etiqueta: {itens_bonus_etiqueta}")
+    # print(f"Itens: {itens_bonus} - Itens Etiqueta: {itens_bonus_etiqueta}")
 
     def construir_itens(item):
         return ft.Container(
@@ -168,6 +168,30 @@ def conferir_bonus(page, navigate_to, header, arguments):
             )
         )
 
+    def ValidarEtiqueta(codetiqueta, page):
+        if not codetiqueta:
+            snackbar("Etiqueta inválida!", colorVariaveis['erro'], page)
+            return
+
+        try:
+            response = requests.post(
+                f"{base_url}/conferir_bonus",
+                json={
+                    "codetiqueta": codetiqueta,
+                    "action": "validar_etiqueta",
+                },
+            )
+            if response.status_code == 200:
+                resposta = response.json()
+                dialogo_codbarra()
+            else:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                print(mensagem)
+                snackbar(mensagem, colorVariaveis['erro'], page)
+        except Exception as exc:
+            print("Erro na requisição (validarEtiqueta):", exc)
+
     def dialogo_codbarra():
         campo_codbarra = ft.TextField(
             label="Código de Barras"
@@ -179,6 +203,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
             actions=[
                 ft.TextButton(
                     "Cancelar",
+                    on_click=lambda _: page.close(dialog_codbarra),
                 ),
                 ft.TextButton(
                     "Confirmar",
@@ -206,25 +231,6 @@ def conferir_bonus(page, navigate_to, header, arguments):
         ],
     )
 
-    def ValidarEtiqueta(codetiqueta, page):
-        try:
-            response = requests.post(
-                f"{base_url}/conferir_bonus",
-                json={"codetiqueta": codetiqueta},
-            )
-            if response.status_code == 200:
-                resposta = response.json()
-                mensagem = resposta.get("message")
-                print(mensagem)
-                snackbar(mensagem, colorVariaveis['sucesso'], page)
-            elif response.status_code == 201:
-                resposta = response.json()
-                mensagem = resposta.get("message")
-                print(mensagem)
-                snackbar(mensagem, colorVariaveis['restante'], page)
-        except Exception as exc:
-            print("Erro na requisição (validarEtiqueta):", exc)
-
     titulo = ft.Text(
         "Conferir Bonus",
         size=24, weight="bold",
@@ -245,7 +251,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
     )
     btnValidarEtiqueta = ft.ElevatedButton(
         text="Validar Etiqueta",
-        on_click=lambda e: dialogo_codbarra()
+        on_click=lambda e: ValidarEtiqueta(inputEtiqueta.value, page)
     )
 
     tabConferir = ft.Container(
