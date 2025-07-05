@@ -6,27 +6,9 @@ def conferir_bonus(page, navigate_to, header, arguments):
     matricula = user_info.get("matricula")
     codfilial = user_info.get("codfilial")
     numbonus = arguments.get("numbonus", "N/A")
+
+    dados_bonus = []
     print(f"Tela de conferir bonusMatricula: {matricula} - Codfilial: {codfilial} - Numbonus: {numbonus}")
-
-    
-    try:
-        response = requests.post(
-            f"{base_url}/conferir_bonus",
-            json={"numbonus": numbonus},
-        )
-
-        if response.status_code == 200:
-            resposta = response.json()
-            itens_bonus = resposta.get("itens_bonus")
-            itens_bonus_etiqueta = resposta.get("itens_bonus_etiqueta")
-        else:
-            resposta = response.json()
-            mensagem = resposta.get("message")
-            snackbar(mensagem, colorVariaveis['erro'], page)
-    except Exception as exc:
-        print("Erro na requisição (buscarItens):", exc)
-
-    print(f"Itens: {itens_bonus} - Itens Etiqueta: {itens_bonus_etiqueta}")
 
     def snackbar(mensagem, bgcolor, page):
         snack = ft.SnackBar(
@@ -36,6 +18,84 @@ def conferir_bonus(page, navigate_to, header, arguments):
             ),
             bgcolor=bgcolor)
         page.open(snack)
+
+    def buscar_dados_bonus(numbonus):
+        try:
+            response = requests.post(
+                f"{base_url}/conferir_bonus",
+                json={"numbonus": numbonus},
+            )
+
+            if response.status_code == 200:
+                resposta = response.json()
+                itens_bonus = resposta.get("itens_bonus")
+                itens_bonus_etiqueta = resposta.get("itens_bonus_etiqueta")
+                dados_bonus.append(itens_bonus)
+                dados_bonus.append(itens_bonus_etiqueta)
+                return dados_bonus
+            else:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                snackbar(mensagem, colorVariaveis['erro'], page)
+        except Exception as exc:
+            print("Erro na requisição (buscarItens):", exc)
+
+    dados_bonus = buscar_dados_bonus(numbonus)
+    itens_bonus = dados_bonus[0]
+    itens_bonus_etiqueta = dados_bonus[1]
+
+    print(f"Itens: {itens_bonus} - Itens Etiqueta: {itens_bonus_etiqueta}")
+
+    def construir_itens(item):
+        return ft.Container(
+            padding=10,
+            expand=True,
+            content=ft.Column(
+                expand=True,
+                horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+                controls=[
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        controls=[
+                            ft.Column(
+                                controls=[
+                                    ft.Text("codprod", weight="bold"),
+                                    ft.Text(str(item[2])),
+                                ]
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("codfab", weight="bold"),
+                                    ft.Text(str(item[3])),
+                                ]
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("qt", weight="bold"),
+                                    ft.Text(str(item[5])),
+                                ]
+                            ),
+                        ]
+                    ),
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        controls=[
+                            ft.Column(
+                                expand=True,
+                                controls=[
+                                    ft.Text("descricao", weight="bold"),
+                                    ft.Text(
+                                        str(item[4]),
+                                        no_wrap=False,
+                                    ),
+                                ]
+                            ),
+                        ]
+                    ),
+                    ft.Divider()
+                ]
+            )
+        )
 
     def construir_resumo(item):
     # desenha apenas um bloco para um único item
@@ -108,7 +168,34 @@ def conferir_bonus(page, navigate_to, header, arguments):
             )
         )
 
-    # …e então, no lugar de um único `tabItens`, faça:
+    def dialogo_codbarra():
+        campo_codbarra = ft.TextField(
+            label="Código de Barras"
+        )
+
+        dialog_codbarra = ft.AlertDialog(
+            title=ft.Text("Inserir Código de Barras"),
+            content=campo_codbarra,
+            actions=[
+                ft.TextButton(
+                    "Cancelar",
+                ),
+                ft.TextButton(
+                    "Confirmar",
+                ),
+            ]
+        )
+        page.open(dialog_codbarra)
+        page.update()
+
+    tabItens = ft.Column(
+        expand=True,
+        scroll=ft.ScrollMode.AUTO,
+        controls=[
+            # para cada item em itens_bonus, gera um Container via construir_itens()
+            *[construir_itens(item) for item in itens_bonus]
+        ],
+    )
 
     tabResumo = ft.Column(
         expand=True,
@@ -118,7 +205,6 @@ def conferir_bonus(page, navigate_to, header, arguments):
             *[construir_resumo(item) for item in itens_bonus_etiqueta]
         ],
     )
-
 
     def ValidarEtiqueta(codetiqueta, page):
         try:
@@ -138,7 +224,6 @@ def conferir_bonus(page, navigate_to, header, arguments):
                 snackbar(mensagem, colorVariaveis['restante'], page)
         except Exception as exc:
             print("Erro na requisição (validarEtiqueta):", exc)
-
 
     titulo = ft.Text(
         "Conferir Bonus",
@@ -160,7 +245,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
     )
     btnValidarEtiqueta = ft.ElevatedButton(
         text="Validar Etiqueta",
-        on_click=lambda e: print(f"Etiqueta: {inputEtiqueta.value}")
+        on_click=lambda e: dialogo_codbarra()
     )
 
     tabConferir = ft.Container(
@@ -172,125 +257,6 @@ def conferir_bonus(page, navigate_to, header, arguments):
             ]
         )
     )
-
-    tabItens = ft.Container(
-        padding=10,
-        expand=True,
-        content=ft.Column(
-            expand=True,
-            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
-            controls=[
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    controls=[
-                        ft.Column(
-                            controls=[
-                                ft.Text("codprod", weight="bold"),
-                                ft.Text(1200),
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("codfab", weight="bold"),
-                                ft.Text(1200),
-                            ]
-                        ),
-                        ft.Column(
-                            controls=[
-                                ft.Text("qt", weight="bold"),
-                                ft.Text(1200),
-                            ]
-                        ),
-                    ]
-                ),
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    controls=[
-                        ft.Column(
-                            expand=True,
-                            controls=[
-                                ft.Text("descricao", weight="bold"),
-                                ft.Text(
-                                    "CAMARA AR DIAN/TRASEIRA CG/TITAN/YBR SA -18 3.00 X 18 - LEVORIN",
-                                    no_wrap=False,
-                                ),
-                            ]
-                        ),
-                    ]
-                ),
-                ft.Divider()
-            ]
-        )
-    )
-    
-    # tabResumo = ft.Container(
-    #     padding=10,
-    #     expand=True,
-    #     content=ft.Column(
-    #         expand=True,
-    #         horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
-    #         controls=[
-    #             ft.Row(
-    #                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-    #                 controls=[
-    #                     ft.Column(
-    #                         controls=[
-    #                             ft.Text("codprod", weight="bold"),
-    #                             ft.Text(1200),
-    #                         ]
-    #                     ),
-    #                     ft.Column(
-    #                         controls=[
-    #                             ft.Text("codfab", weight="bold"),
-    #                             ft.Text(1200),
-    #                         ]
-    #                     ),
-    #                 ]
-    #             ),
-    #             ft.Row(
-    #                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-    #                 controls=[
-    #                     ft.Column(
-    #                         expand=True,
-    #                         controls=[
-    #                             ft.Text("descricao", weight="bold"),
-    #                             ft.Text(
-    #                                 "CAMARA AR DIAN/TRASEIRA CG/TITAN/YBR SA -18 3.00 X 18 - LEVORIN",
-    #                                 no_wrap=False,
-    #                             ),
-    #                         ]
-    #                     ),
-    #                 ]
-    #             ),
-    #             ft.Row(
-    #                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-    #                 controls=[
-    #                     ft.Column(
-    #                         controls=[
-    #                             ft.Text("etiqueta", weight="bold"),
-    #                             ft.Text(8080),
-    #                         ]
-    #                     ),
-    #                     ft.Column(
-    #                         controls=[
-    #                             ft.Text("Qt", weight="bold"),
-    #                             ft.Text(60),
-    #                         ]
-    #                     ),
-    #                     ft.Column(
-    #                         controls=[
-    #                             ft.IconButton(
-    #                                 icon=ft.Icons.EDIT,
-    #                                 padding=10
-    #                             )
-    #                         ]
-    #                     ),
-    #                 ]
-    #             ),
-    #             ft.Divider()
-    #         ]
-    #     )
-    # )
 
     tabFinalizar = ft.Container(
         padding=10,
