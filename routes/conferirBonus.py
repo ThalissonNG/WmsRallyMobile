@@ -7,8 +7,11 @@ def conferir_bonus(page, navigate_to, header, arguments):
     codfilial = user_info.get("codfilial")
     numbonus = arguments.get("numbonus", "N/A")
 
-    dados_bonus = []
+    # dados_bonus = []
     print(f"Tela de conferir bonusMatricula: {matricula} - Codfilial: {codfilial} - Numbonus: {numbonus}")
+
+    tab_itens_container = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[])
+    tab_resumo_container = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[])
 
     def snackbar(mensagem, bgcolor, page):
         snack = ft.SnackBar(
@@ -23,16 +26,17 @@ def conferir_bonus(page, navigate_to, header, arguments):
         try:
             response = requests.post(
                 f"{base_url}/conferir_bonus",
-                json={"numbonus": numbonus},
+                json={
+                    "numbonus": numbonus,
+                    "action": "buscar_itens"
+                },
             )
 
             if response.status_code == 200:
                 resposta = response.json()
                 itens_bonus = resposta.get("itens_bonus")
                 itens_bonus_etiqueta = resposta.get("itens_bonus_etiqueta")
-                dados_bonus.append(itens_bonus)
-                dados_bonus.append(itens_bonus_etiqueta)
-                return dados_bonus
+                return itens_bonus, itens_bonus_etiqueta
             else:
                 resposta = response.json()
                 mensagem = resposta.get("message")
@@ -40,11 +44,17 @@ def conferir_bonus(page, navigate_to, header, arguments):
         except Exception as exc:
             print("Erro na requisição (buscarItens):", exc)
 
-    dados_bonus = buscar_dados_bonus(numbonus)
-    itens_bonus = dados_bonus[0]
-    itens_bonus_etiqueta = dados_bonus[1]
-
-    # print(f"Itens: {itens_bonus} - Itens Etiqueta: {itens_bonus_etiqueta}")
+    def atualizar_tabs():
+        print("Atualizando tabs")
+        itens, resumo = buscar_dados_bonus(numbonus)
+        # print(f"resumo: {resumo}")
+        # Atualiza aba Itens
+        tab_itens_container.controls.clear()
+        tab_itens_container.controls = [construir_itens(item) for item in itens]
+        # Atualiza aba Resumo
+        tab_resumo_container.controls.clear()
+        tab_resumo_container.controls = [construir_resumo(item) for item in resumo]
+        page.update()
 
     def construir_itens(item):
         return ft.Container(
@@ -218,7 +228,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
         except Exception as exc:
             print("Erro na requisição (validarCodbarra):", exc)
 
-    def ValidarQuantidade(codprod, codetiqueta, numobnus, codbarra,  qt, page):
+    def ValidarQuantidade(codprod, codetiqueta, numbonus, codbarra,  qt, page):
         if not qt:
             snackbar("Quantidade inválida!", colorVariaveis['erro'], page)
             return
@@ -229,7 +239,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
                 json={
                     "codprod": codprod,
                     "qt": qt,
-                    "numbonus": numobnus,
+                    "numbonus": numbonus,
                     "codetiqueta": codetiqueta,
                     "codbarra": codbarra,
                     "action": "validar_quantidade",
@@ -237,6 +247,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
             )
             if response.status_code == 200:
                 resposta = response.json()
+                atualizar_tabs()
                 # guardar_produto(page, codetiqueta, qt)
             else:
                 resposta = response.json()
@@ -304,7 +315,8 @@ def conferir_bonus(page, navigate_to, header, arguments):
                         ),
                         page.close(dialog_produto),
                         setattr(inputEtiqueta, "value", ""),
-                        page.update()
+                        page.update(),
+                        # atualizar_tabs()
                     )
                 ),
             ]
@@ -312,23 +324,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
         page.open(dialog_produto)
         page.update()
 
-    tabItens = ft.Column(
-        expand=True,
-        scroll=ft.ScrollMode.AUTO,
-        controls=[
-            # para cada item em itens_bonus, gera um Container via construir_itens()
-            *[construir_itens(item) for item in itens_bonus]
-        ],
-    )
-
-    tabResumo = ft.Column(
-        expand=True,
-        scroll=ft.ScrollMode.AUTO,
-        controls=[
-            # para cada item em itens_bonus, gera um Container via construir_resumo()
-            *[construir_resumo(item) for item in itens_bonus_etiqueta]
-        ],
-    )
+    atualizar_tabs()
 
     titulo = ft.Text(
         "Conferir Bonus",
@@ -382,8 +378,8 @@ def conferir_bonus(page, navigate_to, header, arguments):
         selected_index=0,
         tabs=[
             ft.Tab(text="Conferir", content=tabConferir),
-            ft.Tab(text="Itens", content=tabItens),
-            ft.Tab(text="Resumo", content=tabResumo,),
+            ft.Tab(text="Itens", content=tab_itens_container,),
+            ft.Tab(text="Resumo", content=tab_resumo_container,),
             ft.Tab(text="Finalizar", content=tabFinalizar),
         ]
     )
