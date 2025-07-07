@@ -57,7 +57,20 @@ def conferir_bonus(page, navigate_to, header, arguments):
         page.update()
 
     def construir_itens(item):
+        if item[6] == 0:
+            corfundo = None
+            cortexto = None
+        elif item[6] ==item[5]:
+            corfundo = colorVariaveis['sucesso']
+            cortexto = ft.Colors.BLACK
+        elif item[6] < item[5]:
+            corfundo = colorVariaveis['restante']
+            cortexto = ft.Colors.BLACK
+        elif item[6] > item[5]:
+            corfundo = colorVariaveis['erro']
+            cortexto = ft.Colors.WHITE
         return ft.Container(
+            bgcolor=corfundo,
             padding=10,
             expand=True,
             content=ft.Column(
@@ -69,20 +82,20 @@ def conferir_bonus(page, navigate_to, header, arguments):
                         controls=[
                             ft.Column(
                                 controls=[
-                                    ft.Text("codprod", weight="bold"),
-                                    ft.Text(str(item[2])),
+                                    ft.Text("codprod", weight="bold", color=cortexto),
+                                    ft.Text(str(item[2]), color=cortexto),
                                 ]
                             ),
                             ft.Column(
                                 controls=[
-                                    ft.Text("codfab", weight="bold"),
-                                    ft.Text(str(item[3])),
+                                    ft.Text("codfab", weight="bold", color=cortexto),
+                                    ft.Text(str(item[3]), color=cortexto),
                                 ]
                             ),
                             ft.Column(
                                 controls=[
-                                    ft.Text("qt", weight="bold"),
-                                    ft.Text(str(item[5])),
+                                    ft.Text("qt", weight="bold", color=cortexto),
+                                    ft.Text(str(item[5]), color=cortexto),
                                 ]
                             ),
                         ]
@@ -93,10 +106,11 @@ def conferir_bonus(page, navigate_to, header, arguments):
                             ft.Column(
                                 expand=True,
                                 controls=[
-                                    ft.Text("descricao", weight="bold"),
+                                    ft.Text("descricao", weight="bold", color=cortexto),
                                     ft.Text(
                                         str(item[4]),
                                         no_wrap=False,
+                                        color=cortexto
                                     ),
                                 ]
                             ),
@@ -109,15 +123,12 @@ def conferir_bonus(page, navigate_to, header, arguments):
 
     def construir_resumo(item):
         if item[5] ==item[4]:
-            print("Atintigiu a quantidade")
             corfundo = colorVariaveis['sucesso']
             cortexto = ft.Colors.BLACK
         elif item[5] < item[4]:
-            print("Quantidade menor")
             corfundo = colorVariaveis['restante']
             cortexto = ft.Colors.BLACK
         elif item[5] > item[4]:
-            print("Quantidade maior")
             corfundo = colorVariaveis['erro']
             cortexto = ft.Colors.WHITE
         else:
