@@ -108,8 +108,24 @@ def conferir_bonus(page, navigate_to, header, arguments):
         )
 
     def construir_resumo(item):
+        if item[5] ==item[4]:
+            print("Atintigiu a quantidade")
+            corfundo = colorVariaveis['sucesso']
+            cortexto = ft.Colors.BLACK
+        elif item[5] < item[4]:
+            print("Quantidade menor")
+            corfundo = colorVariaveis['restante']
+            cortexto = ft.Colors.BLACK
+        elif item[5] > item[4]:
+            print("Quantidade maior")
+            corfundo = colorVariaveis['erro']
+            cortexto = ft.Colors.WHITE
+        else:
+            corfundo = ft.Colors.WHITE
+            cortexto = ft.Colors.BLACK
     # desenha apenas um bloco para um único item
         return ft.Container(
+            bgcolor=corfundo,
             padding=10,
             expand=True,
             content=ft.Column(
@@ -121,14 +137,14 @@ def conferir_bonus(page, navigate_to, header, arguments):
                         controls=[
                             ft.Column(
                                 controls=[
-                                    ft.Text("codprod", weight="bold"),
-                                    ft.Text(str(item[0])),
+                                    ft.Text("codprod", weight="bold", color=cortexto),
+                                    ft.Text(str(item[0]), color=cortexto),
                                 ]
                             ),
                             ft.Column(
                                 controls=[
-                                    ft.Text("codfab", weight="bold"),
-                                    ft.Text(str(item[1])),
+                                    ft.Text("codfab", weight="bold", color=cortexto),
+                                    ft.Text(str(item[1]), color=cortexto),
                                 ]
                             ),
                         ]
@@ -139,10 +155,11 @@ def conferir_bonus(page, navigate_to, header, arguments):
                             ft.Column(
                                 expand=True,
                                 controls=[
-                                    ft.Text("descrição", weight="bold"),
+                                    ft.Text("descrição", weight="bold", color=cortexto),
                                     ft.Text(
                                         item[2],
                                         no_wrap=False,
+                                        color=cortexto
                                     ),
                                 ]
                             ),
@@ -153,21 +170,22 @@ def conferir_bonus(page, navigate_to, header, arguments):
                         controls=[
                             ft.Column(
                                 controls=[
-                                    ft.Text("Etiqueta", weight="bold"),
-                                    ft.Text(str(item[6])),
+                                    ft.Text("Etiqueta", weight="bold", color=cortexto),
+                                    ft.Text(str(item[6]), color=cortexto),
                                 ]
                             ),
                             ft.Column(
                                 controls=[
-                                    ft.Text("Qt", weight="bold"),
-                                    ft.Text(str(item[3])),
+                                    ft.Text("Qt", weight="bold", color=cortexto),
+                                    ft.Text(str(item[3]), color=cortexto),
                                 ]
                             ),
                             ft.Column(
                                 controls=[
                                     ft.IconButton(
                                         icon=ft.Icons.EDIT,
-                                        padding=10
+                                        padding=10,
+                                        icon_color=cortexto,
                                     )
                                 ]
                             ),
