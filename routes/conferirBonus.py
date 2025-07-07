@@ -183,7 +183,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
             )
             if response.status_code == 200:
                 resposta = response.json()
-                dialogo_codbarra()
+                dialogo_codbarra(page, codetiqueta)
             else:
                 resposta = response.json()
                 mensagem = resposta.get("message")
@@ -192,7 +192,61 @@ def conferir_bonus(page, navigate_to, header, arguments):
         except Exception as exc:
             print("Erro na requisição (validarEtiqueta):", exc)
 
-    def dialogo_codbarra():
+    def ValidarCodbarra(codbarra, codetiqueta, page):
+        if not codbarra:
+            snackbar("Código de Barras inválido!", colorVariaveis['erro'], page)
+            return
+        
+        try:
+            response = requests.post(
+                f"{base_url}/conferir_bonus",
+                json={
+                    "codbarra": codbarra,
+                    "action": "validar_codbarra",
+                }
+            )
+            if response.status_code == 200:
+                resposta = response.json()
+                dados_codbarra = resposta.get("dados_codbarra")
+                print(dados_codbarra)
+                dialogo_produto(page, codetiqueta, dados_codbarra)
+            else:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                print(mensagem)
+                snackbar(mensagem, colorVariaveis['erro'], page)
+        except Exception as exc:
+            print("Erro na requisição (validarCodbarra):", exc)
+
+    def ValidarQuantidade(codprod, codetiqueta, numobnus, codbarra,  qt, page):
+        if not qt:
+            snackbar("Quantidade inválida!", colorVariaveis['erro'], page)
+            return
+
+        try:
+            response = requests.post(
+                f"{base_url}/conferir_bonus",
+                json={
+                    "codprod": codprod,
+                    "qt": qt,
+                    "numbonus": numobnus,
+                    "codetiqueta": codetiqueta,
+                    "codbarra": codbarra,
+                    "action": "validar_quantidade",
+                }
+            )
+            if response.status_code == 200:
+                resposta = response.json()
+                # guardar_produto(page, codetiqueta, qt)
+            else:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                print(mensagem)
+                snackbar(mensagem, colorVariaveis['erro'], page)
+        except Exception as exc:
+            print("Erro na requisição (validarQuantidade):", exc)
+
+    def dialogo_codbarra(page, codetiqueta):
         campo_codbarra = ft.TextField(
             label="Código de Barras"
         )
@@ -207,10 +261,55 @@ def conferir_bonus(page, navigate_to, header, arguments):
                 ),
                 ft.TextButton(
                     "Confirmar",
+                    on_click=lambda _: ValidarCodbarra(campo_codbarra.value, codetiqueta, page),
                 ),
             ]
         )
         page.open(dialog_codbarra)
+        page.update()
+
+    def dialogo_produto(page, codetiqueta, dados_codbarra):
+        campo_qt = ft.TextField(
+            label="Quantidade"
+        )
+        dialog_produto = ft.AlertDialog(
+            title=ft.Text("Inserir Produto"),
+            content=ft.Column(
+                controls=[
+                    ft.Text(f"Etiqueta: {codetiqueta}", weight="bold"),
+                    ft.Text(f"NUmbonus: {numbonus}", weight="bold"),
+                    ft.Text(f"Codprod: {dados_codbarra[0][0]}"),
+                    ft.Text(f"Codfab: {dados_codbarra[0][2]}"),
+                    ft.Text(f"Descrição: {dados_codbarra[0][1]}"),
+                    campo_qt,
+                ],
+                tight=True,
+                scroll=ft.ScrollMode.AUTO
+            ),
+            actions=[
+                ft.TextButton(
+                    "Cancelar",
+                    on_click=lambda _: page.close(dialog_produto),
+                ),
+                ft.TextButton(
+                    "Confirmar",
+                    on_click=lambda e: (
+                        ValidarQuantidade(
+                            dados_codbarra[0][0],
+                            codetiqueta,
+                            numbonus,
+                            dados_codbarra[0][3],
+                            campo_qt.value,
+                            page
+                        ),
+                        page.close(dialog_produto),
+                        setattr(inputEtiqueta, "value", ""),
+                        page.update()
+                    )
+                ),
+            ]
+        )
+        page.open(dialog_produto)
         page.update()
 
     tabItens = ft.Column(
