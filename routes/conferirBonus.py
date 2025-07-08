@@ -160,6 +160,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
                     ft.TextButton("Cancelar", on_click=lambda _: page.close(dialog_editar_qt)),
                     ft.TextButton("Salvar", on_click=lambda _: (
                         print("Salvar nova quantidade", campo_editar_qt.value),
+                        AtualizarQuantidade(codprod, codetiqueta, numbonus, campo_editar_qt.value, page),
                         page.close(dialog_editar_qt)
                     ))
                 ]
@@ -319,6 +320,34 @@ def conferir_bonus(page, navigate_to, header, arguments):
                 snackbar(mensagem, colorVariaveis['erro'], page)
         except Exception as exc:
             print("Erro na requisição (validarQuantidade):", exc)
+
+    def AtualizarQuantidade(codprod, codetiqueta, numbonus, qt, page):
+        if not qt:
+            snackbar("Quantidade inválida!", colorVariaveis['erro'], page)
+            return
+
+        try:
+            response = requests.post(
+                f"{base_url}/conferir_bonus",
+                json={
+                    "codprod": codprod,
+                    "qt": qt,
+                    "numbonus": numbonus,
+                    "codetiqueta": codetiqueta,
+                    "action": "editar_quantidade",
+                }
+            )
+            if response.status_code == 200:
+                resposta = response.json()
+                atualizar_tabs()
+                # guardar_produto(page, codetiqueta, qt)
+            else:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                print(mensagem)
+                snackbar(mensagem, colorVariaveis['erro'], page)
+        except Exception as exc:
+            print("Erro na requisição (editarQuantidade):", exc)
 
     def dialogo_codbarra(page, codetiqueta):
         campo_codbarra = ft.TextField(
