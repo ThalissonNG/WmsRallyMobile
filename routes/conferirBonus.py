@@ -416,6 +416,28 @@ def conferir_bonus(page, navigate_to, header, arguments):
         page.open(dialog_produto)
         page.update()
 
+    def finalizar(page, numbonus):
+        try:
+            response = requests.post(
+                f"{base_url}/conferir_bonus",
+                json={
+                    "numbonus": numbonus,
+                    "matricula": matricula,
+                    "action": "finalizar",
+                }
+            )
+            if response.status_code == 200:
+                resposta = response.json()
+                navigate_to("/buscar_bonus")
+                snackbar(resposta.get("message"), colorVariaveis['sucesso'], page)
+            else:
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                print(mensagem)
+                snackbar(mensagem, colorVariaveis['erro'], page)
+        except Exception as exc:
+            print("Erro na requisição (finalizar):", exc)
+
     atualizar_tabs()
 
     titulo = ft.Text(
@@ -457,7 +479,8 @@ def conferir_bonus(page, navigate_to, header, arguments):
             controls=[
                 ft.ElevatedButton(
                     text="Finalizar",
-                    on_click=lambda e: print("Finalizar")
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    on_click=lambda e: finalizar(page, numbonus)
                 )
             ]
         )
