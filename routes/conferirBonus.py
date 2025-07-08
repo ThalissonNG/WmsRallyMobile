@@ -134,6 +134,39 @@ def conferir_bonus(page, navigate_to, header, arguments):
         else:
             corfundo = ft.Colors.WHITE
             cortexto = ft.Colors.BLACK
+    
+        def dialogo_editar(page, codprod, codfab, descricao, numbonus, qt, codetiqueta):
+            print(f"dialogo_editar - Codprod: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Qt: {qt} - Bônus: {numbonus} - Etiqueta: {codetiqueta}")
+            campo_editar_qt = ft.TextField(
+                label="Nova Quantidade",
+                value=str(qt),
+            )
+            dialog_editar_qt = ft.AlertDialog(
+                title=ft.Text("Editar Quantidade"),
+                content=ft.Column(
+                    controls=[
+                        ft.Text(f"Produto: {descricao}", weight="bold"),
+                        ft.Text(f"Codprod: {codprod}"),
+                        ft.Text(f"Codfab: {codfab}"),
+                        ft.Text(f"Etiqueta: {codetiqueta}"),
+                        campo_editar_qt,
+                    ],
+                    expand=True,
+                    height="100%",
+                    tight=True,
+                    scroll=ft.ScrollMode.AUTO
+                ),
+                actions=[
+                    ft.TextButton("Cancelar", on_click=lambda _: page.close(dialog_editar_qt)),
+                    ft.TextButton("Salvar", on_click=lambda _: (
+                        print("Salvar nova quantidade", campo_editar_qt.value),
+                        page.close(dialog_editar_qt)
+                    ))
+                ]
+            )
+            page.open(dialog_editar_qt)
+            page.update()
+
     # desenha apenas um bloco para um único item
         return ft.Container(
             bgcolor=corfundo,
@@ -197,6 +230,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
                                         icon=ft.Icons.EDIT,
                                         padding=10,
                                         icon_color=cortexto,
+                                        on_click=lambda ev: dialogo_editar(page, item[0], item[1], item[2], numbonus, item[3], item[6])
                                     )
                                 ]
                             ),
