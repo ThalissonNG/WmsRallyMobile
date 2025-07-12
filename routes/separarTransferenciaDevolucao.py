@@ -13,7 +13,11 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
     try:
         response = requests.post(
             f"{base_url}/buscar_dados_transferencia_devolucao",
-            json={"matricula": matricula, "codfilial": codfilial}
+            json={
+                "matricula": matricula,
+                "codfilial": codfilial,
+                "numnota": numnota
+            }
         )
         if response.status_code == 200:
             dados = response.json()
@@ -41,7 +45,7 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
         color=colorVariaveis['titulo']
     )
 
-    def envio_resumo(dados_resumo, page, navigate_to, itens_sucesso):
+    def envio_resumo(dados_resumo, page, navigate_to, itens_sucesso, numnota):
         try:
             response = requests.post(
                 f"{base_url}/finalizar_transferencia_devolucao",
@@ -49,7 +53,8 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
                     "dados_resumo": dados_resumo,
                     "matricula": matricula,
                     "codfilial": codfilial,
-                    "itens_sucesso": itens_sucesso
+                    "itens_sucesso": itens_sucesso,
+                    "numnota": numnota
                 }
             )
             dados = response.json()
@@ -437,9 +442,10 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
             # Função para confirmar a finalização mesmo havendo divergências
             def confirmar_finalizacao(e):
                 print("Finalização confirmada, mesmo com divergências.")
-                e.page.dialog.open = False
-                e.page.update()
-                envio_resumo(dados_resumo, e.page, navigate_to)
+                # e.page.dialog.open = False
+                # e.page.update()
+                e.page.close(dialog)
+                envio_resumo(dados_resumo, e.page, navigate_to, itens_sucesso, numnota)
                 # Aqui você pode inserir a lógica final de finalização
             
             # Cria o AlertDialog com os botões de ação
@@ -451,14 +457,15 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
                     ft.TextButton("Cancelar", on_click=lambda e: (setattr(e.page.dialog, "open", False), e.page.update()))
                 ]
             )
-            e.page.dialog = dialog
-            dialog.open = True
-            e.page.update()
+            # e.page.dialog = dialog
+            # dialog.open = True
+            # e.page.update()
+            e.page.open(dialog)
         else:
             print("Nenhuma divergência encontrada, finalizando...")
             print(f"dados resumo : {dados_resumo}")
             print(f"resumo separado: {itens_sucesso}")
-            envio_resumo(dados_resumo, e.page, navigate_to, itens_sucesso)
+            envio_resumo(dados_resumo, e.page, navigate_to, itens_sucesso, numnota)
             # Prossegue com a finalização normalmente
 
 
