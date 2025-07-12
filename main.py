@@ -74,7 +74,7 @@ def main(page: ft.Page):
         elif route == "/buscar_transferencia_devolucao":
             page.views.append(buscar_transferencia_devolucao(page, navigate_to, create_header()))
         elif route == "/separar_transferencia_devolucao":
-            page.views.append(separar_transferencia_devolucao(page, navigate_to, create_header()))
+            page.views.append(separar_transferencia_devolucao(page, navigate_to, create_header(), arguments))
         elif route == "/contagem_inventario":
             page.views.append(contagem_inventario(page, navigate_to, create_header()))
         elif route == "/cadastrar_codbarra":

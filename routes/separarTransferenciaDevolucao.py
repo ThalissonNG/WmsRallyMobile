@@ -2,9 +2,11 @@ import flet as ft
 import requests
 from routes.config.config import base_url, colorVariaveis, user_info
 
-def separar_transferencia_devolucao(e, navigate_to, header):
+def separar_transferencia_devolucao(e, navigate_to, header, arguments):
     matricula = user_info.get('matricula')
     codfilial = user_info.get('codfilial')
+    numnota = arguments.get('numnota')
+    print(matricula, codfilial, numnota)
 
     itens_sucesso = []
     

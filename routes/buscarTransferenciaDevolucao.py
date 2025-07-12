@@ -19,11 +19,26 @@ def buscar_transferencia_devolucao(e, navigate_to, header):
                 }
             )
             if response.status_code == 200:
+                dados = response.json()
+                numnota_separar = dados.get("numnota")
+                print(f"numnota: {numnota_separar}")
                 print("Iniciada separação")
-                navigate_to("/separar_transferencia_devolucao")
+                navigate_to("/separar_transferencia_devolucao",
+                    arguments={
+                        "numnota": numnota
+                    }
+                )
             elif response.status_code == 202:
+                dados = response.json()
+                numnota_separar = dados.get("numnota")
+                print(f"numnota: {numnota_separar}")
+                print("Iniciada separação")
                 print("Separação em andamento")
-                navigate_to("/separar_transferencia_devolucao")
+                navigate_to("/separar_transferencia_devolucao",
+                    arguments={
+                        "numnota": numnota
+                    }
+                )
             elif response.status_code == 404:
                 print("Não tem pedido")
         except Exception as exc:
