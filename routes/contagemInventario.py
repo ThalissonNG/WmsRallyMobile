@@ -98,8 +98,6 @@ def contagem_inventario(e, navigate_to, header):
             else:
                 e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao atualizar quantidade"), bgcolor=colorVariaveis['erro'])
                 e.page.snack_bar.open = True
-            # e.page.dialog.open = False
-            # e.page.update()
     
         dialog_edicao = ft.AlertDialog(
             title=ft.Text("Editar Quantidade"),
@@ -110,9 +108,6 @@ def contagem_inventario(e, navigate_to, header):
             ]),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_edicao(e))]
         )
-        # e.page.dialog = dialog_edicao
-        # dialog_edicao.open = True
-        # e.page.update()
         e.page.open(dialog_edicao)
     def mostrar_campos_endereco(e, dados_os):
         conteudo_dinamico.controls.clear()
@@ -135,7 +130,6 @@ def contagem_inventario(e, navigate_to, header):
                     controls=[
                         ft.Text(f"Nº Inventário: {dados_os[0][0]}"),
                         ft.Text(f"Nº OS: {dados_os[0][1]}"),
-                        # ft.Text(f"Endereço: {dados_os[0][2]}"),
                         ft.Text(f"MOD: {dados_os[0][3]}, RUA: {dados_os[0][4]}, EDI: {dados_os[0][5]}, NIV: {dados_os[0][6]}, APT: {dados_os[0][7]}"),
                         campo_endereco,
                         ft.ElevatedButton("Confirmar Endereço", on_click=confirmar_endereco)
@@ -173,17 +167,12 @@ def contagem_inventario(e, navigate_to, header):
                 abrir_dialog_codbarra_nao_cadastrado(e)
             else:
                 print("Resposta inesperada:", response.status_code)
-            # e.page.dialog.open = False
-            # e.page.update()
         
         dialog_codbarra = ft.AlertDialog(
             title=ft.Text("Inserir Código de Barras invent"),
             content=ft.Column(controls=[campo_codbarra]),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_codbarra(e, campo_codbarra.value))]
         )
-        # e.page.dialog = dialog_codbarra
-        # dialog_codbarra.open = True
-        # e.page.update()
         e.page.open(dialog_codbarra)
     
     def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
@@ -241,8 +230,6 @@ def contagem_inventario(e, navigate_to, header):
                 e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['erro'])
                 e.page.snack_bar.open = True
                 e.page.update()
-            # e.page.dialog.open = False
-            # e.page.update()
         
         dialog_quantidade = ft.AlertDialog(
             title=ft.Text("Inserir Quantidade"),
@@ -257,9 +244,6 @@ def contagem_inventario(e, navigate_to, header):
             ),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
         )
-        # e.page.dialog = dialog_quantidade
-        # dialog_quantidade.open = True
-        # e.page.update()
         e.page.open(dialog_quantidade)
     
     def abrir_dialog_mais_produtos(e, dados_os):
@@ -276,9 +260,6 @@ def contagem_inventario(e, navigate_to, header):
                 ft.TextButton("Não", on_click=lambda e: on_nao(e))
             ]
         )
-        # e.page.dialog = dialog_mais
-        # dialog_mais.open = True
-        # e.page.update()
         e.page.open(dialog_mais)
     
     def finalizar(e, dados_os):
@@ -310,9 +291,6 @@ def contagem_inventario(e, navigate_to, header):
             title=ft.Text("Código de Barras não cadastrado"),
             actions=[ft.TextButton("Cadastrar", on_click=lambda e: navigate_to("/cadastrar_codbarra"))]
         )
-        # e.page.dialog = dialog_nao_cadastrado
-        # dialog_nao_cadastrado.open = True
-        # e.page.update()
         e.page.open(dialog_nao_cadastrado)
     
     def buscar_os(e, codfilial, matricula):
