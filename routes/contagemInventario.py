@@ -22,6 +22,16 @@ def contagem_inventario(e, navigate_to, header):
         ]
     )
     
+    def snackbar(mensagem, bgcolor, textcolor, page):
+        snack = ft.SnackBar(
+            content=ft.Text(
+                mensagem,
+                color=textcolor
+            ),
+            bgcolor=bgcolor
+        )
+        page.open(snack)
+
     def atualizar_resumo(e, dados_os):
         """Faz uma requisição para o endpoint /resumo_contagem e atualiza o container de resumo."""
         try:
@@ -118,13 +128,11 @@ def contagem_inventario(e, navigate_to, header):
                 }
             )
             if response.status_code == 200:
-                e.page.snack_bar = ft.SnackBar(ft.Text("Quantidade atualizada"), bgcolor=colorVariaveis['sucesso'])
-                e.page.snack_bar.open = True
+                snackbar("Quantidade atualizada!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], e.page)
                 dialog_edicao.open = False
                 atualizar_resumo(e, dados_os)
             else:
-                e.page.snack_bar = ft.SnackBar(ft.Text("Erro ao atualizar quantidade"), bgcolor=colorVariaveis['erro'])
-                e.page.snack_bar.open = True
+                snackbar("Erro ao atualizar quantidade", colorVariaveis['erro'], colorVariaveis['texto'], e.page)
     
         dialog_edicao = ft.AlertDialog(
             title=ft.Text("Editar Quantidade"),
@@ -147,9 +155,7 @@ def contagem_inventario(e, navigate_to, header):
             if campo_endereco.value == codigo_esperado:
                 abrir_dialog_codbarra(e, dados_os)
             else:
-                e.page.snack_bar = ft.SnackBar(ft.Text("Endereço incorreto"))
-                e.page.snack_bar.open = True
-                e.page.update()
+                snackbar("Endereço incorreto", colorVariaveis['erro'], colorVariaveis['texto'], e.page)
     
         conteudo_dinamico.controls.append(
             ft.Container(
@@ -246,16 +252,14 @@ def contagem_inventario(e, navigate_to, header):
             if response.status_code == 200:
                 dados = response.json()
                 mensagem = dados.get("mensagem")
-                e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['sucesso'])
-                e.page.snack_bar.open = True
+                snackbar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], e.page)
                 e.page.update()
                 atualizar_resumo(e, dados_os)
                 abrir_dialog_mais_produtos(e, dados_os)
             else:
                 dados = response.json()
                 mensagem = dados.get("mensagem")
-                e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['erro'])
-                e.page.snack_bar.open = True
+                snackbar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], e.page)
                 e.page.update()
         
         dialog_quantidade = ft.AlertDialog(
@@ -292,7 +296,7 @@ def contagem_inventario(e, navigate_to, header):
     def dialog_finalizar(e, dados_os):
         dialogo_finalizar = ft.AlertDialog(
             title=ft.Text("Finalizar a contagem desse endereço?"),
-            content=ft.Container(height=20),
+            content=ft.Container(height=50),
             actions=[
                 ft.Row(
                     spacing=10,
@@ -338,16 +342,14 @@ def contagem_inventario(e, navigate_to, header):
         if response.status_code == 200:
             dados = response.json()
             mensagem = dados.get("mensagem")
-            e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['sucesso'])
-            e.page.snack_bar.open = True
+            snackbar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], e.page)
             e.page.close(dialogo)
             navigate_to("/contagem_inventario")
             e.page.update()
         else:
             dados = response.json()
             mensagem = dados.get("mensagem")
-            e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['erro'])
-            e.page.snack_bar.open = True
+            snackbar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], e.page)
             e.page.update()
     
     def abrir_dialog_codbarra_nao_cadastrado(e):
