@@ -36,15 +36,26 @@ def contagem_inventario(e, navigate_to, header):
                 resumo_container.controls.clear()
                 resumo_container.controls.append(ft.Text("Resumo de Contagem:"))
                 for item in resumo:
-                    print(f"Container resumo: {item}")
-                    # Cada item tem o formato: [codprod, descrição, codfab, quantidade]
-                    texto_item = f"Produto: {item[0]} | Descrição: {item[1]} | CodFab: {item[2]} | Quantidade: {item[3]}"
+                    texto_item = ft.Column(
+                        controls=[
+                            ft.Row(
+                                controls=[
+                                    ft.Text(f"Codprod:  {item[0]}", weight="bold"),
+                                    ft.Text(f"CodFab: {item[2]}"),
+                                    ft.Text(f"Qt: {item[3]}", weight="bold")
+                                ]   
+                            ),
+                            ft.Text("Descrição: " + item[1])
+                        ]
+                    )
                     # Cria uma linha com o texto e o botão de editar
                     row = ft.Column(
                         controls=[
-                            ft.Text(texto_item),
+                            # ft.Text(texto_item),
+                            texto_item,
                             ft.TextButton(
-                                "Editar",
+                                icon=ft.Icons.EDIT,
+                                text="Editar",
                                 on_click=lambda e, item=item: editar_item(e, item, dados_os)
                             ),
                             ft.Divider()
