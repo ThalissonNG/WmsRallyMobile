@@ -231,6 +231,7 @@ def main(page: ft.Page):
             password=True,
             can_reveal_password=True,
             width=300,
+            on_submit=login,
         )
         button_login = ft.ElevatedButton(
             text="Login",

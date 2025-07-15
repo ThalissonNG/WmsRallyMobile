@@ -10,6 +10,7 @@ def contagem_inventario(e, navigate_to, header):
     # Container principal e container de resumo
     conteudo_dinamico = ft.Column(
         expand=True,
+        width="100%",
         scroll=ft.ScrollMode.AUTO,
         spacing=50,
         controls=[
@@ -17,9 +18,16 @@ def contagem_inventario(e, navigate_to, header):
         ]
     )
     resumo_container = ft.Column(
+        expand=True,
+        horizontal_alignment=ft.CrossAxisAlignment.END,
+        width="100%",
         controls=[
-            ft.Text("Resumo de Contagem:")
-        ]
+            ft.Text(
+                "Resumo de Contagem:",
+                width="100%",
+                text_align=ft.TextAlign.LEFT
+            )
+        ],
     )
     
     def snackbar(mensagem, bgcolor, textcolor, page):
@@ -76,7 +84,7 @@ def contagem_inventario(e, navigate_to, header):
                     text="Finalizar",
                     bgcolor=colorVariaveis['botaoAcao'],
                     color=colorVariaveis['texto'],
-                    on_click=lambda e: dialog_finalizar(e, dados_os)
+                    on_click=lambda e: dialog_finalizar(e, dados_os),
                 )
                 resumo_container.controls.append(finalizar_btn)
                 e.page.update()
@@ -313,6 +321,7 @@ def contagem_inventario(e, navigate_to, header):
                             "Cancelar",
                             expand=True,
                             bgcolor=colorVariaveis['erro'],
+                            color=ft.Colors.WHITE,
                             on_click=lambda e: (
                                 e.page.close(dialogo_finalizar),
                                 e.page.update()
