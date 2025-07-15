@@ -16,7 +16,11 @@ def contagem_inventario(e, navigate_to, header):
             
         ]
     )
-    resumo_container = ft.Column(controls=[ft.Text("Resumo de Contagem:")])
+    resumo_container = ft.Column(
+        controls=[
+            ft.Text("Resumo de Contagem:")
+        ]
+    )
     
     def atualizar_resumo(e, dados_os):
         """Faz uma requisição para o endpoint /resumo_contagem e atualiza o container de resumo."""
@@ -32,13 +36,18 @@ def contagem_inventario(e, navigate_to, header):
                 resumo_container.controls.clear()
                 resumo_container.controls.append(ft.Text("Resumo de Contagem:"))
                 for item in resumo:
+                    print(f"Container resumo: {item}")
                     # Cada item tem o formato: [codprod, descrição, codfab, quantidade]
                     texto_item = f"Produto: {item[0]} | Descrição: {item[1]} | CodFab: {item[2]} | Quantidade: {item[3]}"
                     # Cria uma linha com o texto e o botão de editar
                     row = ft.Column(
                         controls=[
                             ft.Text(texto_item),
-                            ft.TextButton("Editar", on_click=lambda e, item=item: editar_item(e, item, dados_os))
+                            ft.TextButton(
+                                "Editar",
+                                on_click=lambda e, item=item: editar_item(e, item, dados_os)
+                            ),
+                            ft.Divider()
                         ]
                     )
                     resumo_container.controls.append(row)
