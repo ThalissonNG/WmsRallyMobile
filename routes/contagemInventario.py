@@ -66,7 +66,7 @@ def contagem_inventario(e, navigate_to, header):
                     text="Finalizar",
                     bgcolor=colorVariaveis['botaoAcao'],
                     color=colorVariaveis['texto'],
-                    on_click=lambda e: finalizar(e, dados_os)
+                    on_click=lambda e: dialog_finalizar(e, dados_os)
                 )
                 resumo_container.controls.append(finalizar_btn)
                 e.page.update()
@@ -288,8 +288,44 @@ def contagem_inventario(e, navigate_to, header):
             ]
         )
         e.page.open(dialog_mais)
-    
-    def finalizar(e, dados_os):
+
+    def dialog_finalizar(e, dados_os):
+        dialogo_finalizar = ft.AlertDialog(
+            title=ft.Text("Finalizar a contagem desse endereço?"),
+            content=ft.Container(height=20),
+            actions=[
+                ft.Row(
+                    spacing=10,
+                    width="100%",
+                    controls=[
+                        ft.ElevatedButton(
+                            "Sim",
+                            expand=True,
+                            bgcolor=colorVariaveis['botaoAcao'],
+                            color=ft.Colors.WHITE,
+                            on_click=lambda e: finalizar(e, dados_os, dialogo_finalizar)
+                        ),
+                        ft.ElevatedButton(
+                            "Cancelar",
+                            expand=True,
+                            bgcolor=colorVariaveis['erro'],
+                            on_click=lambda e: (
+                                e.page.close(dialogo_finalizar),
+                                e.page.update()
+                            )
+                        ),
+                    ]
+                )
+                
+            ]
+        )
+        e.page.open(dialogo_finalizar)
+        e.page.update()
+
+    def finalizar(e, dados_os, dialogo):
+        btn = e.control
+        btn.disabled = True
+        e.page.update()
         response = requests.post(
             f"{base_url}/contagem_inventario",
             json={
@@ -304,6 +340,7 @@ def contagem_inventario(e, navigate_to, header):
             mensagem = dados.get("mensagem")
             e.page.snack_bar = ft.SnackBar(ft.Text(mensagem), bgcolor=colorVariaveis['sucesso'])
             e.page.snack_bar.open = True
+            e.page.close(dialogo)
             navigate_to("/contagem_inventario")
             e.page.update()
         else:
