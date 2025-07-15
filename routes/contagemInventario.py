@@ -8,7 +8,14 @@ def contagem_inventario(e, navigate_to, header):
     codfilial = user_info.get('codfilial')
     
     # Container principal e container de resumo
-    conteudo_dinamico = ft.Column()
+    conteudo_dinamico = ft.Column(
+        expand=True,
+        scroll=ft.ScrollMode.AUTO,
+        spacing=50,
+        controls=[
+            
+        ]
+    )
     resumo_container = ft.Column(controls=[ft.Text("Resumo de Contagem:")])
     
     def atualizar_resumo(e, dados_os):
@@ -252,7 +259,7 @@ def contagem_inventario(e, navigate_to, header):
             abrir_dialog_codbarra(evt, dados_os)  # segue para o próximo
         def on_nao(evt):
             evt.page.close(dialog_mais)           # fecha este diálogo
-            finalizar(evt, dados_os) 
+            # finalizar(evt, dados_os) 
         dialog_mais = ft.AlertDialog(
             title=ft.Text("Tem mais algum produto nesse endereço?"),
             actions=[
