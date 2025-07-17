@@ -155,7 +155,11 @@ def contagem_inventario(e, navigate_to, header):
     def mostrar_campos_endereco(e, dados_os):
         conteudo_dinamico.controls.clear()
     
-        campo_endereco = ft.TextField(label="Endereço")
+        campo_endereco = ft.TextField(
+            label="Endereço",
+            autofocus=True,
+            on_submit=lambda e: confirmar_endereco(e)
+        )
     
         def confirmar_endereco(e):
             print("Endereço:", campo_endereco.value)
@@ -183,7 +187,11 @@ def contagem_inventario(e, navigate_to, header):
         e.page.update()
     
     def abrir_dialog_codbarra(e, dados_os):
-        campo_codbarra = ft.TextField(label="Código de Barras")
+        campo_codbarra = ft.TextField(
+            label="Código de Barras",
+            autofocus=True,
+            on_submit=lambda e: confirmar_codbarra(e, campo_codbarra.value)
+        )
         
         def confirmar_codbarra(e, codbarra):
             response = requests.post(
@@ -218,7 +226,10 @@ def contagem_inventario(e, navigate_to, header):
     
     def abrir_dialog_quantidade(e, codbarra, dados_os, produto):
         print("abrir dialog_quantidade")
-        campo_quantidade = ft.TextField(label="Quantidade")
+        campo_quantidade = ft.TextField(
+            label="Quantidade",
+            autofocus=True,
+        )
         def apenas_numeros(valor: str) -> str:
             # Remove qualquer caractere que não seja dígito e limita a 8 caracteres.
             return "".join(filter(str.isdigit, valor))[:8]
