@@ -83,7 +83,12 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
         if digit_index < len(numped_lista_global):
             numped = numped_lista_global[digit_index]
             texto_pedido = ft.Text(f"Pedido: {numped}", size=18)
-            campo_etiqueta = ft.TextField(label="Etiqueta", width=300)
+            campo_etiqueta = ft.TextField(
+                label="Etiqueta",
+                width=300,
+                autofocus=True,
+                on_submit=lambda e: salvar_etiqueta(e, campo_etiqueta.value)
+            )
             botao_salvar = ft.ElevatedButton(
                 text="Salvar",
                 on_click=lambda e: salvar_etiqueta(e, campo_etiqueta.value)

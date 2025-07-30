@@ -28,6 +28,8 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         border_width=2,
         width=300,
         keyboard_type=ft.KeyboardType.NUMBER,
+        autofocus=True,
+        on_submit=lambda e: abrir_dialog_manual(e),
     )
     button_buscar_manual = ft.ElevatedButton(
         text="Buscar Pedido Manual",

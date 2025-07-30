@@ -98,12 +98,24 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     )
 
     separar_body = ft.Column(spacing=10, expand=True)
-    address_field = ft.TextField(label="Endereço", autofocus=True)
+    address_field = ft.TextField(
+        label="Endereço",
+        autofocus=True,
+        on_submit=lambda e: validate_address_btn.on_click(e),
+        )
     validate_address_btn = ft.ElevatedButton(text="Validar Endereço")
-    pedido_field = ft.TextField(label="Código Etiqueta (Pedido)")
+    pedido_field = ft.TextField(
+        label="Código Etiqueta (Pedido)",
+        autofocus=True,
+        on_submit=lambda e: validate_pedido_btn.on_click(e),
+    )
     expected_label_text = ft.Text("")
     validate_pedido_btn = ft.ElevatedButton(text="Validar Etiqueta")
-    barcode_field = ft.TextField(label="Código de Barras")
+    barcode_field = ft.TextField(
+        label="Código de Barras",
+        autofocus=True,
+        on_submit=lambda e: validate_barcode_btn.on_click(e),
+    )
     validate_barcode_btn = ft.ElevatedButton(text="Bipar Produto")
     skip_prod_btn = ft.ElevatedButton(text="Pular Produto")
 
