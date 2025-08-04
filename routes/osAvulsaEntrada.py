@@ -247,6 +247,7 @@ def _validar_endereco(
         "codfilial": user_info["codfilial"],
         "action": "validar_endereco",
     }
+    print(payload)
 
     try:
         resp = requests.post(f"{base_url}/os_avulsa_entrada", json=payload)
