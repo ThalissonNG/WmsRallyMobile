@@ -161,7 +161,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
         if detalhes:
             separar_body.controls.append(
                 ft.DataTable(
-                    column_spacing=42,
+                    column_spacing=35,
                     horizontal_margin=10,
                     columns=[ft.DataColumn(ft.Text(h)) for h in ["MOD", "RUA", "EDI", "NIV", "APT"]],
                     rows=[
