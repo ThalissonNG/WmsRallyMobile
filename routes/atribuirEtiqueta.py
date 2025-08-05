@@ -30,6 +30,7 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
 
     # Função para enviar as etiquetas atribuídas ao backend
     def atribuir_etiqueta():
+        global digit_index, numped_lista_global, etiquetas
         try:
             response = requests.post(
                 f"{base_url}/separarPedido",
@@ -42,6 +43,9 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
             )
             if response.status_code == 201:
                 show_snack("Etiquetas atribuídas com sucesso!")
+                digit_index = 0
+                numped_lista_global = []
+                etiquetas = []
                 navigate_to("/separar_pedido")
             else:
                 show_snack("Erro ao atribuir etiquetas!", error=True)
