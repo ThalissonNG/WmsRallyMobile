@@ -58,12 +58,12 @@ def os_avulsa_saida(page, navigate_to, header):
             content=ft.Column(
                 spacing=4,
                 controls=[
-                    ft.Text(f"MOD: {dados_endereco[1]}", color=ft.Colors.WHITE),
-                    ft.Text(f"RUA: {dados_endereco[2]}", color=ft.Colors.WHITE),
-                    ft.Text(f"EDI: {dados_endereco[3]}", color=ft.Colors.WHITE),
-                    ft.Text(f"NIV: {dados_endereco[4]}", color=ft.Colors.WHITE),
-                    ft.Text(f"APT: {dados_endereco[5]}", color=ft.Colors.WHITE),
-                    ft.Text(f"Cód. Produto: {dados_endereco[6]}", color=ft.Colors.WHITE),
+                    ft.Text(f"MOD: {dados_endereco[1]}"),
+                    ft.Text(f"RUA: {dados_endereco[2]}"),
+                    ft.Text(f"EDI: {dados_endereco[3]}"),
+                    ft.Text(f"NIV: {dados_endereco[4]}"),
+                    ft.Text(f"APT: {dados_endereco[5]}"),
+                    ft.Text(f"Cód. Produto: {dados_endereco[6]}"),
                 ]
             )
         )
