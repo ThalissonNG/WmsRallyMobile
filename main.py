@@ -6,9 +6,9 @@ from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
 from routes.consultarProdutoEndereco import consultar_produto_endereco
 from routes.transferirProduto import transferir_produto
-from routes.buscarPedido import buscar_pedido
+from routes.buscarPedidoMultiplos import buscar_pedido
 from routes.atribuirEtiqueta import atribuir_etiqueta_pedido
-from routes.separarPedido import separar_pedido
+from routes.separarPedidoMultiplos import separar_pedido
 from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 from routes.contagemInventario import contagem_inventario
