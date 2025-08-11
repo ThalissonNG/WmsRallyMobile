@@ -65,16 +65,23 @@ def os_avulsa_entrada(page, navigate_to, header):
     # Primeira etapa: validar código de barras do produto
     # ------------------------------------------------------------------
     if dados_os:
-        numos, codprod = dados_os[0][0], dados_os[0][1]
+        numos, codprod, codfab, descricao = dados_os[0][0], dados_os[0][1], dados_os[0][2], dados_os[0][3]
 
         dynamic_section.controls.extend(
             [
-                ft.Text(f"OS: {numos}", color=ft.Colors.WHITE),
-                ft.Text(f"Cód. Produto: {codprod}", color=ft.Colors.WHITE),
+                ft.Text(f"OS: {numos}", weight="bold"),
+                ft.Row(
+                    controls=[
+                        ft.Text(f"Códprod: {codprod}"),
+                        ft.Text(f"Códfab: {codfab}"),
+                    ]
+                ),
+                ft.Text(f"Descrição: {descricao}"),
             ]
         )
 
         campo_cod_bar = ft.TextField(
+            autofocus=True,
             label="Código de Barras do Produto",
             hint_text="Escaneie ou digite aqui",
             keyboard_type=ft.KeyboardType.TEXT,
@@ -90,6 +97,7 @@ def os_avulsa_entrada(page, navigate_to, header):
             tb,
             dynamic_section,
             codprod,
+            descricao,
             numos,
         )
 
@@ -102,6 +110,7 @@ def os_avulsa_entrada(page, navigate_to, header):
                 tb,
                 dynamic_section,
                 codprod,
+                descricao,
                 numos,
             ),
         )
@@ -119,24 +128,34 @@ def os_avulsa_entrada(page, navigate_to, header):
         controls=[*controls, dynamic_section],
     )
 
+def snack_bar(message, cor_texto, color, page):
+        page.snack_bar = ft.SnackBar(
+            ft.Text(
+                message,
+                color=cor_texto
+                ),
+            bgcolor=color,
+            duration=1000
+        )
+        page.open(page.snack_bar)
+        # page.snack_bar.open = True
+        # page.update()
 
 # ======================================================================
 # Funções auxiliares
 # ======================================================================
-def _validar_codbarra(
-    e,
-    page,
-    navigate_to,
-    campo,
-    dynamic_section,
-    codprod,
-    numos,
-):
+def _validar_codbarra(e, page, navigate_to, campo, dynamic_section, codprod, descricao, numos,):
     """Valida o código de barras do produto."""
 
     entrada = campo.value.strip()
     if not entrada:
         campo.error_text = "Informe o código de barras"
+        snack_bar(
+            "Codigo de barras incorreto!",
+            colorVariaveis['texto'],
+            colorVariaveis['erro'],
+            page
+        )
         page.update()
         return
 
@@ -157,11 +176,34 @@ def _validar_codbarra(
             },
         )
         resp.raise_for_status()
+        print(resp.status_code)
+
+        if resp.status_code == 400:
+            snack_bar(
+                "Codigo de barras incorreto!",
+                colorVariaveis['texto'],
+                colorVariaveis['erro'],
+                page
+            )
+            page.update()
+            return
 
         # Sucesso: próxima etapa (informar endereço)
         dynamic_section.controls.clear()
         dynamic_section.controls.append(
-            ft.Text(f"Cód. Produto: {codprod}", weight="bold")
+            ft.Text(f"OS: {numos}", weight="bold"),
+        )
+        dynamic_section.controls.append(
+            ft.Text(f"Cód. Produto: {codprod}", weight="bold"),
+        )
+        dynamic_section.controls.append(
+            ft.Text(f"Descrição: {descricao}")
+        )
+        snack_bar(
+            "Código de barras validado com sucesso!",
+            colorVariaveis['textoPreto'],
+            colorVariaveis['sucesso'],
+            page
         )
 
         campo_end = ft.TextField(
@@ -203,6 +245,12 @@ def _validar_codbarra(
 
     except Exception as exc:  # status != 200
         msg = ""
+        snack_bar(
+            "Erro ao validar código de barras!",
+            colorVariaveis['texto'],
+            colorVariaveis['erro'],
+            page
+        )
         try:
             msg = resp.json().get("mensagem", str(exc))
         except Exception:
@@ -218,20 +266,18 @@ def _validar_codbarra(
         page.update()
 
 
-def _validar_endereco(
-    e,
-    page,
-    navigate_to,
-    campo,
-    dynamic_section,
-    codprod,
-    numos,
-):
+def _validar_endereco( e, page, navigate_to, campo, dynamic_section, codprod, numos,):
     """Valida o endereço e finaliza a OS avulsa de entrada."""
 
     endereco = campo.value.strip()
     if not endereco:
         campo.error_text = "Informe o endereço"
+        snack_bar(
+            "Endereço incorreto!",
+            colorVariaveis['texto'],
+            colorVariaveis['erro'],
+            page
+        )
         page.update()
         return
 
@@ -252,11 +298,23 @@ def _validar_endereco(
     try:
         resp = requests.post(f"{base_url}/os_avulsa_entrada", json=payload)
         resp.raise_for_status()
+        snack_bar(
+            "Produto guardado com sucesso!",
+            colorVariaveis['textoPreto'],
+            colorVariaveis['sucesso'],
+            page
+        )
 
         # Sucesso: retorna para tela principal de OS avulsa
         navigate_to("/os_avulsa")
     except Exception as exc:
         msg = ""
+        snack_bar(
+            "Erro ao validar endereço!",
+            colorVariaveis['texto'],
+            colorVariaveis['erro'],
+            page
+        )
         try:
             msg = resp.json().get("mensagem", str(exc))
         except Exception:
