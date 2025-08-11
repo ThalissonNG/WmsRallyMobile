@@ -33,7 +33,7 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
         global digit_index, numped_lista_global, etiquetas
         try:
             response = requests.post(
-                f"{base_url}/separarPedido",
+                f"{base_url}/separarPedidoMultiplos",
                 json={
                     "action": "atribuir_etiqueta",
                     "matricula": matricula,
@@ -55,7 +55,7 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
     # 1) Buscar lista de pedidos via API
     try:
         resp = requests.post(
-            f"{base_url}/separarPedido",
+            f"{base_url}/separarPedidoMultiplos",
             json={"action": "buscar_pedidos", "matricula": matricula}
         )
         dados = resp.json() if resp.status_code == 200 else {}

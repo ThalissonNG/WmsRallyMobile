@@ -20,7 +20,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     def buscar_itens():
         try:
             resp = requests.post(
-                f"{base_url}/separarPedido",
+                f"{base_url}/separarPedidoMultiplos",
                 json={"action": "buscar_dados", "matricula": matricula, "codfilial": codfilial},
             )
             resp.raise_for_status()
@@ -309,7 +309,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
 
         try:
             resp = requests.post(
-                f"{base_url}/separarPedido",
+                f"{base_url}/separarPedidoMultiplos",
                 json={
                     "action": "finalizar",
                     "matricula": matricula,

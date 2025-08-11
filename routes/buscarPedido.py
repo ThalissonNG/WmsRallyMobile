@@ -60,7 +60,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     def em_aberto(matricula, codfilial):
         try:
             resp = requests.post(
-                f"{base_url}/buscarPedido",
+                f"{base_url}/buscarPedidoMultiplos",
                 json={
                     "action": "aberto",
                     "matricula": matricula,
@@ -84,7 +84,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     def pedido_manual(lista_de_pedidos: list[str]):
         try:
             resp = requests.post(
-                f"{base_url}/buscarPedido",
+                f"{base_url}/buscarPedidoMultiplos",
                 json={
                     "action": "manual",
                     "numped": lista_de_pedidos,
@@ -107,7 +107,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     def pedido_automatico():
         try:
             resp = requests.post(
-                f"{base_url}/buscarPedido",
+                f"{base_url}/buscarPedidoMultiplos",
                 json={
                     "action": "automatico",
                     "matricula": matricula
