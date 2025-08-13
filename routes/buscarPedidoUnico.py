@@ -20,7 +20,7 @@ def buscar_pedido_unico(page: ft.Page, navigate_to, header):
         page.open(page.snack_bar)
     
     def dialog_pedido_aberto(page, mensagem: str, numped: int | None):
-        info_pedido = f"Pedido em aberto: {numped}" if numped is not None else "Há um pedido em aberto."
+        info_pedido = f"Pedido em aberto: {numped[0][0]}" if numped is not None else "Há um pedido em aberto."
 
         dlg = ft.AlertDialog(
             modal=True,
@@ -40,15 +40,21 @@ def buscar_pedido_unico(page: ft.Page, navigate_to, header):
                     spacing=10,
                     horizontal_alignment=ft.CrossAxisAlignment.START,
                     controls=[
-                        ft.TextButton(
+                        ft.ElevatedButton(
                             "OK",
+                            bgcolor=colorVariaveis['botaoAcao'],
+                            color=colorVariaveis['texto'],
                             on_click=lambda e, d=None: (e.page.close(dlg), e.page.update())
                         ),
                         ft.Container(height=30),
                         ft.ElevatedButton(
                             "Finalizar Pedido",
                             bgcolor=ft.Colors.RED,
-                            on_click=lambda e, d=None: (print(f"Finalizando pedido... {numped}"), e.page.close(dlg), e.page.update())
+                            color=colorVariaveis['texto'],
+                            on_click=lambda e, d=None: (
+                                finalizar_pedido(numped[0][0]),
+                                e.page.close(dlg), e.page.update()
+                                )
                         )
                     ]
                 ),
@@ -136,6 +142,38 @@ def buscar_pedido_unico(page: ft.Page, navigate_to, header):
                 colorVariaveis['erro'],
                 page)
             page.update()
+
+    def finalizar_pedido(numped):
+        print(f"Finalizando pedido: {numped}")
+        try:
+            response = requests.post(
+                f"{base_url}/buscarPedidoUnico",
+                json={
+                    "numped": numped,
+                    "matricula": matricula,
+                    "codfilial": codfilial,
+                    "action": "finalizar_pedido"
+                }
+            )
+            if response.status_code == 200:
+                snack_bar(
+                    "Pedido finalizado com sucesso!",
+                    colorVariaveis['textoPreto'],
+                    colorVariaveis['sucesso'],
+                    page)
+            else:
+                snack_bar(
+                    "Erro ao finalizar pedido.",
+                    colorVariaveis['texto'],
+                    colorVariaveis['erro'],
+                    page)
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao fazer a requisição: {e}")
+            snack_bar(
+                "Erro ao finalizar pedido. Tente novamente mais tarde.",
+                colorVariaveis['texto'],
+                colorVariaveis['erro'],
+                page)
 
     verificar_pedido_aberto(matricula, codfilial)
 
