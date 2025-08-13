@@ -64,6 +64,10 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
     prod_idx = 0
     etiqueta_idx = 0
 
+    if not produtos:
+        show_snack("Nenhum item para separar", error=True)
+        return ft.View(route="/separar_pedido_unico", appbar=header, controls=[])
+
     # Atualiza contexto do produto atual (etiquetas, endereços)
     def load_context():
         nonlocal produto_atual, codfab_atual, desc_atual, etiquetas, enderecos, detalhes
@@ -87,7 +91,11 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
     etiquetas = []
     enderecos = []
     detalhes = []
-    load_context()
+    try:
+        load_context()
+    except Exception as e:
+        show_snack(f"Erro ao preparar itens: {e}", error=True)
+        return ft.View(route="/separar_pedido_unico", appbar=header, controls=[])
     current_endereco = None
 
     title = ft.Text(
@@ -277,12 +285,11 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
             )
             if resp.status_code == 200:
                 show_snack("Separação finalizada com sucesso!")
-                navigate_to("/menu)")
+                navigate_to("/menu")
             else:
                 show_snack("Erro ao finalizar separação!", error=True)
-        except Exception:
+        except Exception as e:
             print("Erro ao finalizar separação (requisicao):", e)
-            print(e)
             show_snack("Erro ao finalizar separação! (requisicao)", error=True)
 
     validate_address_btn.on_click = validar_endereco
@@ -317,4 +324,4 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         tabs=[separar_tab, resumo_tab, finalizar_tab],
         expand=True
     )
-    return ft.View(route="/separar_pedido_unico", controls=[header, title, tabs])
+    return ft.View(route="/separar_pedido_unico", appbar=header, controls=[title, tabs])
