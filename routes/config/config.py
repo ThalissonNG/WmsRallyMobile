@@ -1,4 +1,4 @@
-base_url = "http://192.168.1.100:5000/wmsMobile"
+base_url = "http://192.168.1.42:5000/wmsMobile"
 app_version = '1.1.9'
 user_info = {}
 colorVariaveis = {

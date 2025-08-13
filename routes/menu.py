@@ -22,9 +22,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "Separar Pedido",
+                                    "Separar Pedido - Multiplos",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/buscar_pedido")
+                                    on_click=lambda e: navigate_to("/buscar_pedido_multiplos")
                                 ),
                                 ft.ElevatedButton(
                                     "Transferência/Devolução",
@@ -90,6 +90,20 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     "Conferir Bonus",
                                     expand=True,
                                     on_click=lambda e: navigate_to("/buscar_bonus")
+                                ),
+                            ],
+                            spacing=10,
+                        ),
+                        ft.Row(
+                            controls=[
+                                ft.ElevatedButton(
+                                    "Separar Pedido - Unico",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/buscar_pedido_unico")
+                                ),
+                                ft.ElevatedButton(
+                                    "--------",
+                                    expand=True,
                                 ),
                             ],
                             spacing=10,

@@ -20,7 +20,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
     def buscar_itens():
         try:
             resp = requests.post(
-                f"{base_url}/separarPedido",
+                f"{base_url}/separarPedidoMultiplos",
                 json={"action": "buscar_dados", "matricula": matricula, "codfilial": codfilial},
             )
             resp.raise_for_status()
@@ -266,7 +266,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
 
         try:
             resp = requests.post(
-                f"{base_url}/separarPedido",
+                f"{base_url}/separarPedidoMultiplos",
                 json={
                     "action": "finalizar",
                     "matricula": matricula,
@@ -275,7 +275,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             )
             if resp.status_code == 200:
                 show_snack("Separação finalizada com sucesso!")
-                navigate_to("/buscar_pedido")
+                navigate_to("/buscar_pedido_multiplos)")
             else:
                 show_snack("Erro ao finalizar separação!", error=True)
         except Exception:

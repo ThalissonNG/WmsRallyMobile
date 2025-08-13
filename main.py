@@ -6,9 +6,9 @@ from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
 from routes.consultarProdutoEndereco import consultar_produto_endereco
 from routes.transferirProduto import transferir_produto
-from routes.buscarPedido import buscar_pedido
+from routes.buscarPedidoMultiplos import buscar_pedido
 from routes.atribuirEtiqueta import atribuir_etiqueta_pedido
-from routes.separarPedido import separar_pedido
+from routes.separarPedidoMultiplos import separar_pedido
 from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 from routes.contagemInventario import contagem_inventario
@@ -20,6 +20,7 @@ from routes.osAvulsaEntrada import os_avulsa_entrada
 from routes.separarPedidoDist import separar_pedido_dist
 from routes.buscarBonus import buscar_bonus
 from routes.conferirBonus import conferir_bonus
+from routes.buscarPedidoUnico import buscar_pedido_unico
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -65,11 +66,11 @@ def main(page: ft.Page):
             page.views.append(consultar_produto_endereco(navigate_to, create_header()))
         elif route == "/transferirProduto":
             page.views.append(transferir_produto(page, navigate_to, create_header()))
-        elif route == "/buscar_pedido":
+        elif route == "/buscar_pedido_multiplos":
             page.views.append(buscar_pedido(page, navigate_to, create_header()))
         elif route == "/atribuir_etiqueta":
             page.views.append(atribuir_etiqueta_pedido(page, navigate_to, create_header()))
-        elif route == "/separar_pedido":
+        elif route == "/separar_pedido_multiplos":
             page.views.append(separar_pedido(page, navigate_to, create_header()))
         elif route == "/buscar_transferencia_devolucao":
             page.views.append(buscar_transferencia_devolucao(page, navigate_to, create_header()))
@@ -93,6 +94,8 @@ def main(page: ft.Page):
             page.views.append(buscar_bonus(page, navigate_to, create_header()))
         elif route == "/conferir_bonus":
             page.views.append(conferir_bonus(page, navigate_to, create_header(), arguments))
+        elif route == "/buscar_pedido_unico":
+            page.views.append(buscar_pedido_unico(page, navigate_to, create_header()))
 
         page.update()
 

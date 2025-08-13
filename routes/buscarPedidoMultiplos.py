@@ -60,7 +60,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     def em_aberto(matricula, codfilial):
         try:
             resp = requests.post(
-                f"{base_url}/buscarPedido",
+                f"{base_url}/buscarPedidoMultiplos",
                 json={
                     "action": "aberto",
                     "matricula": matricula,
@@ -84,7 +84,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     def pedido_manual(lista_de_pedidos: list[str]):
         try:
             resp = requests.post(
-                f"{base_url}/buscarPedido",
+                f"{base_url}/buscarPedidoMultiplos",
                 json={
                     "action": "manual",
                     "numped": lista_de_pedidos,
@@ -107,7 +107,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
     def pedido_automatico():
         try:
             resp = requests.post(
-                f"{base_url}/buscarPedido",
+                f"{base_url}/buscarPedidoMultiplos",
                 json={
                     "action": "automatico",
                     "matricula": matricula
@@ -168,7 +168,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         route="/buscar_pedido",
         controls=[
             header,
-            ft.Text("Buscar Pedido", size=24, weight="bold", color=colorVariaveis['titulo']),
+            ft.Text("Buscar Pedido - Multiplos", size=24, weight="bold", color=colorVariaveis['titulo']),
             ft.Container(height=20),
             ft.Text("Busca Manual", size=18, weight="bold"),
             input_numped,
