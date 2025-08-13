@@ -62,21 +62,20 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         if cod not in produtos:
             produtos.append(cod)
     prod_idx = 0
-    etiqueta_idx = 0
 
-    # Atualiza contexto do produto atual (etiquetas, endereços)
+    if not produtos:
+        show_snack("Nenhum item para separar", error=True)
+        return ft.View(route="/separar_pedido_unico", appbar=header, controls=[])
+
+    # Atualiza contexto do produto atual (endereços)
     def load_context():
-        nonlocal produto_atual, codfab_atual, desc_atual, etiquetas, enderecos, detalhes
+        nonlocal produto_atual, codfab_atual, desc_atual, enderecos, detalhes
         produto_atual = produtos[prod_idx]
         subset = [it for it in dados_itens if it[2] == produto_atual]
         codfab_atual, desc_atual = subset[0][3], subset[0][4]
-        etiquetas = []
         enderecos = []
         detalhes.clear()
         for it in subset:
-            # coleta etiquetas únicas
-            if it[1] not in etiquetas:
-                etiquetas.append(it[1])
             # coleta endereços ligados ao produto
             addr = it[7]
             if addr not in enderecos and len(it) > 12:
@@ -84,13 +83,14 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
                 detalhes.append({'mod': it[8], 'rua': it[9], 'edi': it[10], 'niv': it[11], 'apt': it[12]})
 
     produto_atual = codfab_atual = desc_atual = None
-    etiquetas = []
     enderecos = []
     detalhes = []
-    load_context()
+    try:
+        load_context()
+    except Exception as e:
+        show_snack(f"Erro ao preparar itens: {e}", error=True)
+        return ft.View(route="/separar_pedido_unico", appbar=header, controls=[])
     current_endereco = None
-    current_pedido = None
-    barcode_valid = False
 
     title = ft.Text(
         "Separar Pedido - Unico",
@@ -107,13 +107,6 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         on_submit=lambda e: validate_address_btn.on_click(e),
         )
     validate_address_btn = ft.ElevatedButton(text="Validar Endereço")
-    pedido_field = ft.TextField(
-        label="Código Etiqueta (Pedido)",
-        autofocus=True,
-        on_submit=lambda e: validate_pedido_btn.on_click(e),
-    )
-    expected_label_text = ft.Text("")
-    validate_pedido_btn = ft.ElevatedButton(text="Validar Etiqueta")
     barcode_field = ft.TextField(
         label="Código de Barras",
         autofocus=True,
@@ -127,7 +120,7 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         controls = []
         for grupo in dados_resumo:
             for item in grupo:
-                codprod, codfab, desc, orig, total, sep, rest, numped, etiqueta = item
+                codprod, codfab, desc, orig, total, sep, rest, numped, *_ = item
                 if sep == total:
                     bg, fg = colorVariaveis['sucesso'], colorVariaveis['textoPreto']
                 elif sep == 0:
@@ -140,8 +133,7 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
                     ft.Container(
                         padding=ft.padding.all(12), bgcolor=bg,
                         content=ft.Column(spacing=6, controls=[
-                            ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                   controls=[ft.Text(f"Pedido: {numped}", color=fg), ft.Text(f"Etiqueta: {etiqueta}", color=fg)]),
+                            ft.Text(f"Pedido: {numped}", color=fg),
                             ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                    controls=[ft.Text(f"Cód: {codprod}", color=fg), ft.Text(f"Fab: {codfab}", color=fg), ft.Text(f"Origem: {orig}", color=fg)]),
                             ft.Text(desc, color=fg),
@@ -157,7 +149,6 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         separar_body.controls.clear()
         # limpa campos ao voltar
         address_field.value = ""
-        pedido_field.value = ""
         barcode_field.value = ""
         separar_body.controls.append(ft.Text("Selecione o endereço:"))
         # sempre mostra tabela de detalhes de endereços
@@ -191,105 +182,57 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         ])
         page.update()
 
-    def mostrar_label_ui():
-        separar_body.controls.clear()
-        expected_label_text.value = f"Etiqueta esperada: {etiquetas[etiqueta_idx]}"
-        pedido_field.value = ""
-        separar_body.controls.extend([
-            ft.Text("Digite o código da etiqueta (pedido):"),
-            expected_label_text,
-            pedido_field,
-            validate_pedido_btn
-        ])
-        page.update()
-
     def finalizar_separacao_ui():
         separar_body.controls.clear()
         separar_body.controls.append(ft.Text("Separação concluída!", weight="bold"))
 
     def validar_endereco(e):
-        nonlocal current_endereco, barcode_valid
+        nonlocal current_endereco
         v = address_field.value
         if v and int(v) in enderecos:
             current_endereco = int(v)
-            barcode_valid = False
             show_snack(f"Endereço {v} válido!", False)
-            # atualiza origem em dados_resumo para este produto/etiqueta
             for grupo in dados_resumo:
                 for item in grupo:
-                    codprod, codfab, desc, orig, total, sep, rest, numped, etiqueta = item
-                    if etiqueta == etiquetas[etiqueta_idx] and codprod == produto_atual:
-                        item[3] = current_endereco  # preenche campo origem
+                    if len(item) > 3 and item[0] == produto_atual:
+                        item[3] = current_endereco
             mostrar_barcode_ui()
         else:
             show_snack("Endereço incorreto!", True)
 
-    def validar_pedido(e):
-        nonlocal current_pedido, etiqueta_idx, prod_idx, barcode_valid
-        v = pedido_field.value
-        if not barcode_valid:
-            show_snack("Bipe um produto primeiro", True)
-            pedido_field.value = ""
-            page.update()
-            return
-        if v and int(v) == etiquetas[etiqueta_idx]:
-            current_pedido = int(v)
-            barcode_valid = False
-            show_snack(f"Etiqueta {v} válida!", False)
-            item_concluido = False
+    def validar_barcode(e):
+        nonlocal prod_idx
+        codigo = barcode_field.value
+        validos = [str(t[1]) for t in dados_codbarra if t[0] == produto_atual and t[2] == current_endereco]
+        print(f"Códigos válidos para produto {produto_atual}, endereço {current_endereco}: {validos}")
+        if codigo in validos:
+            barcode_field.value = ""
             for grupo in dados_resumo:
                 for item in grupo:
-                    codprod, *_ , total, sep, rest, numped, etiqueta = item
-                    if etiqueta == current_pedido and codprod == produto_atual:
+                    codprod, codfab, desc, orig, total, sep, rest, numped, *_ = item
+                    if codprod == produto_atual and sep < total:
                         item[5] += 1
                         item[6] = total - item[5]
-                        if item[5] == total:
-                            item_concluido = True
                         break
-                if item_concluido:
-                    break
-
             resumo_tab.content = ft.ListView(
                 expand=True,
                 spacing=4,
                 padding=ft.padding.symmetric(vertical=8),
                 controls=gerar_resumo_list(),
             )
-            pedido_field.value = ""
-            if item_concluido:
-                etiqueta_idx += 1
-                if etiqueta_idx < len(etiquetas):
-                    current_pedido = etiquetas[etiqueta_idx]
-                    show_snack(f"Próxima etiqueta {current_pedido}")
+            show_snack("Produto separado!")
+            restante = sum(item[6] for grupo in dados_resumo for item in grupo if item[0] == produto_atual)
+            if restante == 0:
+                prod_idx += 1
+                if prod_idx < len(produtos):
+                    load_context()
+                    show_snack(f"Iniciando produto {produto_atual}")
                     construir_separar_ui()
                 else:
-                    prod_idx += 1
-                    etiqueta_idx = 0
-                    if prod_idx < len(produtos):
-                        load_context()
-                        show_snack(f"Iniciando produto {produto_atual}")
-                        construir_separar_ui()
-                    else:
-                        show_snack("Separação concluída!", False)
-                        finalizar_separacao_ui()
+                    show_snack("Separação concluída!", False)
+                    finalizar_separacao_ui()
             else:
                 mostrar_barcode_ui()
-            page.update()
-        else:
-            pedido_field.value = ""
-            show_snack("Etiqueta inválida!", True)
-            mostrar_label_ui()
-
-    def validar_barcode(e):
-        nonlocal barcode_valid
-        codigo = barcode_field.value
-        validos = [str(t[1]) for t in dados_codbarra if t[0] == produto_atual and t[2] == current_endereco]
-        print(f"Códigos válidos para produto {produto_atual}, endereço {current_endereco}: {validos}")
-        if codigo in validos:
-            barcode_valid = True
-            barcode_field.value = ""
-            show_snack("Produto válido! Bipe a etiqueta.")
-            mostrar_label_ui()
         else:
             barcode_field.value = ""
             barcode_field.focus()
@@ -297,10 +240,9 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         page.update()
 
     def pular_produto(e):
-        nonlocal prod_idx, etiqueta_idx
+        nonlocal prod_idx
         produto_pulado = produtos.pop(prod_idx)
         produtos.append(produto_pulado)
-        etiqueta_idx = 0
         if prod_idx >= len(produtos):
             prod_idx = len(produtos) - 1
         load_context()
@@ -321,16 +263,14 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
             )
             if resp.status_code == 200:
                 show_snack("Separação finalizada com sucesso!")
-                navigate_to("/menu)")
+                navigate_to("/menu")
             else:
                 show_snack("Erro ao finalizar separação!", error=True)
-        except Exception:
+        except Exception as e:
             print("Erro ao finalizar separação (requisicao):", e)
-            print(e)
             show_snack("Erro ao finalizar separação! (requisicao)", error=True)
 
     validate_address_btn.on_click = validar_endereco
-    validate_pedido_btn.on_click = validar_pedido
     validate_barcode_btn.on_click = validar_barcode
     skip_prod_btn.on_click = pular_produto
 
@@ -362,4 +302,4 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         tabs=[separar_tab, resumo_tab, finalizar_tab],
         expand=True
     )
-    return ft.View(route="/separar_pedido_unico", controls=[header, title, tabs])
+    return ft.View(route="/separar_pedido_unico", appbar=header, controls=[title, tabs])
