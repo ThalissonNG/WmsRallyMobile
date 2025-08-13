@@ -318,7 +318,7 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             )
             if resp.status_code == 200:
                 show_snack("Separação finalizada com sucesso!")
-                navigate_to("/buscar_pedido")
+                navigate_to("/buscar_pedido_multiplos)")
             else:
                 show_snack("Erro ao finalizar separação!", error=True)
         except Exception:

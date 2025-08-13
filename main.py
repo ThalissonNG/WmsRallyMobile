@@ -65,11 +65,11 @@ def main(page: ft.Page):
             page.views.append(consultar_produto_endereco(navigate_to, create_header()))
         elif route == "/transferirProduto":
             page.views.append(transferir_produto(page, navigate_to, create_header()))
-        elif route == "/buscar_pedido":
+        elif route == "/buscar_pedido_multiplos":
             page.views.append(buscar_pedido(page, navigate_to, create_header()))
         elif route == "/atribuir_etiqueta":
             page.views.append(atribuir_etiqueta_pedido(page, navigate_to, create_header()))
-        elif route == "/separar_pedido":
+        elif route == "/separar_pedido_multiplos":
             page.views.append(separar_pedido(page, navigate_to, create_header()))
         elif route == "/buscar_transferencia_devolucao":
             page.views.append(buscar_transferencia_devolucao(page, navigate_to, create_header()))

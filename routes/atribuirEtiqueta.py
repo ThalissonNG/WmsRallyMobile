@@ -46,7 +46,7 @@ def atribuir_etiqueta_pedido(page: ft.Page, navigate_to, header):
                 digit_index = 0
                 numped_lista_global = []
                 etiquetas = []
-                navigate_to("/separar_pedido")
+                navigate_to("/separar_pedido_multiplos")
             else:
                 show_snack("Erro ao atribuir etiquetas!", error=True)
         except Exception:

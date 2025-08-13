@@ -168,7 +168,7 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
         route="/buscar_pedido",
         controls=[
             header,
-            ft.Text("Buscar Pedido", size=24, weight="bold", color=colorVariaveis['titulo']),
+            ft.Text("Buscar Pedido - Multiplos", size=24, weight="bold", color=colorVariaveis['titulo']),
             ft.Container(height=20),
             ft.Text("Busca Manual", size=18, weight="bold"),
             input_numped,

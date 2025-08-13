@@ -22,9 +22,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "Separar Pedido",
+                                    "Separar Pedido - Multiplos",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/buscar_pedido")
+                                    on_click=lambda e: navigate_to("/buscar_pedido_multiplos")
                                 ),
                                 ft.ElevatedButton(
                                     "Transferência/Devolução",
