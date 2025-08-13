@@ -118,7 +118,7 @@ def buscar_pedido_unico(page: ft.Page, navigate_to, header):
 
             if response.status_code == 200:
                 print("Pedido encontrado com sucesso!")
-                # navigate_to("/atribuir_etiqueta")
+                navigate_to("/separar_pedido_unico")
             elif response.status_code == 500:
                 mensagem = response.json().get("message")
                 snack_bar(
