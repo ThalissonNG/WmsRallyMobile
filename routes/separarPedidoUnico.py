@@ -67,7 +67,6 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         show_snack("Nenhum item para separar", error=True)
         return ft.View(route="/separar_pedido_unico", appbar=header, controls=[])
 
-    # Atualiza contexto do produto atual (endereços)
     def load_context():
         nonlocal produto_atual, codfab_atual, desc_atual, enderecos, detalhes
         produto_atual = produtos[prod_idx]
@@ -202,6 +201,7 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
 
     def validar_barcode(e):
         nonlocal prod_idx
+  
         codigo = barcode_field.value
         validos = [str(t[1]) for t in dados_codbarra if t[0] == produto_atual and t[2] == current_endereco]
         print(f"Códigos válidos para produto {produto_atual}, endereço {current_endereco}: {validos}")
@@ -211,6 +211,7 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
                 for item in grupo:
                     codprod, codfab, desc, orig, total, sep, rest, numped, *_ = item
                     if codprod == produto_atual and sep < total:
+              
                         item[5] += 1
                         item[6] = total - item[5]
                         break
