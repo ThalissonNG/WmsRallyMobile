@@ -44,7 +44,11 @@ def buscar_pedido_unico(page: ft.Page, navigate_to, header):
                             "OK",
                             bgcolor=colorVariaveis['botaoAcao'],
                             color=colorVariaveis['texto'],
-                            on_click=lambda e, d=None: (e.page.close(dlg), e.page.update())
+                            on_click=lambda e, d=None: (
+                                navigate_to("/separar_pedido_unico"),
+                                e.page.close(dlg),
+                                e.page.update()
+                            )
                         ),
                         ft.Container(height=30),
                         ft.ElevatedButton(
