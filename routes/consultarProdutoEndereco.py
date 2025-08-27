@@ -30,7 +30,7 @@ def consultar_produto_endereco(navigate_to, header):
                     ft.Text(str(total)),
                 ]
             ),
-            border=ft.border.all(1, colorVariaveis['bordarInput']),
+            border=ft.border.all(1,),
         )
 
     def criar_container_produto(row):
@@ -73,7 +73,7 @@ def consultar_produto_endereco(navigate_to, header):
                     ft.Divider(),
                 ]
             ),
-            border=ft.border.all(1, colorVariaveis['bordarInput']),
+            border=ft.border.all(1,),
         )
     
     def criar_container_produto_filial(row):
@@ -146,7 +146,7 @@ def consultar_produto_endereco(navigate_to, header):
                     )
                 ]
             ),
-            border=ft.border.all(1, colorVariaveis['bordarInput']),
+            border=ft.border.all(1),
         )
 
     def consultar_produto(codbarra, e):
@@ -244,7 +244,7 @@ def consultar_produto_endereco(navigate_to, header):
                     ),
                 ]
             ),
-            border=ft.border.all(1, colorVariaveis['bordarInput']),
+            border=ft.border.all(1,),
         )
     
     def consultar_endereco(codendereco_valor, e):
