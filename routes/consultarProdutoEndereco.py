@@ -19,7 +19,7 @@ def consultar_produto_endereco(navigate_to, header):
         e.page.open(snack)
 
     def criar_container_total(row):
-        codprod, codfab, qt, descricao, modulo, rua, edificio, nivel, apto, tipoendereco, total = row
+        codprod, codfab, qt, descricao, modulo, rua, edificio, nivel, apto, tipoendereco, total, validade = row
 
         return ft.Container(
             padding=10,
@@ -77,7 +77,7 @@ def consultar_produto_endereco(navigate_to, header):
         )
     
     def criar_container_produto_filial(row):
-        codprod, codfab, qt, descricao, modulo, rua, edificio, nivel, apto, tipoendereco, total = row
+        codprod, codfab, qt, descricao, modulo, rua, edificio, nivel, apto, tipoendereco, total, validade = row
 
         return ft.Container(
             padding=10,
@@ -136,6 +136,12 @@ def consultar_produto_endereco(navigate_to, header):
                                     ft.Text(str(tipoendereco)),
                                 ]
                             ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("VAL", weight="BOLD"),
+                                    ft.Text(str(validade)),
+                                ]
+                            ),
                         ]
                     )
                 ]
@@ -155,14 +161,14 @@ def consultar_produto_endereco(navigate_to, header):
                 dados_produto = dados.get("dados_produto", [])
                 dados_produto_filial = dados.get("dados_produto_filial", [])
 
-                print("Dados do produto na filial:", dados_produto_filial)
-                print("Dados do produto", dados_produto)
+                # print("Dados do produto na filial:", dados_produto_filial)
+                # print("Dados do produto", dados_produto)
 
                 lista_produtos_col.controls.clear()
 
                 if dados_produto_filial:
                     linha1 = dados_produto_filial[0]
-                    print(f"Linha 1{linha1}")
+                    # print(f"Linha 1{linha1}")
                     container_total = criar_container_total(linha1)
                     lista_produtos_col.controls.append(container_total)
 
@@ -184,11 +190,11 @@ def consultar_produto_endereco(navigate_to, header):
             else:
                 print("Erro no backend:", response.status_code, response.text)
         except Exception as exc:
-            print("Erro na requisição:", exc)
+            print("Erro na requisição consultar produto:", exc)
 
     def criar_container_endereco(row):
         """row deve ser algo como [codprod, codfab, qt, descricao]."""
-        codprod, codfab, qt, descricao = row
+        codprod, codfab, qt, descricao, validade = row
 
         return ft.Container(
             padding=10,
@@ -214,6 +220,12 @@ def consultar_produto_endereco(navigate_to, header):
                                 controls=[
                                     ft.Text("QT", weight="BOLD"),
                                     ft.Text(str(qt)),
+                                ]
+                            ),
+                            ft.Column(
+                                controls=[
+                                    ft.Text("VAL", weight="BOLD"),
+                                    ft.Text(str(validade)),
                                 ]
                             ),
                         ],
@@ -249,7 +261,7 @@ def consultar_produto_endereco(navigate_to, header):
                 dados = response.json()
                 dados_endereco = dados.get("dados_endereco", [])
 
-                # print("Recebido do backend (endereços):", dados_endereco)
+                #print("Recebido do backend (endereços):", dados_endereco)
 
                 # Preenche com containers de endereço
                 for row in dados_endereco:
