@@ -289,12 +289,14 @@ def consultar_produto_endereco(navigate_to, header):
         width=300,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
+        on_submit=lambda e: consultar_produto(codbarra.value, e),
     )
     codendereco = ft.TextField(
         label="Endereço",
         width=300,
         border_radius=ft.border_radius.all(10),
         border_color=colorVariaveis['bordarInput'],
+        on_submit=lambda e: consultar_endereco(codendereco.value, e),
     )
 
     tabs = ft.Tabs(
