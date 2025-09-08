@@ -2,6 +2,26 @@ import flet as ft
 import requests
 from routes.config.config import base_url, colorVariaveis, user_info
 
+# Placeholder de requisição: sempre que atualizar a quantidade separada
+# retorne 200 se a requisição der certo ou 303 se der errado.
+def requisicao_atualizar_quantidade(payload: dict) -> int:
+    try:
+        response = requests.post(
+            f"{base_url}/buscar_dados_transferencia_devolucao",
+            json={
+                "payload": payload,
+                "action": "atualizar_qt_separada"
+            }
+        )
+        if response.status_code == 200:
+            return 200
+        else:
+            print("Erro ao buscar os dados da transferência/devolução")
+            print(f"Status code: {response.status_code}, Response: {response.text}")
+            return 303
+    except Exception:
+        return 303
+
 def separar_transferencia_devolucao(e, navigate_to, header, arguments):
     matricula = user_info.get('matricula')
     codfilial = user_info.get('codfilial')
@@ -25,6 +45,21 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
             dados_itens = [list(i) for i in raw_itens]
             raw_resumo = dados.get("dados_resumo", [])
             dados_resumo = [list(i) for i in raw_resumo]
+            # Normaliza campo "restante" (índice 6) de acordo com o que já veio separado (índice 5)
+            for r in dados_resumo:
+                # Garante tamanho mínimo até o índice 6
+                while len(r) <= 6:
+                    r.append(0)
+                # Recalcula restante: total (4) - separado (5)
+                try:
+                    total_pedido = int(r[4])
+                except Exception:
+                    total_pedido = r[4]
+                try:
+                    ja_separado = int(r[5])
+                except Exception:
+                    ja_separado = r[5]
+                r[6] = total_pedido - ja_separado
             raw_barras = dados.get("dados_codbarras", [])
             dados_codbarras = [list(i) for i in raw_barras]
         else:
@@ -82,8 +117,19 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
             page.update()
 
 
+    def filtrar_itens_pendentes():
+        # Mantém apenas itens (endereços) de produtos que ainda têm saldo a separar
+        codprod_pendentes = {r[0] for r in dados_resumo if len(r) > 5 and r[5] < r[4]}
+        if codprod_pendentes:
+            dados_itens[:] = [it for it in dados_itens if it[1] in codprod_pendentes]
+        else:
+            # Se nenhum pendente, esvazia a lista para forçar mensagem de fim
+            dados_itens.clear()
+
+
     def atualizar_tab_separar():
     # Verifica se ainda há produtos para separar
+        filtrar_itens_pendentes()
         if dados_itens:
             next_item = dados_itens[0]
             # Cria os controles para o próximo produto
@@ -165,6 +211,20 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
         e.page.open(snack)
     
     def abrir_dialogo_produto(e, resumo_item, endereco_item):
+        # Segurança: assegura que o "restante" (índice 6) está coerente com o que já foi separado (índice 5)
+        while len(resumo_item) <= 6:
+            resumo_item.append(0)
+        try:
+            total_pedido = int(resumo_item[4])
+        except Exception:
+            total_pedido = resumo_item[4]
+        try:
+            ja_separado = int(resumo_item[5])
+        except Exception:
+            ja_separado = resumo_item[5]
+        # Se vier inconsistente do backend, rebaseia
+        if resumo_item[6] != total_pedido - ja_separado:
+            resumo_item[6] = total_pedido - ja_separado
         qt_separada = ft.Text(f"Quantidade Separada: {resumo_item[5]}/{resumo_item[4]}")
         qt_falta = ft.Text(f"Quantidade Faltante: {resumo_item[4] - resumo_item[5]}")
         qt_endereco = ft.Text(f"Disponível neste endereço: {endereco_item[5]}")
@@ -266,6 +326,25 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
                         "quantidade":  nova_qt
                     })
                     print(f"Item adicionado ao sucesso: {itens_sucesso}")
+
+                    # Dispara requisição sempre que atualizar a quantidade separada
+                    # Envia a quantidade TOTAL já separada (resumo_item[5])
+                    # em vez da quantidade digitada (nova_qt), para evitar
+                    # sobrescrever o valor existente no backend.
+                    status_req = requisicao_atualizar_quantidade({
+                        "codendereco": endereco_item[7],
+                        "codprod":     endereco_item[1],
+                        "quantidade":  resumo_item[5],
+                        "numnota":     numnota,
+                        "matricula":   matricula,
+                        "codfilial":   codfilial,
+                    })
+                    if status_req == 200:
+                        # Sucesso (200) - você pode adicionar sua lógica aqui se desejar
+                        pass
+                    else:
+                        # Erro (303) - você pode adicionar sua lógica de erro aqui
+                        pass
                     # Se atingiu o pedido, remove e fecha
 
                     if endereco_item[5] < 0:
@@ -348,6 +427,7 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
         )
         e.page.open(dialog)
 
+    filtrar_itens_pendentes()
     if dados_itens:
         item = dados_itens[0]
         input_endereco = ft.TextField(label="Digite o código do endereço")
