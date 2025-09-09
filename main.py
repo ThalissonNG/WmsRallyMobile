@@ -192,32 +192,31 @@ def main(page: ft.Page):
 
         def validar_versao():
             try:
-                response = requests.get(
-                    f"{base_url}/verificarVersao",
-                    json={"versao": app_version}
-                )
-                print(f"Status code: {response.status_code}")
+                r = requests.post(f"{base_url}/verificarVersao", json={"versao": app_version}, timeout=8)
 
-                if response.status_code == 200:
+                if r.status_code in (200, 204):
                     print("Versão atualizada")
-                    pass
-                elif response.status_code == 404:
-                    response_versao = response.json()
-                    link_download = response_versao.get('linkDownload')
-                    print(f"Response: {response_versao}")
-                    dialog_nova_versao = ft.AlertDialog(
-                        title=ft.Text("Nova versão disponível"),
-                        content=ft.Text("Deseja atualizar a versão?"),
+                    return
+
+                if r.status_code in (409, 426):
+                    data = r.json()
+                    link = data.get("download")
+                    dlg = ft.AlertDialog(
+                        title=ft.Text(f"Nova versão {data.get('latest')} disponível"),
+                        content=ft.Text("Deseja atualizar agora?"),
                         actions=[
-                            ft.TextButton(
-                                "Baixar Agora",
-                                on_click=lambda e: page.launch_url(link_download)
-                                ),
-                        ]
+                            ft.TextButton("Depois", on_click=lambda e: page.close(dlg)),
+                            ft.ElevatedButton("Baixar e instalar", on_click=lambda e: page.launch_url(link)),
+                        ],
                     )
-                    page.open(dialog_nova_versao)
+                    page.open(dlg)
+                    return
+
+                print("Falha ao verificar versão:", r.status_code, r.text)
+
             except Exception as exc:
-                print(exc)
+                print("Erro:", exc)
+
 
         validar_versao()
         username = ft.TextField(
