@@ -13,6 +13,10 @@ def conferir_bonus(page, navigate_to, header, arguments):
     tab_itens_container = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[])
     tab_resumo_container = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, controls=[])
 
+    campo_pesquisa_itens = ft.TextField(
+        label="Pesquisar",
+        on_change=lambda e: aplicar_filtro_itens(e),
+    )
     def snackbar(mensagem, bgcolor, page):
         snack = ft.SnackBar(
             content=ft.Text(
@@ -50,11 +54,33 @@ def conferir_bonus(page, navigate_to, header, arguments):
         # print(f"resumo: {resumo}")
         # Atualiza aba Itens
         tab_itens_container.controls.clear()
-        tab_itens_container.controls = [construir_itens(item) for item in itens]
+        tab_itens_container.controls.append(campo_pesquisa_itens)
+        # tab_itens_container.controls = [construir_itens(item) for item in itens]
+        tab_itens_container.controls[:] = [campo_pesquisa_itens] + [construir_itens(item) for item in itens]
         # Atualiza aba Resumo
         tab_resumo_container.controls.clear()
         tab_resumo_container.controls = [construir_resumo(item) for item in resumo]
         page.update()
+
+    def aplicar_filtro_itens(e: ft.ControlEvent):
+        item, resumo = buscar_dados_bonus(numbonus)
+        q = (e.control.value or "").strip().lower()
+
+        if not q:
+            filtrados = item
+        else:
+            def match(item):
+                codprod = str(item[2]).lower()
+                codfab  = str(item[3]).lower()
+                return (q in codprod) or (q in codfab)
+
+            filtrados = [it for it in item if match(it)]
+
+        tab_itens_container.controls[:] = [tab_itens_container.controls[0]] + [
+            construir_itens(item) for item in filtrados
+        ]
+        page.update()
+
 
     def construir_itens(item):
         if item[6] == 0:
@@ -95,7 +121,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
                             ft.Column(
                                 controls=[
                                     ft.Text("qt", weight="bold", color=cortexto),
-                                    ft.Text(str(item[5]), color=cortexto),
+                                    ft.Text(str(item[6]) + "/" + str(item[5]), color=cortexto),
                                 ]
                             ),
                         ]
