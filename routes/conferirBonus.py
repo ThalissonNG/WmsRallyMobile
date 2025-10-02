@@ -17,6 +17,11 @@ def conferir_bonus(page, navigate_to, header, arguments):
         label="Pesquisar",
         on_change=lambda e: aplicar_filtro_itens(e),
     )
+
+    campo_pesquisa_resumo = ft.TextField(
+        label="Pesquisar",
+        on_change=lambda e: aplicar_filtro_resumo(e),
+    )
     def snackbar(mensagem, bgcolor, page):
         snack = ft.SnackBar(
             content=ft.Text(
@@ -59,7 +64,9 @@ def conferir_bonus(page, navigate_to, header, arguments):
         tab_itens_container.controls[:] = [campo_pesquisa_itens] + [construir_itens(item) for item in itens]
         # Atualiza aba Resumo
         tab_resumo_container.controls.clear()
-        tab_resumo_container.controls = [construir_resumo(item) for item in resumo]
+        tab_resumo_container.controls.append(campo_pesquisa_resumo)
+        tab_resumo_container.controls[:] = [campo_pesquisa_resumo] + [construir_resumo(item) for item in resumo]
+        # tab_resumo_container.controls = [construir_resumo(item) for item in resumo]
         page.update()
 
     def aplicar_filtro_itens(e: ft.ControlEvent):
@@ -81,6 +88,23 @@ def conferir_bonus(page, navigate_to, header, arguments):
         ]
         page.update()
 
+    def aplicar_filtro_resumo(e: ft.ControlEvent):
+        item, resumo = buscar_dados_bonus(numbonus)
+        q = (e.control.value or "").strip().lower()
+
+        if not q:
+            filtrados = resumo
+        else:
+            def match(resumo):
+                codprod = str(resumo[0]).lower()
+                codfab = str(resumo[1]).lower()
+                return (q in codprod) or (q in codfab)
+            filtrados = [it for it in resumo if match(it)]
+
+        tab_resumo_container.controls[:] = [tab_resumo_container.controls[0]] + [
+            construir_resumo(item) for item in filtrados
+        ]
+        page.update()
     def construir_itens(item):
         if item[6] == 0:
             corfundo = None
