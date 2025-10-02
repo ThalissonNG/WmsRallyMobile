@@ -7,6 +7,10 @@ def conferir_bonus(page, navigate_to, header, arguments):
     codfilial = user_info.get("codfilial")
     numbonus = arguments.get("numbonus", "N/A")
 
+    itens_bonus_cache = []
+    resumo_bonus_cache = []
+    codigos_bonus = set()
+
     # dados_bonus = []
     print(f"Tela de conferir bonusMatricula: {matricula} - Codfilial: {codfilial} - Numbonus: {numbonus}")
 
@@ -31,6 +35,21 @@ def conferir_bonus(page, navigate_to, header, arguments):
             bgcolor=bgcolor)
         page.open(snack)
 
+    def atualizar_produtos_bonus_cache(itens, resumo):
+        itens_bonus_cache.clear()
+        itens_bonus_cache.extend(itens or [])
+        resumo_bonus_cache.clear()
+        resumo_bonus_cache.extend(resumo or [])
+        codigos_bonus.clear()
+
+        for item in itens_bonus_cache:
+            if len(item) > 2 and item[2] is not None:
+                codigos_bonus.add(str(item[2]))
+
+        for item in resumo_bonus_cache:
+            if len(item) > 0 and item[0] is not None:
+                codigos_bonus.add(str(item[0]))
+
     def buscar_dados_bonus(numbonus):
         try:
             response = requests.post(
@@ -43,9 +62,10 @@ def conferir_bonus(page, navigate_to, header, arguments):
 
             if response.status_code == 200:
                 resposta = response.json()
-                itens_bonus = resposta.get("itens_bonus")
-                itens_bonus_etiqueta = resposta.get("itens_bonus_etiqueta")
-                return itens_bonus, itens_bonus_etiqueta
+                itens_bonus = resposta.get("itens_bonus") or []
+                itens_bonus_etiqueta = resposta.get("itens_bonus_etiqueta") or []
+                atualizar_produtos_bonus_cache(itens_bonus, itens_bonus_etiqueta)
+                return itens_bonus_cache, resumo_bonus_cache
             else:
                 resposta = response.json()
                 mensagem = resposta.get("message")
@@ -330,9 +350,18 @@ def conferir_bonus(page, navigate_to, header, arguments):
             )
             if response.status_code == 200:
                 resposta = response.json()
-                dados_codbarra = resposta.get("dados_codbarra")
+                dados_codbarra = resposta.get("dados_codbarra") or []
+                if not dados_codbarra:
+                    snackbar("Produto não encontrado para este código de barras.", colorVariaveis['erro'], page)
+                    return
+                codprod = str(dados_codbarra[0][0])
+                if not codigos_bonus:
+                    buscar_dados_bonus(numbonus)
+                produto_no_bonus = codprod in codigos_bonus
+                if not produto_no_bonus:
+                    snackbar("Produto não pertence a este bônus.", colorVariaveis['erro'], page)
                 print(dados_codbarra)
-                dialogo_produto(page, codetiqueta, dados_codbarra)
+                dialogo_produto(page, codetiqueta, dados_codbarra, produto_no_bonus)
             else:
                 resposta = response.json()
                 mensagem = resposta.get("message")
@@ -420,10 +449,28 @@ def conferir_bonus(page, navigate_to, header, arguments):
         page.open(dialog_codbarra)
         page.update()
 
-    def dialogo_produto(page, codetiqueta, dados_codbarra):
+    def dialogo_produto(page, codetiqueta, dados_codbarra, produto_no_bonus):
         campo_qt = ft.TextField(
             label="Quantidade"
         )
+        status_text = "Produto pertence a este bônus." if produto_no_bonus else "Produto não pertence a este bônus."
+        status_color = colorVariaveis['sucesso'] if produto_no_bonus else colorVariaveis['erro']
+
+        def confirmar_produto(_):
+            if not produto_no_bonus:
+                return
+            ValidarQuantidade(
+                dados_codbarra[0][0],
+                codetiqueta,
+                numbonus,
+                dados_codbarra[0][3],
+                campo_qt.value,
+                page
+            )
+            page.close(dialog_produto)
+            setattr(inputEtiqueta, "value", "")
+            page.update()
+
         dialog_produto = ft.AlertDialog(
             title=ft.Text("Inserir Produto"),
             content=ft.Column(
@@ -433,6 +480,7 @@ def conferir_bonus(page, navigate_to, header, arguments):
                     ft.Text(f"Codprod: {dados_codbarra[0][0]}"),
                     ft.Text(f"Codfab: {dados_codbarra[0][2]}"),
                     ft.Text(f"Descrição: {dados_codbarra[0][1]}"),
+                    ft.Text(status_text, weight="bold", color=status_color),
                     campo_qt,
                 ],
                 tight=True,
@@ -445,20 +493,8 @@ def conferir_bonus(page, navigate_to, header, arguments):
                 ),
                 ft.TextButton(
                     "Confirmar",
-                    on_click=lambda e: (
-                        ValidarQuantidade(
-                            dados_codbarra[0][0],
-                            codetiqueta,
-                            numbonus,
-                            dados_codbarra[0][3],
-                            campo_qt.value,
-                            page
-                        ),
-                        page.close(dialog_produto),
-                        setattr(inputEtiqueta, "value", ""),
-                        page.update(),
-                        # atualizar_tabs()
-                    )
+                    disabled=not produto_no_bonus,
+                    on_click=confirmar_produto,
                 ),
             ]
         )
