@@ -20,3 +20,6 @@ icon = "assets/icon.png"
 [tool.flet.flutter.dependencies]
 window_to_front = "0.0.3"
 # Adicione outras dependências Flutter/Dart aqui, se necessário
+
+[tool.flet.flutter.pubspec.dependency_overrides]
+webview_flutter_android = "4.10.1"
