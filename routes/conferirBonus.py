@@ -81,7 +81,6 @@ def conferir_bonus(page, navigate_to, header, arguments):
         ]
         page.update()
 
-
     def construir_itens(item):
         if item[6] == 0:
             corfundo = None
