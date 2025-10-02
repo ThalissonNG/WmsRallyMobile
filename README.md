@@ -16,7 +16,7 @@ Antes de começar, você precisará instalar as seguintes ferramentas:
 
 Baixe a versão 3.24.5 do Flutter no seguinte link:
 
-- [Flutter SDK - versão 3.24.5](https://flutter-ko.dev/development/tools/sdk/releases)
+- [Flutter SDK - versão 3.24.5](https://docs.flutter.dev/install/archive)
 
 Após o download, extraia o arquivo em um diretório de sua escolha e adicione o Flutter à variável de ambiente `PATH` para garantir que o comando `flutter` esteja disponível no terminal.
 
@@ -72,12 +72,12 @@ flutter create wms_rally_mobile
     source venv/bin/activate
     ```
 
-### 6. Instalar o Flet versão 0.24.0
+### 6. Instalar o Flet versão 0.28.3
 
 1. No diretório do projeto, crie o arquivo `requirements.txt` com o seguinte conteúdo:
 
     ```txt
-    flet==0.24.0
+    flet==0.28.3
     ```
 
 2. Instale as dependências utilizando o comando:
@@ -86,4 +86,4 @@ flutter create wms_rally_mobile
     pip install -r requirements.txt
     ```
 
-Agora, o **Flet versão 0.24.0** estará instalado e pronto para ser utilizado no seu projeto.
+Agora, o **Flet versão 0.28.3** estará instalado e pronto para ser utilizado no seu projeto.
