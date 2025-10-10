@@ -5,6 +5,7 @@ from routes.config.config import base_url, colorVariaveis, user_info
 # Placeholder de requisição: sempre que atualizar a quantidade separada
 # retorne 200 se a requisição der certo ou 303 se der errado.
 def requisicao_atualizar_quantidade(payload: dict) -> int:
+    print(f"Payload para atualizar quantidade: {payload}")
     try:
         response = requests.post(
             f"{base_url}/buscar_dados_transferencia_devolucao",
@@ -320,6 +321,7 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
                     tabsResumo.update()
                     evt.page.update()
 
+                    itens_sucesso.clear()
                     itens_sucesso.append({
                         "codendereco": endereco_item[7],
                         "codprod":     endereco_item[1],
@@ -334,7 +336,7 @@ def separar_transferencia_devolucao(e, navigate_to, header, arguments):
                     status_req = requisicao_atualizar_quantidade({
                         "codendereco": endereco_item[7],
                         "codprod":     endereco_item[1],
-                        "quantidade":  resumo_item[5],
+                        "quantidade":  nova_qt,
                         "numnota":     numnota,
                         "matricula":   matricula,
                         "codfilial":   codfilial,
