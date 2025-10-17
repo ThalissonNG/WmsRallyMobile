@@ -22,6 +22,7 @@ from routes.buscarBonus import buscar_bonus
 from routes.conferirBonus import conferir_bonus
 from routes.buscarPedidoUnico import buscar_pedido_unico
 from routes.separarPedidoUnico import separar_pedido_unico
+from routes.abastecimento import abastecimento
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -99,6 +100,8 @@ def main(page: ft.Page):
             page.views.append(buscar_pedido_unico(page, navigate_to, create_header()))
         elif route == "/separar_pedido_unico":
             page.views.append(separar_pedido_unico(page, navigate_to, create_header()))
+        elif route == "/abastecimento":
+            page.views.append(abastecimento(page, navigate_to, create_header()))
 
         page.update()
 
