@@ -7,8 +7,44 @@ def abastecimento(page: ft.Page, navigate_to, header):
     codfilial = user_info.get("codfilial")
     print(f"User config na tela Abastecimento: {matricula}")
 
+    def snackbar(mensagem, bgcolor, page):
+        snack = ft.SnackBar(
+            content=ft.Text(
+                mensagem,
+                color="white"
+            ),
+            bgcolor=bgcolor)
+        page.open(snack)
     def buscar_os(numos):
+        if not numos:
+            snackbar("Digite o numero da OS", colorVariaveis['erro'], page)
+            return
+
         print(f"Buscar OS: {numos}")
+
+        response = requests.post(
+            base_url + "/abastecimento",
+            json={
+                "numos": numos,
+                "matricula": matricula,
+                "codfilial": codfilial,
+                "action": "atribuir_os"
+            },
+        )
+        print(f"Status code: {response.status_code}")
+        print(f"Response: {response.json()}")
+        resposta = response.json()
+        mensagem = resposta.get("message")
+        print(mensagem)
+        
+        if response.status_code == 200:
+            snackbar(mensagem, colorVariaveis['sucesso'], page)
+            navigate_to("/separar_abastecimento", arguments={
+                "num_os": numos,
+            })
+        elif response.status_code == 400:
+            snackbar(mensagem, colorVariaveis['erro'], page)
+
 
     titulo = ft.Text(
         "Abastecimento",
