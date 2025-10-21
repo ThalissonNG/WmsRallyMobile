@@ -109,6 +109,42 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             )
         return ft.Column(itens)
 
+    # Helpers que sempre retornam Column (facilita atualizar a UI)
+    def construir_container_dados_os(dados_os):
+        itens = []
+        if not dados_os:
+            itens.append(ft.Text("Nenhum dado dispon��vel."))
+        else:
+            for item in dados_os:
+                codprod_item = item[1]
+                descricao_item = item[2]
+                quantidade_item = item[3]
+                qtSeparada_item = item[4]
+                itens.append(
+                    ft.ListTile(
+                        ft.Text(f"Codprod = {codprod_item} - Qt_os: {quantidade_item} - Qt.Separada: {qtSeparada_item}"),
+                        subtitle=ft.Text(f"Descrição: {descricao_item}")
+                    )
+                )
+        return ft.Column(itens)
+
+    def construir_container_endereco(dados_endereco):
+        itens = []
+        if not dados_endereco:
+            itens.append(ft.Text("Nenhum dado dispon��vel."))
+        else:
+            for endereco in dados_endereco:
+                modulo = endereco[1]
+                rua = endereco[2]
+                edificio = endereco[3]
+                nivel = endereco[4]
+                apto = endereco[5]
+                qt_endereco = endereco[7]
+                itens.append(
+                    ft.Text(f"MOD: {modulo} - RUA: {rua} - EDI: {edificio} - NIV: {nivel} - APTO: {apto} - Qtde: {qt_endereco}")
+                )
+        return ft.Column(itens)
+
     def validar_endereco(e, dados_endereco):
         codendereco = int(dados_endereco[0][0])
         codendereco_input = int(input_codendereco.value.strip())
@@ -131,6 +167,7 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             page.update()
 
         def validar_qt(e):
+            nonlocal dados_os, dados_endereco, container_dados_os, container_endereco, input_codendereco, button_validarEndereco
             quantidade_informada = int(input_quantidade.value.strip())
 
             if not quantidade_informada:
@@ -140,6 +177,20 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             if quantidade_informada <= qt_endereco:
                 snackbar(f"Quantidade {quantidade_informada} confirmada.", colorVariaveis['sucesso'], page)
                 atualizar_quantidade_separada(numos, codprod, quantidade_informada, codendereco)
+                # Recarrega os dados atualizados e atualiza a interface
+                dados_os, dados_endereco = buscar_dados_os(numos)
+
+                # Atualiza os containers na tela mantendo as referências
+                novo_container_os = construir_container_dados_os(dados_os)
+                novo_container_end = construir_container_endereco(dados_endereco)
+                container_dados_os.controls = novo_container_os.controls
+                container_endereco.controls = novo_container_end.controls
+
+                # Atualiza os handlers para usarem o novo dados_endereco
+                input_codendereco.on_submit = lambda ev: validar_endereco(ev, dados_endereco)
+                button_validarEndereco.on_click = lambda ev: validar_endereco(ev, dados_endereco)
+                input_codendereco.value = ""
+                page.update()
                 fechar_dialog(e)
             else:
                 fechar_dialog(e)
@@ -175,15 +226,9 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
 
     dados_os, dados_endereco = buscar_dados_os(numos)
     
-    if dados_os:
-        container_dados_os = container_dados_os(dados_os)
-    else:
-        container_dados_os = ft.Text("Nenhum dado disponível.")
-
-    if dados_endereco:
-        container_endereco = container_endereco(dados_endereco)
-    else:
-        container_endereco = ft.Text("Nenhum dado disponível.")
+    # Cria containers como Column para poder atualizar seu conteúdo posteriormente
+    container_dados_os = construir_container_dados_os(dados_os)
+    container_endereco = construir_container_endereco(dados_endereco)
 
     input_codendereco = ft.TextField(
         label="Código Endereço",
@@ -205,3 +250,4 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             button_validarEndereco
         ]
     )
+
