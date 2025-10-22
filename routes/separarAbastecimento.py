@@ -122,6 +122,59 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
                 )
         return ft.Column(itens)
 
+    def construir_container_picking(dados_picking):
+        input_codendereco_picking = ft.TextField(
+            label="Endereço Picking",
+            keyboard_type=ft.KeyboardType.NUMBER,
+            on_submit=lambda e: print(input_codendereco_picking.value)
+        )
+        button_validarEndereco_picking = ft.ElevatedButton(
+            text="Validar Endereço",
+            on_click=lambda e: print(input_codendereco_picking.value),
+        )
+
+        itens = []
+        if not dados_picking:
+            itens.append(ft.Text("Nenhum dado disponível."))
+        else:
+            for endereco in dados_picking:
+                modulo = endereco[1]
+                rua = endereco[2]
+                edificio = endereco[3]
+                nivel = endereco[4]
+                apto = endereco[5]
+                qt_endereco = endereco[7]
+                itens.append(
+                    ft.Text(
+                        f"MOD: {modulo} - RUA: {rua} - EDI: {edificio} - NIV: {nivel} - APTO: {apto} - Qtde: {qt_endereco}"
+                    )
+                )
+            itens.append(input_codendereco_picking)
+            itens.append(button_validarEndereco_picking)
+        return ft.Column(itens)
+
+    def busca_picking(codprod, codfilial):
+        response = requests.post(
+            base_url + "/abastecimento",
+            json={
+                "codprod": codprod,
+                "codfilial": codfilial,
+                "matricula": matricula,
+                "action": "buscar_picking",
+            },
+        )
+        print(f"Status code: {response.status_code}")
+        resposta = response.json()
+        mensagem = resposta.get("message")
+
+        if response.status_code == 200:
+            dados_picking = resposta.get("dados_picking")
+            print("Dados encontrados do picking:", dados_picking)
+            return dados_picking
+        elif response.status_code == 404:
+            snackbar(mensagem, colorVariaveis["erro"], page)
+            return []
+
     def atualizar_quantidade_separada(numos, codprod, quantidade, codendereco):
         nonlocal container_principal
         response = requests.post(
@@ -144,9 +197,16 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             snackbar(mensagem, colorVariaveis["sucesso"], page)
             return 200
         elif response.status_code == 202:
+            dados_picking = busca_picking(codprod, codfilial)
+            print("Dados do picking após atualização:", dados_picking)
             # Limpa o container principal para permitir nova informação
             if container_principal and isinstance(container_principal.content, ft.Column):
                 container_principal.content.controls.clear()
+
+                if dados_picking:
+                    container_principal.content.controls.append(
+                        construir_container_picking(dados_picking)
+                    )
             snackbar(mensagem, colorVariaveis["sucesso"], page)
             page.update()
             return 202
