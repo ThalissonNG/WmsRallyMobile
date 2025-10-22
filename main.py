@@ -2,6 +2,7 @@ import flet as ft
 import requests
 from routes.config.config import base_url, colorVariaveis, app_version
 from routes.menu import menu_page
+from routes.configuracoes import configuracoes_page
 from routes.armazenarEtiqueta import buscar_etiqueta
 from routes.enderecarProduto import enderecar_produto
 from routes.consultarProdutoEndereco import consultar_produto_endereco
@@ -59,6 +60,8 @@ def main(page: ft.Page):
         page.views.clear()
         if route == "/login":
             page.views.append(create_login_view())
+        elif route == "/configuracoes":
+            page.views.append(configuracoes_page(page, navigate_to, create_header()))
         elif route == "/menu":
             page.views.append(menu_page(page, navigate_to, create_header()))
         elif route == "/armazenar_bonus":
@@ -253,21 +256,44 @@ def main(page: ft.Page):
         versao = ft.Text(
             f"Versão: {app_version}" 
         )
+        button_settings = ft.IconButton(
+            icon=ft.Icons.SETTINGS,
+            on_click=lambda e:navigate_to("/configuracoes")
+        )
 
         return ft.View(
             route="/login",
             controls=[
                 ft.Container(
-                    content=ft.Column(
-                        controls=[username, password, button_login, versao],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    ),
-                    alignment=ft.alignment.center,
                     expand=True,
+                    content=ft.Column(
+                        controls=[
+                            ft.Container(
+                                content=button_settings,
+                                alignment=ft.alignment.top_left,
+                                padding=10,  # distância das bordas
+                            ),
+
+                            ft.Container(
+                                content=ft.Column(
+                                    controls=[
+                                        username,
+                                        password,
+                                        button_login,
+                                        versao,
+                                    ],
+                                    alignment=ft.MainAxisAlignment.CENTER,
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                                alignment=ft.alignment.center,
+                                expand=True,
+                            ),
+                        ]
+                    ),
                 )
             ],
         )
+
 
     # Inicializa a navegação na tela de login
     navigate_to("/login")
