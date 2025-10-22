@@ -123,14 +123,48 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
         return ft.Column(itens)
 
     def construir_container_picking(dados_picking):
+        def validar_picking(input_picking, page):
+            codendereco_picking = int(dados_picking[0][0])
+            codendereco_input = int(input_picking.value.strip())
+    
+            print(f"Validando endereço picking: Input={codendereco_input}, Esperado={codendereco_picking}")
+    
+            if codendereco_input == codendereco_picking:
+                atualizar_endereco_picking(codendereco_input, numos, page)
+                snackbar("Endereço Picking válido!", colorVariaveis["sucesso"], page)
+            else:
+                snackbar("Endereço Picking inválido. Tente novamente.", colorVariaveis["erro"], page)
+
+        def atualizar_endereco_picking(codendereco, numos, page):
+            response = requests.post(
+                base_url + "/abastecimento",
+                json={
+                    "codendereco": codendereco,
+                    "numos": numos,
+                    "matricula": matricula,
+                    "codfilial": codfilial,
+                    "codprod": dados_os[0][1],
+                    "action": "atualizar_endereco_picking",
+                },
+            )
+            print(f"Status code: {response.status_code}")
+            resposta = response.json()
+            mensagem = resposta.get("message")
+
+            if response.status_code == 200:
+                snackbar(mensagem, colorVariaveis["sucesso"], page)
+                navigate_to("/menu")
+            elif response.status_code == 404:
+                snackbar(mensagem, colorVariaveis["erro"], page)
+
         input_codendereco_picking = ft.TextField(
             label="Endereço Picking",
             keyboard_type=ft.KeyboardType.NUMBER,
-            on_submit=lambda e: print(input_codendereco_picking.value)
+            on_submit=lambda e: validar_picking(input_codendereco_picking, page),
         )
         button_validarEndereco_picking = ft.ElevatedButton(
             text="Validar Endereço",
-            on_click=lambda e: print(input_codendereco_picking.value),
+            on_click=lambda e: validar_picking(input_codendereco_picking, page),
         )
 
         itens = []
