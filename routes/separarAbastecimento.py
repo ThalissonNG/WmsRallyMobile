@@ -7,14 +7,15 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
     codfilial = user_info.get("codfilial")
     numos = arguments.get("num_os")
     print(f"User config na tela Separar Abastecimento: {matricula}, Num OS: {numos}")
+    
+    # Será definida adiante (usada no 202)
+    container_principal = None  # placeholder para manter escopo
 
     def snackbar(mensagem, bgcolor, page):
         snack = ft.SnackBar(
-            content=ft.Text(
-                mensagem,
-                color="white"
-            ),
-            bgcolor=bgcolor)
+            content=ft.Text(mensagem, color="white"),
+            bgcolor=bgcolor,
+        )
         page.open(snack)
 
     def buscar_dados_os(numos):
@@ -24,50 +25,21 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
                 "numos": numos,
                 "matricula": matricula,
                 "codfilial": codfilial,
-                "action": "buscar_dados_os"
+                "action": "buscar_dados_os",
             },
         )
         print(f"Status code: {response.status_code}")
-        # print(f"Response: {response.json()}")
         resposta = response.json()
         mensagem = resposta.get("message")
-        # print(mensagem)
 
         if response.status_code == 200:
             dados_os = resposta.get("dados_os")
             dados_endereco = resposta.get("dados_endereco")
             print("Dados encontrados da OS:", dados_os)
             return dados_os, dados_endereco
-
-            snackbar(mensagem, colorVariaveis['sucesso'], page)
-            # Aqui você pode adicionar a lógica para exibir os dados da OS na tela
         elif response.status_code == 404:
-            snackbar(mensagem, colorVariaveis['erro'], page)
-
-    def atualizar_quantidade_separada(numos, codprod, quantidade, codendereco):
-        response = requests.post(
-            base_url + "/abastecimento",
-            json={
-                "numos": numos,
-                "codprod": codprod,
-                "quantidade": quantidade,
-                "codendereco": codendereco,
-                "matricula": matricula,
-                "codfilial": codfilial,
-                "action": "atualizar_quantidade_separada"
-            },
-        )
-        print(f"Status code: {response.status_code}")
-        # print(f"Response: {response.json()}")
-        resposta = response.json()
-        mensagem = resposta.get("message")
-        # print(mensagem)
-
-        if response.status_code == 200:
-            snackbar(mensagem, colorVariaveis['sucesso'], page)
-            # Aqui você pode adicionar a lógica para exibir os dados da OS na tela
-        elif response.status_code == 404:
-            snackbar(mensagem, colorVariaveis['erro'], page)
+            snackbar(mensagem, colorVariaveis["erro"], page)
+            return [], []
 
     def container_dados_os(dados_os):
         if not dados_os:
@@ -75,17 +47,17 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
 
         itens = []
         for item in dados_os:
-            numos_item = item[0]
             codprod_item = item[1]
             descricao_item = item[2]
             quantidade_item = item[3]
             qtSeparada_item = item[4]
-            codfilial_item = item[5]
 
             itens.append(
                 ft.ListTile(
-                    ft.Text(f"Codprod = {codprod_item} - Quantidade: {quantidade_item} - Qt.Separada: {qtSeparada_item}"),
-                    subtitle=ft.Text(f"Descrição: {descricao_item}")
+                    ft.Text(
+                        f"Codprod = {codprod_item} - Quantidade: {quantidade_item} - Qt.Separada: {qtSeparada_item}"
+                    ),
+                    subtitle=ft.Text(f"Descrição: {descricao_item}"),
                 )
             )
         return ft.Column(itens)
@@ -96,7 +68,6 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
 
         itens = []
         for endereco in dados_endereco:
-            codendereco = endereco[0]
             modulo = endereco[1]
             rua = endereco[2]
             edificio = endereco[3]
@@ -105,15 +76,17 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             qt_endereco = endereco[7]
 
             itens.append(
-                ft.Text(f"MOD: {modulo} - RUA: {rua} - EDI: {edificio} - NIV: {nivel} - APTO: {apto} - Qtde: {qt_endereco}")
+                ft.Text(
+                    f"MOD: {modulo} - RUA: {rua} - EDI: {edificio} - NIV: {nivel} - APTO: {apto} - Qtde: {qt_endereco}"
+                )
             )
         return ft.Column(itens)
 
-    # Helpers que sempre retornam Column (facilita atualizar a UI)
+    # Helpers para construir conteúdo (mantém referência de Column para refresh)
     def construir_container_dados_os(dados_os):
         itens = []
         if not dados_os:
-            itens.append(ft.Text("Nenhum dado dispon��vel."))
+            itens.append(ft.Text("Nenhum dado disponível."))
         else:
             for item in dados_os:
                 codprod_item = item[1]
@@ -122,8 +95,10 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
                 qtSeparada_item = item[4]
                 itens.append(
                     ft.ListTile(
-                        ft.Text(f"Codprod = {codprod_item} - Qt_os: {quantidade_item} - Qt.Separada: {qtSeparada_item}"),
-                        subtitle=ft.Text(f"Descrição: {descricao_item}")
+                        ft.Text(
+                            f"Codprod = {codprod_item} - Quantidade: {quantidade_item} - Qt.Separada: {qtSeparada_item}"
+                        ),
+                        subtitle=ft.Text(f"Descrição: {descricao_item}"),
                     )
                 )
         return ft.Column(itens)
@@ -131,7 +106,7 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
     def construir_container_endereco(dados_endereco):
         itens = []
         if not dados_endereco:
-            itens.append(ft.Text("Nenhum dado dispon��vel."))
+            itens.append(ft.Text("Nenhum dado disponível."))
         else:
             for endereco in dados_endereco:
                 modulo = endereco[1]
@@ -141,9 +116,43 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
                 apto = endereco[5]
                 qt_endereco = endereco[7]
                 itens.append(
-                    ft.Text(f"MOD: {modulo} - RUA: {rua} - EDI: {edificio} - NIV: {nivel} - APTO: {apto} - Qtde: {qt_endereco}")
+                    ft.Text(
+                        f"MOD: {modulo} - RUA: {rua} - EDI: {edificio} - NIV: {nivel} - APTO: {apto} - Qtde: {qt_endereco}"
+                    )
                 )
         return ft.Column(itens)
+
+    def atualizar_quantidade_separada(numos, codprod, quantidade, codendereco):
+        nonlocal container_principal
+        response = requests.post(
+            base_url + "/abastecimento",
+            json={
+                "numos": numos,
+                "codprod": codprod,
+                "quantidade": quantidade,
+                "codendereco": codendereco,
+                "matricula": matricula,
+                "codfilial": codfilial,
+                "action": "atualizar_quantidade_separada",
+            },
+        )
+        print(f"Status code: {response.status_code}")
+        resposta = response.json()
+        mensagem = resposta.get("message")
+
+        if response.status_code == 200:
+            snackbar(mensagem, colorVariaveis["sucesso"], page)
+            return 200
+        elif response.status_code == 202:
+            # Limpa o container principal para permitir nova informação
+            if container_principal and isinstance(container_principal.content, ft.Column):
+                container_principal.content.controls.clear()
+            snackbar(mensagem, colorVariaveis["sucesso"], page)
+            page.update()
+            return 202
+        elif response.status_code == 404:
+            snackbar(mensagem, colorVariaveis["erro"], page)
+            return 404
 
     def validar_endereco(e, dados_endereco):
         codendereco = int(dados_endereco[0][0])
@@ -153,15 +162,16 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
 
         if codendereco_input == codendereco:
             dialog_quantidade()
-            snackbar("Endereço válido!", colorVariaveis['sucesso'], page)
+            snackbar("Endereço válido!", colorVariaveis["sucesso"], page)
         else:
-            snackbar("Endereço inválido. Tente novamente.", colorVariaveis['erro'], page)
+            snackbar("Endereço inválido. Tente novamente.", colorVariaveis["erro"], page)
 
     def dialog_quantidade():
         codendereco = int(dados_endereco[0][0])
         numos = int(dados_os[0][0])
         qt_endereco = dados_endereco[0][7]
         codprod = int(dados_os[0][1])
+
         def fechar_dialog(e):
             dialog.open = False
             page.update()
@@ -171,12 +181,22 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             quantidade_informada = int(input_quantidade.value.strip())
 
             if not quantidade_informada:
-                snackbar("Informe a quantidade", colorVariaveis['erro'], page)
+                snackbar("Informe a quantidade", colorVariaveis["erro"], page)
                 return
-            
+
             if quantidade_informada <= qt_endereco:
-                snackbar(f"Quantidade {quantidade_informada} confirmada.", colorVariaveis['sucesso'], page)
-                atualizar_quantidade_separada(numos, codprod, quantidade_informada, codendereco)
+                snackbar(
+                    f"Quantidade {quantidade_informada} confirmada.",
+                    colorVariaveis["sucesso"],
+                    page,
+                )
+                status = atualizar_quantidade_separada(
+                    numos, codprod, quantidade_informada, codendereco
+                )
+                if status == 202:
+                    fechar_dialog(e)
+                    return
+
                 # Recarrega os dados atualizados e atualiza a interface
                 dados_os, dados_endereco = buscar_dados_os(numos)
 
@@ -187,18 +207,26 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
                 container_endereco.controls = novo_container_end.controls
 
                 # Atualiza os handlers para usarem o novo dados_endereco
-                input_codendereco.on_submit = lambda ev: validar_endereco(ev, dados_endereco)
-                button_validarEndereco.on_click = lambda ev: validar_endereco(ev, dados_endereco)
+                input_codendereco.on_submit = lambda ev: validar_endereco(
+                    ev, dados_endereco
+                )
+                button_validarEndereco.on_click = lambda ev: validar_endereco(
+                    ev, dados_endereco
+                )
                 input_codendereco.value = ""
                 page.update()
                 fechar_dialog(e)
             else:
                 fechar_dialog(e)
-                snackbar(f"Quantidade inválida. Máximo permitido: {qt_endereco}.", colorVariaveis['erro'], page)
+                snackbar(
+                    f"Quantidade inválida. Máximo permitido: {qt_endereco}.",
+                    colorVariaveis["erro"],
+                    page,
+                )
 
         input_quantidade = ft.TextField(
             label="Quantidade",
-            keyboard_type=ft.KeyboardType.NUMBER
+            keyboard_type=ft.KeyboardType.NUMBER,
         )
         button_confirmar = ft.ElevatedButton(
             "Confirmar",
@@ -212,7 +240,7 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
                 controls=[
                     ft.Text("Informe a quantidade"),
                     input_quantidade,
-                    button_confirmar
+                    button_confirmar,
                 ],
             ),
             actions=[
@@ -224,30 +252,40 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
         dialog.open = True
         page.update()
 
+    # Busca inicial
     dados_os, dados_endereco = buscar_dados_os(numos)
-    
+
     # Cria containers como Column para poder atualizar seu conteúdo posteriormente
     container_dados_os = construir_container_dados_os(dados_os)
     container_endereco = construir_container_endereco(dados_endereco)
 
     input_codendereco = ft.TextField(
         label="Código Endereço",
-        on_submit=lambda e: validar_endereco(e, dados_endereco)
+        on_submit=lambda e: validar_endereco(e, dados_endereco),
     )
     button_validarEndereco = ft.ElevatedButton(
         "Validar Endereço",
-        on_click=lambda e: validar_endereco(e, dados_endereco)
+        on_click=lambda e: validar_endereco(e, dados_endereco),
+    )
+
+    # Container principal (limpado quando API retorna 202)
+    container_principal = ft.Container(
+        content=ft.Column(
+            controls=[
+                container_dados_os,
+                container_endereco,
+                input_codendereco,
+                button_validarEndereco,
+            ]
+        )
     )
 
     return ft.View(
-        route="/separar_abastecimento",  # Define a rota da página
+        route="/separar_abastecimento",
         controls=[
             header,
             ft.Text(f"Número da OS: {numos}", size=16),
-            container_dados_os,
-            container_endereco,
-            input_codendereco,
-            button_validarEndereco
-        ]
+            container_principal,
+        ],
     )
 
