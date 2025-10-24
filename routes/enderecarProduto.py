@@ -8,6 +8,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     descricao = arguments.get("descricao", "N/A")
     qt = int(arguments.get("qt", 0))
     numbonus = arguments.get("numbonus", "N/A")
+    classevenda = arguments.get("classevenda", "N/A")
     codetiqueta = arguments.get("codetiqueta", "N/A")
     matricula = user_info.get("matricula", "N/A")
     codfilial = user_info.get("codfilial", "N/A")
@@ -109,7 +110,16 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                                 ),
                                 ft.Text(qt),
                             ],
-                        )
+                        ),
+                        ft.Column(
+                            controls=[
+                                ft.Text(
+                                    "CLASSE:",
+                                    weight="bold",
+                                ),
+                                ft.Text(classevenda),
+                            ],
+                        ),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_AROUND
                 ),

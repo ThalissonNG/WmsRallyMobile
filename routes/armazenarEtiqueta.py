@@ -23,6 +23,7 @@ def buscar_etiqueta(navigate_to, header):
                 descricao = data.get("descricao")
                 qt = data.get("qt")
                 numbonus = data.get("numbonus")
+                classevenda = data.get("classevenda")
                 print(f"Codprod: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Qt: {qt} - Bônus: {numbonus}")
 
                 navigate_to("/enderecarProduto",
@@ -37,6 +38,7 @@ def buscar_etiqueta(navigate_to, header):
                                 "qt": qt,
                                 "numbonus": numbonus,
                                 "codetiqueta": codetiqueta,
+                                "classevenda": classevenda,
                             }
                             )
             else:
