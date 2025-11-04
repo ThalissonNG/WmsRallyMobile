@@ -115,6 +115,7 @@ def separar_pedido_unico(page: ft.Page, navigate_to, header):
         label="Código de Barras",
         # deixe autofocus só em UM campo por etapa
         on_submit=lambda e: validate_barcode_btn.on_click(e),
+        autofocus=True,
     )
     validate_barcode_btn = ft.ElevatedButton(text="Bipar Produto")
     skip_prod_btn = ft.ElevatedButton(text="Pular Produto")
