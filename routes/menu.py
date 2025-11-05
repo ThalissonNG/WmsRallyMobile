@@ -125,6 +125,8 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ),
                     ],
                     spacing=10,
+                    scroll=ft.ScrollMode.AUTO,
+                    expand=True
                 ),
             ],
     )
