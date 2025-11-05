@@ -11,7 +11,9 @@ from routes.buscarPedidoMultiplos import buscar_pedido
 from routes.atribuirEtiqueta import atribuir_etiqueta_pedido
 from routes.separarPedidoMultiplos import separar_pedido
 from routes.buscarTransferenciaDevolucao import buscar_transferencia_devolucao
+from routes.buscarDevolucao import buscar_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
+from routes.separarDevolucao import separar_devolucao
 from routes.contagemInventario import contagem_inventario
 from routes.cadastrarCodbarra import cadastrar_codbarra
 from routes.contagemInventarioRotativo import contagem_inventario_rotativo
@@ -80,8 +82,12 @@ def main(page: ft.Page):
             page.views.append(separar_pedido(page, navigate_to, create_header()))
         elif route == "/buscar_transferencia_devolucao":
             page.views.append(buscar_transferencia_devolucao(page, navigate_to, create_header()))
+        elif route == "/buscar_devolucao":
+            page.views.append(buscar_devolucao(page, navigate_to, create_header()))
         elif route == "/separar_transferencia_devolucao":
             page.views.append(separar_transferencia_devolucao(page, navigate_to, create_header(), arguments))
+        elif route == "/separar_devolucao":
+            page.views.append(separar_devolucao(page, navigate_to, create_header(), arguments))
         elif route == "/contagem_inventario":
             page.views.append(contagem_inventario(page, navigate_to, create_header()))
         elif route == "/cadastrar_codbarra":

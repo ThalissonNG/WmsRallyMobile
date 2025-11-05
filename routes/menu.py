@@ -27,7 +27,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     on_click=lambda e: navigate_to("/buscar_pedido_multiplos")
                                 ),
                                 ft.ElevatedButton(
-                                    "Transferência/Devolução",
+                                    "Transferência",
                                     expand=True,
                                     on_click=lambda e: navigate_to("/buscar_transferencia_devolucao")
                                     ),
@@ -105,6 +105,20 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     "Abastecimento",
                                     expand=True,
                                     on_click=lambda e: navigate_to("/abastecimento")
+                                ),
+                            ],
+                            spacing=10,
+                        ),
+                        ft.Row(
+                            controls=[
+                                ft.ElevatedButton(
+                                    "Devolução",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/buscar_devolucao")
+                                ),
+                                ft.ElevatedButton(
+                                    "----",
+                                    expand=True,
                                 ),
                             ],
                             spacing=10,
