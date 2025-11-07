@@ -38,6 +38,47 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
             mensagem = response.json().get("message")
             snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
 
+    # Dialog controls para exibir/editar (sem salvar por enquanto)
+    info_produto_text = ft.Text("")
+    tf_capacidade = ft.TextField(label="Capacidade")
+    tf_validade = ft.TextField(label="Validade")
+    tf_reposicao = ft.TextField(label="Reposicao")
+    tf_quantidade = ft.TextField(label="Quantidade")
+
+    editar_dialog = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Ajustar Endereco"),
+        content=ft.Column(
+            tight=True,
+            expand=True,
+            scroll=ft.ScrollMode.AUTO,
+            controls=[
+                info_produto_text,
+                tf_capacidade,
+                tf_validade,
+                tf_reposicao,
+                tf_quantidade,
+            ],
+        ),
+        actions=[
+            ft.TextButton("Salvar"),
+            ft.TextButton("Fechar", on_click=lambda e: fechar_dialog()),
+        ],
+    )
+
+    def abrir_dialog(codprod, codfab, descricao, qt, capacidade, reposicao, validade):
+        print("Clicou para abrir")
+        info_produto_text.value = f"{descricao} (Codprod: {codprod} | Codfab: {codfab})"
+        tf_capacidade.value = str(capacidade) if capacidade is not None else ""
+        tf_validade.value = str(validade) if validade is not None else ""
+        tf_reposicao.value = str(reposicao) if reposicao is not None else ""
+        tf_quantidade.value = str(qt) if qt is not None else ""
+
+        page.open(editar_dialog)
+
+    def fechar_dialog():
+        page.close(editar_dialog)
+
     def construir_container(lista_enderecos):
         cards = []
 
@@ -74,10 +115,14 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
                                 ft.Text(f"Reposição: {reposicao}", size=12,),
                             ]
                         ),
+                        ft.Container(height=10),
                         ft.Button(
                             text="Ajustar Endereço",
-                            bgcolor=colorVariaveis['botaoAcao'],
+                            icon=ft.Icons.EDIT,                            bgcolor=colorVariaveis['botaoAcao'],
                             color=colorVariaveis['texto'],
+                            on_click=(
+                                lambda e: abrir_dialog(codprod, codfab, descricao, qt, capacidade, reposicao, validade)
+                            ),
                         )
                     ]
                 )
