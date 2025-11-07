@@ -27,6 +27,7 @@ from routes.buscarPedidoUnico import buscar_pedido_unico
 from routes.separarPedidoUnico import separar_pedido_unico
 from routes.abastecimento import abastecimento
 from routes.separarAbastecimento import separar_abastecimento
+from routes.ajustarEndereco import ajustar_endereco
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -114,6 +115,8 @@ def main(page: ft.Page):
             page.views.append(abastecimento(page, navigate_to, create_header()))
         elif route == "/separar_abastecimento":
             page.views.append(separar_abastecimento(page, navigate_to, create_header(), arguments))
+        elif route == "/ajustar_endereco":
+            page.views.append(ajustar_endereco(page, navigate_to, create_header()))
         page.update()
 
     # Tela de login
