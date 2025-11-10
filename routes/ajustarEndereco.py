@@ -50,6 +50,9 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
 
         if response.status_code == 200:
             snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+            fechar_dialog()
+            navigate_to("/ajustar_endereco")
+            page.update()
         else:
             snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
 
@@ -91,7 +94,7 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
     def abrir_dialog(codprod, codfab, descricao, qt, capacidade, reposicao, validade, codendereco):
         print("Clicou para abrir")
         info_produto_text.value = f"{descricao}"
-        codprod_text.value = f"Codprod: {codprod}"
+        codprod_text.value = f"{codprod}"
         codendereco_txt.value = f"{codendereco}"
         tf_capacidade.value = str(capacidade) if capacidade is not None else ""
         tf_validade.value = str(validade) if validade is not None else ""
