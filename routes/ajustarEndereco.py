@@ -17,18 +17,13 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
         page.open(snack)
 
     def validar_endereco(codendereco, codfilial):
-        response = requests.post(
-            base_url + "/ajustar_endereco",
-            json={
-                "codendereco": codendereco,
-                "matricula": matricula,
-                "codfilial": codfilial
-            }
+        response = requests.get(
+            f"{base_url}/ajustar_endereco/{codendereco}",
         )
         print(f"Status code: {response.status_code}")
         print(f"Response: {response.json()}")
 
-        if response.status_code == 201:
+        if response.status_code == 200:
             dados_endereco = response.json().get("dados_endereco", [])
             container_principal.content = construir_container(dados_endereco)
             page.update()
@@ -38,8 +33,30 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
             mensagem = response.json().get("message")
             snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
 
+    def atualizar_dados(codendereco, codprod, capacidade, reposicao, validade, qt):
+        response = requests.put(
+            f"{base_url}/ajustar_endereco/{codendereco}",
+            json={
+                "codprod": codprod,
+                "qt": qt,
+                "capacidade": capacidade,
+                "reposicao": reposicao,
+                "validade": validade
+            }
+        )
+        print(f"Status code: {response.status_code}")
+        resposta = response.json()
+        mensagem = resposta.get("message")
+
+        if response.status_code == 200:
+            snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+        else:
+            snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+
     # Dialog controls para exibir/editar (sem salvar por enquanto)
     info_produto_text = ft.Text("")
+    codprod_text = ft.Text("")
+    codendereco_txt = ft.Text("")
     tf_capacidade = ft.TextField(label="Capacidade")
     tf_validade = ft.TextField(label="Validade")
     tf_reposicao = ft.TextField(label="Reposicao")
@@ -54,6 +71,8 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
             scroll=ft.ScrollMode.AUTO,
             controls=[
                 info_produto_text,
+                codprod_text,
+                # codendereco_txt,
                 tf_capacidade,
                 tf_validade,
                 tf_reposicao,
@@ -61,19 +80,25 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
             ],
         ),
         actions=[
-            ft.TextButton("Salvar"),
+            ft.TextButton(
+                "Salvar",
+                on_click=lambda e: atualizar_dados(codendereco_txt.value, codprod_text.value, tf_capacidade.value, tf_reposicao.value, tf_validade.value, tf_quantidade.value),
+            ),
             ft.TextButton("Fechar", on_click=lambda e: fechar_dialog()),
         ],
     )
 
-    def abrir_dialog(codprod, codfab, descricao, qt, capacidade, reposicao, validade):
+    def abrir_dialog(codprod, codfab, descricao, qt, capacidade, reposicao, validade, codendereco):
         print("Clicou para abrir")
-        info_produto_text.value = f"{descricao} (Codprod: {codprod} | Codfab: {codfab})"
+        info_produto_text.value = f"{descricao}"
+        codprod_text.value = f"Codprod: {codprod}"
+        codendereco_txt.value = f"{codendereco}"
         tf_capacidade.value = str(capacidade) if capacidade is not None else ""
         tf_validade.value = str(validade) if validade is not None else ""
         tf_reposicao.value = str(reposicao) if reposicao is not None else ""
         tf_quantidade.value = str(qt) if qt is not None else ""
 
+        page.update()
         page.open(editar_dialog)
 
     def fechar_dialog():
@@ -83,7 +108,7 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
         cards = []
 
         for linha in lista_enderecos:
-            codprod, codfab, descricao, qt, tipoendereco, capacidade, reposicao, validade = linha
+            codprod, codfab, descricao, qt, tipoendereco, capacidade, reposicao, validade, codendereco = linha
             
             card = ft.Container(
                 padding=10,
@@ -121,7 +146,7 @@ def ajustar_endereco(page: ft.Page, navigate_to, header):
                             icon=ft.Icons.EDIT,                            bgcolor=colorVariaveis['botaoAcao'],
                             color=colorVariaveis['texto'],
                             on_click=(
-                                lambda e: abrir_dialog(codprod, codfab, descricao, qt, capacidade, reposicao, validade)
+                                lambda e, codprod=codprod, codfab=codfab, descricao=descricao, qt=qt, capacidade=capacidade, reposicao=reposicao, validade=validade, codendereco=codendereco: abrir_dialog(codprod, codfab, descricao, qt, capacidade, reposicao, validade, codendereco)
                             ),
                         )
                     ]
