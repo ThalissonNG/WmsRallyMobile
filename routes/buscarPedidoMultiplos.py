@@ -110,7 +110,8 @@ def buscar_pedido(page: ft.Page, navigate_to, header):
                 f"{base_url}/buscarPedidoMultiplos",
                 json={
                     "action": "automatico",
-                    "matricula": matricula
+                    "matricula": matricula,
+                    "codfilial": codfilial
                 }
             )
             if resp.status_code == 200:
