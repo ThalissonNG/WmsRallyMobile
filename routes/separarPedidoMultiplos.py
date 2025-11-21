@@ -14,8 +14,9 @@ def separar_pedido(page: ft.Page, navigate_to, header):
             content=ft.Text(message, color=text_color),
             bgcolor=colorVariaveis['erro'] if error else colorVariaveis['sucesso'],
         )
-        page.snack_bar.open = True
-        page.update()
+        page.open(page.snack_bar)
+        # page.snack_bar.open = True
+        # page.update()
 
     def buscar_itens():
         try:

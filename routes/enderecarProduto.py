@@ -35,7 +35,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                 print("Produto guardado com sucesso")
                 snackbar_sucess = ft.SnackBar(
                     content=ft.Text("Produto guardado com sucesso"),
-                    # bgcolor=ft.Colors.GREEN,
+                    bgcolor=ft.Colors.GREEN,
                     show_close_icon=True,
                     duration=1000,
                 )
