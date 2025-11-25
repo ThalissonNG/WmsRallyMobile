@@ -124,6 +124,20 @@ def menu_page(page: ft.Page, navigate_to, header):
                             ],
                             spacing=10,
                         ),
+                        ft.Row(
+                            controls=[
+                                ft.ElevatedButton(
+                                    "Separar Pedido Dist",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/buscar_pedido_dist")
+                                ),
+                                ft.ElevatedButton(
+                                    "--------",
+                                    expand=True,
+                                ),
+                            ],
+                            spacing=10,
+                        ),
                     ],
                     spacing=10,
                     scroll=ft.ScrollMode.AUTO,

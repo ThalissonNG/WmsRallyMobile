@@ -20,7 +20,6 @@ from routes.contagemInventarioRotativo import contagem_inventario_rotativo
 from routes.osAvulsa import os_avulsa
 from routes.osAvulsaSaida import os_avulsa_saida
 from routes.osAvulsaEntrada import os_avulsa_entrada
-from routes.separarPedidoDist import separar_pedido_dist
 from routes.buscarBonus import buscar_bonus
 from routes.conferirBonus import conferir_bonus
 from routes.buscarPedidoUnico import buscar_pedido_unico
@@ -28,6 +27,8 @@ from routes.separarPedidoUnico import separar_pedido_unico
 from routes.abastecimento import abastecimento
 from routes.separarAbastecimento import separar_abastecimento
 from routes.ajustarEndereco import ajustar_endereco
+from routes.buscarPedidosDIst import buscar_pedido_dist
+from routes.separarPedidoDist import separar_pedido_dist
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -101,8 +102,6 @@ def main(page: ft.Page):
             page.views.append(os_avulsa_saida(page, navigate_to, create_header()))
         elif route == "/os_avulsa_entrada":
             page.views.append(os_avulsa_entrada(page, navigate_to, create_header()))
-        elif route == "/separar_pedido_dist":
-            page.views.append(separar_pedido_dist(page, navigate_to, create_header()))
         elif route == "/buscar_bonus":
             page.views.append(buscar_bonus(page, navigate_to, create_header()))
         elif route == "/conferir_bonus":
@@ -117,6 +116,10 @@ def main(page: ft.Page):
             page.views.append(separar_abastecimento(page, navigate_to, create_header(), arguments))
         elif route == "/ajustar_endereco":
             page.views.append(ajustar_endereco(page, navigate_to, create_header()))
+        elif route == "/buscar_pedido_dist":
+            page.views.append(buscar_pedido_dist(page, navigate_to, create_header()))
+        elif route == "/separar_pedido_dist":
+            page.views.append(separar_pedido_dist(page, navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login
