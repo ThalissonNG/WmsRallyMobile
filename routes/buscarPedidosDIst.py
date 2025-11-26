@@ -58,7 +58,7 @@ def buscar_pedido_dist(page: ft.Page, navigate_to, header):
 
     def atribuir_etiqueta(numped, codetiqueta, codfilial, matricula):
         print(f"Atribuindo etiqueta {codetiqueta} ao pedido {numped} para matricula: {matricula} na filial: {codfilial}")
-        response = requests.post(
+        response = requests.put(
             f"{base_url}/buscarPedidoDist",
             json={
                 "numped": numped,
