@@ -20,6 +20,8 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             controls=[
                 
             ],
+            scroll=ft.ScrollMode.AUTO,
+            expand=True
         ),
     )
     abas = ft.Tabs(
@@ -31,7 +33,10 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             ft.Tab(text="Separar Abastecimento", content=ft.Column(controls=[
                 ft.Text("Conteúdo da aba Separar Abastecimento")
             ]))
-        ]
+        ],
+        scrollable=True,
+        selected_index=0,
+        expand=1
     )
 
     def snack_bar(mensagem, bgcolor, color, page):
@@ -73,12 +78,12 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
     def construir_endereco(item):
         # print(f"Construindo endereço para o item: {item}")
         qt_separada = int(item[5])
-        codendereco_item = int(item[7])
-        mod_item = item[8]
-        rua_item = item[9]
-        edi_item = item[10]
-        nivel_item = item[11]
-        apto_item = item[12]
+        codendereco_item = int(item[8])
+        mod_item = item[9]
+        rua_item = item[10]
+        edi_item = item[11]
+        nivel_item = item[12]
+        apto_item = item[13]
 
         def validar_endereco(e):
             print("Validando endereço...")
@@ -89,7 +94,12 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
 
             if codendereco_digitado == codendereco_item:
                 snack_bar("Endereço validado com sucesso!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
-                dialog_produto(item)
+
+                aba_separar.content.controls.clear()
+                aba_separar.content.controls.extend(contruir_produto(item))
+                page.update()
+                # construir_endereco(item)
+                # dialog_produto(item)
             else:
                 snack_bar("Endereço incorreto. Tente novamente.", colorVariaveis['erro'], colorVariaveis['texto'], page)
 
@@ -135,31 +145,128 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
         btn_confirmar_endereco
     ]
 
-    def dialog_produto(item):
+    # def dialog_produto(item):
+    #     codprod_item = item[1]
+    #     codfab_item = item[2]
+    #     descricao_item = item[3]
+    #     qt_pedida_item = item[4]
+    #     qt_separada_item = item[5]
+    #     qt_endereco_item = item[6]
+
+    #     def validar_codbarras(e, codprod_item, codbarra):
+    #         print(f"Validando código de barras {codbarra} para o produto {codprod_item}")
+    #         try:
+    #             response = requests.get(
+    #                 f"{base_url}/separarPedidoDist/{pedido}",
+    #                 params={
+    #                     "codprod": codprod_item,
+    #                     "codbarra": codbarra
+    #                 }
+    #             )
+    #             resposta = response.json()
+
+    #             if response.status_code == 200:
+    #                 buscar_itens_pedido(pedido, codfilial)
+    #                 page.open(dialog_produto)
+    #                 mensagem = resposta.get("message")
+    #                 snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+    #             else:
+    #                 mensagem = resposta.get("message")
+    #                 snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+    #         except Exception as e:
+    #             print(f"Erro ao validar código de barras: {e}")
+
+    #         snack_bar(f"Código de barras {codbarra} validado com sucesso para o produto {codprod_item}!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+
+    #     input_codbarras = ft.TextField(
+    #         label="Código de Barras",
+    #         expand=True,
+    #         autofocus=True,
+    #         on_submit=lambda e: validar_codbarras(e, codprod_item, input_codbarras.value)
+    #     )
+    #     btn_validar_codbarras = ft.ElevatedButton(
+    #         "Validar Código de Barras",
+    #         expand=True,
+    #         bgcolor=colorVariaveis['botaoAcao'],
+    #         color=colorVariaveis['texto'],
+    #         on_click=lambda e: validar_codbarras(e, codprod_item, input_codbarras.value)
+    #     )
+
+    #     dialog_produto = ft.AlertDialog(
+    #         title=ft.Text(f"Codprod: {codprod_item}"),
+    #         content=ft.Column(
+    #             controls=[
+    #                 ft.Text(f"Codfab: {codfab_item}"),
+    #                 ft.Text(f"Descrição: {descricao_item}"),
+    #                 ft.Row(
+    #                     controls=[
+    #                         ft.Text(f"Qt Pedida: {qt_pedida_item}"),
+    #                         ft.Text(f"Qt Separada: {qt_separada_item}"),
+    #                         ft.Text(f"Qt Endereço: {qt_endereco_item}"),
+    #                     ],
+    #                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+    #                     wrap=True
+    #                 ),
+    #                 ft.Divider(),
+    #                 input_codbarras,
+    #                 btn_validar_codbarras
+    #             ],
+    #             scroll=ft.ScrollMode.AUTO,
+
+    #         ),
+    #         actions=[
+    #             ft.ElevatedButton(
+    #                 "Fechar",
+    #                 on_click=lambda e: page.close(dialog_produto)
+    #             )
+    #         ]
+    #     )
+    #     page.open(dialog_produto)
+    #     page.update()
+    #     return dialog_produto
+
+    def contruir_produto(item):
         codprod_item = item[1]
         codfab_item = item[2]
         descricao_item = item[3]
         qt_pedida_item = item[4]
         qt_separada_item = item[5]
-        qt_endereco_item = item[6]
+        qt_restante_item = item[6]
+        qt_endereco_item = item[7]
+        print(f"Qt restante do item {codprod_item}: {qt_restante_item}")
 
         def validar_codbarras(e, codprod_item, codbarra):
-            print(f"Validando código de barras {codbarra} para o produto {codprod_item}")
+            # print(f"Validando código de barras {codbarra} para o produto {codprod_item}")
             try:
                 response = requests.get(
                     f"{base_url}/separarPedidoDist/{pedido}",
                     params={
                         "codprod": codprod_item,
-                        "codbarra": codbarra
+                        "codbarra": codbarra,
+                        "qtrestante": qt_restante_item
                     }
                 )
                 resposta = response.json()
 
                 if response.status_code == 200:
-                    buscar_itens_pedido(pedido, codfilial)
-                    page.open(dialog_produto)
+                    item = buscar_itens_pedido(pedido, codfilial)
+                    print(f"Resta ainda conferir {item[6]} unidades do item {codprod_item}")
+                    
+                    aba_separar.content.controls.clear()
+                    aba_separar.content.controls.extend(contruir_produto(item))
+                    page.update()
+
                     mensagem = resposta.get("message")
                     snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                elif response.status_code == 202:
+                    snack_bar("Produto totalmente separado!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+
+                    item = buscar_itens_pedido(pedido, codfilial)
+
+                    aba_separar.content.controls.clear()
+                    aba_separar.content.controls.extend(construir_endereco(item))
+                    page.update()
+                    return
                 else:
                     mensagem = resposta.get("message")
                     snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
@@ -181,40 +288,33 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             color=colorVariaveis['texto'],
             on_click=lambda e: validar_codbarras(e, codprod_item, input_codbarras.value)
         )
-
-        dialog_produto = ft.AlertDialog(
-            title=ft.Text(f"Codprod: {codprod_item}"),
-            content=ft.Column(
-                controls=[
-                    ft.Text(f"Codfab: {codfab_item}"),
-                    ft.Text(f"Descrição: {descricao_item}"),
-                    ft.Row(
-                        controls=[
-                            ft.Text(f"Qt Pedida: {qt_pedida_item}"),
-                            ft.Text(f"Qt Separada: {qt_separada_item}"),
-                            ft.Text(f"Qt Endereço: {qt_endereco_item}"),
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        wrap=True
-                    ),
-                    ft.Divider(),
-                    input_codbarras,
-                    btn_validar_codbarras
-                ],
-                scroll=ft.ScrollMode.AUTO,
-
-            ),
-            actions=[
-                ft.ElevatedButton(
-                    "Fechar",
-                    on_click=lambda e: page.close(dialog_produto)
-                )
-            ]
+        btn_pular_produto = ft.ElevatedButton(
+            "Pular Produto",
+            expand=True,
+            bgcolor=colorVariaveis['erro'],
+            color=colorVariaveis['texto'],
+            # on_click=lambda e: buscar_itens_pedido(pedido, codfilial)
         )
-        page.open(dialog_produto)
-        page.update()
-        return dialog_produto
-    
+
+        return [
+            ft.Text(f"Codprod: {codprod_item}"),
+            ft.Text(f"Codfab: {codfab_item}"),
+            ft.Text(f"Descrição: {descricao_item}"),
+            ft.Row(
+                controls=[
+                    ft.Text(f"Qt Pedida: {qt_pedida_item}"),
+                    ft.Text(f"Qt Separada: {qt_separada_item}"),
+                    ft.Text(f"Qt Endereço: {qt_endereco_item}"),
+                ],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                wrap=True
+            ),
+            ft.Divider(),
+            input_codbarras,
+            btn_validar_codbarras,
+            ft.Container(height=20),
+            btn_pular_produto
+        ]
 
     itens = buscar_itens_pedido(pedido, codfilial)
     # print(f"Itens para separar do pedido {itens}")

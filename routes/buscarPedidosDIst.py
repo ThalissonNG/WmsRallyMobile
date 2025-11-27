@@ -57,6 +57,10 @@ def buscar_pedido_dist(page: ft.Page, navigate_to, header):
             snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
 
     def atribuir_etiqueta(numped, codetiqueta, codfilial, matricula):
+        if not codetiqueta:
+            snack_bar("Por favor, insira o código da etiqueta.", colorVariaveis['erro'], colorVariaveis['texto'], page)
+            return
+        
         print(f"Atribuindo etiqueta {codetiqueta} ao pedido {numped} para matricula: {matricula} na filial: {codfilial}")
         response = requests.put(
             f"{base_url}/buscarPedidoDist",
