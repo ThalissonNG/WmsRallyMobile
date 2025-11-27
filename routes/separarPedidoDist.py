@@ -24,12 +24,21 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             expand=True
         ),
     )
+    aba_resumo = ft.Tab(
+        text="Resumo",
+        content=ft.Column(
+            spacing=10,
+            controls=[
+                
+            ],
+            scroll=ft.ScrollMode.AUTO,
+            expand=True
+        ),
+    )
     abas = ft.Tabs(
         tabs=[
             aba_separar,
-            ft.Tab(text="Conferir Itens", content=ft.Column(controls=[
-                ft.Text("Conteúdo da aba Conferir Itens")
-            ])),
+            aba_resumo,
             ft.Tab(text="Separar Abastecimento", content=ft.Column(controls=[
                 ft.Text("Conteúdo da aba Separar Abastecimento")
             ]))
@@ -61,16 +70,23 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
 
         if response.status_code == 200:
             itens = resposta.get("data", [])
+            resumo = resposta.get("resumo", [])
+            print(f"Resumo do pedido {numped}: {resumo}")
             # print(f"Itens do pedido {numped}: {itens}")
             
             aba_separar.content.controls.clear()
+            aba_resumo.content.controls.clear()
             if itens:
                 item = itens
                 aba_separar.content.controls.extend(construir_endereco(item))
+                for res in resumo:
+                    aba_resumo.content.controls.extend(construir_resumo(res))
             else:
                 aba_separar.content.controls.append(
                     ft.Text("Todos os itens do pedido foram separados!", size=16)
                 )
+                for res in resumo:
+                    aba_resumo.content.controls.extend(construir_resumo(res))
             
             page.update()
             return itens
@@ -345,6 +361,85 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             btn_validar_codbarras,
             ft.Container(height=20),
             btn_pular_produto
+        ]
+
+    def construir_resumo(resumo):
+        codfilial_resumo = resumo[0]
+        codprod_resumo = resumo[1]
+        codfab_resumo = resumo[2]
+        descricao_resumo = resumo[3]
+        qt_pedida_resumo = resumo[4]
+        qt_restante_resumo = resumo[5]
+        qt_separada_resumo = resumo[6]
+        pendencia_resumo = resumo[7]
+        codetiqueta_resumo = resumo[8]
+
+        cor_resumo = None
+        cor_resumo_texto = None
+
+        if int(qt_separada_resumo) == 0:
+            print(f"Produto {codprod_resumo} ainda não separado.")
+            cor_resumo = None
+            cor_resumo_texto = None
+        elif qt_separada_resumo < qt_pedida_resumo:
+            print(f"Adicionando resumo do produto {codprod_resumo} com pendência {pendencia_resumo}")
+            cor_resumo = colorVariaveis['restante']
+            cor_resumo_texto = colorVariaveis['textoPreto']
+        elif qt_separada_resumo == qt_pedida_resumo:
+            print(f"Produto {codprod_resumo} totalmente separado.")
+            cor_resumo = colorVariaveis['sucesso']
+            cor_resumo_texto = colorVariaveis['textoPreto']
+        elif qt_separada_resumo > qt_pedida_resumo:
+            print(f"Produto {codprod_resumo} separado com excesso de {qt_separada_resumo - qt_pedida_resumo} unidades.")
+            cor_resumo = colorVariaveis['erro']
+            cor_resumo_texto = colorVariaveis['texto']
+        
+
+        return [
+            ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            ft.Row(
+                                controls=[
+                                    ft.Text(
+                                        f"Codprod: {codprod_resumo}",
+                                        color=cor_resumo_texto
+                                    ),
+                                    ft.Text(
+                                        f"Codfab: {codfab_resumo}",
+                                        color=cor_resumo_texto
+                                    ),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            ),
+                            ft.Text(
+                                f"Descrição: {descricao_resumo}",
+                                color=cor_resumo_texto
+                            ),
+                            ft.Row(
+                                controls=[
+                                    ft.Text(
+                                        f"Qt Pedida: {qt_pedida_resumo}",
+                                        color=cor_resumo_texto
+                                    ),
+                                    ft.Text(
+                                        f"Qt Separada: {qt_separada_resumo}",
+                                        color=cor_resumo_texto
+                                    ),
+                                    ft.Text(
+                                        f"Qt Restante: {qt_restante_resumo}",
+                                        color=cor_resumo_texto
+                                    ),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                wrap=True
+                            ),
+                            ft.Divider(),
+                        ],
+                    ),
+                    bgcolor=cor_resumo,
+                    padding=10,
+                )
         ]
 
     itens = buscar_itens_pedido(pedido, codfilial)
