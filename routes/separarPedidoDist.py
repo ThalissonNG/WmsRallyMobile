@@ -35,13 +35,27 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             expand=True
         ),
     )
+    aba_finalizar = ft.Tab(
+        text="Finalizar",
+        content=ft.Column(
+            controls=[
+                ft.Container(height=20),
+                ft.ElevatedButton(
+                    "Finalizar Separação do Pedido",
+                    # expand=True,
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    color=colorVariaveis['texto'],
+                    on_click=lambda e: finalizar_separacao(pedido)
+                ),
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+    )
     abas = ft.Tabs(
         tabs=[
             aba_separar,
             aba_resumo,
-            ft.Tab(text="Separar Abastecimento", content=ft.Column(controls=[
-                ft.Text("Conteúdo da aba Separar Abastecimento")
-            ]))
+            aba_finalizar
         ],
         scrollable=True,
         selected_index=0,
@@ -445,6 +459,27 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
                     padding=10,
                 )
         ]
+
+    def finalizar_separacao(numped):
+        try:
+            response = requests.post(
+                f"{base_url}/separarPedidoDist/{numped}",
+                json={
+                    "matricula": matricula,
+                    "codfilial": codfilial
+                }
+            )
+            resposta = response.json()
+
+            if response.status_code == 200:
+                mensagem = resposta.get("message")
+                snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                navigate_to("/buscar_pedido_dist")
+            else:
+                mensagem = resposta.get("message")
+                snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+        except Exception as e:
+            print(f"Erro ao finalizar separação do pedido: {e}")
 
     itens = buscar_itens_pedido(pedido, codfilial)
     # print(f"Itens para separar do pedido {itens}")
