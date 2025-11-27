@@ -253,17 +253,21 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
         qt_separada_item = item[5]
         qt_restante_item = item[6]
         qt_endereco_item = item[7]
+        codendereco_item = item[8]
         print(f"Qt restante do item {codprod_item}: {qt_restante_item}")
 
         def validar_codbarras(e, codprod_item, codbarra):
+            print(f"Codfilial: {codfilial}, Pedido: {pedido}")
             # print(f"Validando código de barras {codbarra} para o produto {codprod_item}")
             try:
                 response = requests.get(
                     f"{base_url}/separarPedidoDist/{pedido}",
                     params={
+                        "codfilial": codfilial,
                         "codprod": codprod_item,
                         "codbarra": codbarra,
-                        "qtrestante": qt_restante_item
+                        "qtrestante": qt_restante_item,
+                        "codendereco": codendereco_item
                     }
                 )
                 resposta = response.json()
