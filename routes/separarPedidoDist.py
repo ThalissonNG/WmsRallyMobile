@@ -67,6 +67,10 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             if itens:
                 item = itens
                 aba_separar.content.controls.extend(construir_endereco(item))
+            else:
+                aba_separar.content.controls.append(
+                    ft.Text("Todos os itens do pedido foram separados!", size=16)
+                )
             
             page.update()
             return itens
@@ -275,6 +279,33 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
 
             snack_bar(f"Código de barras {codbarra} validado com sucesso para o produto {codprod_item}!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
 
+        def pular_produto(e, codprod_item):
+            try:
+                response = requests.patch(
+                    f"{base_url}/separarPedidoDist/{pedido}",
+                    json={
+                        "codprod": codprod_item,
+                        "action": "pular"
+                    }
+                )
+                resposta = response.json()
+
+                if response.status_code == 200:
+                    item = buscar_itens_pedido(pedido, codfilial)
+                    print(f"Resta ainda conferir {item[6]} unidades do item {codprod_item}")
+                    
+                    aba_separar.content.controls.clear()
+                    aba_separar.content.controls.extend(construir_endereco(item))
+                    page.update()
+
+                    mensagem = resposta.get("message")
+                    snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                else:
+                    mensagem = resposta.get("message")
+                    snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+            except Exception as e:
+                print(f"Erro ao pular produto: {e}")
+
         input_codbarras = ft.TextField(
             label="Código de Barras",
             expand=True,
@@ -293,7 +324,7 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
             expand=True,
             bgcolor=colorVariaveis['erro'],
             color=colorVariaveis['texto'],
-            # on_click=lambda e: buscar_itens_pedido(pedido, codfilial)
+            on_click=lambda e: pular_produto(e, codprod_item)
         )
 
         return [
