@@ -15,10 +15,10 @@ def abastecimento(page: ft.Page, navigate_to, header):
             ),
             bgcolor=bgcolor)
         page.open(snack)
-    def buscar_os(numos):
-        if not numos:
-            snackbar("Digite o numero da OS", colorVariaveis['erro'], page)
-            return
+    def buscar_os(numos=None):
+        # if not numos:
+        #     snackbar("Digite o numero da OS", colorVariaveis['erro'], page)
+        #     return
 
         print(f"Buscar OS: {numos}")
 
@@ -35,16 +35,18 @@ def abastecimento(page: ft.Page, navigate_to, header):
         print(f"Response: {response.json()}")
         resposta = response.json()
         mensagem = resposta.get("message")
+        numos_atribuida = resposta.get("numos")
         print(mensagem)
         
         if response.status_code == 200:
             snackbar(mensagem, colorVariaveis['sucesso'], page)
             navigate_to("/separar_abastecimento", arguments={
-                "num_os": numos,
+                "num_os": numos_atribuida,
             })
         elif response.status_code == 400:
             snackbar(mensagem, colorVariaveis['erro'], page)
-
+        else:   
+            snackbar(mensagem, colorVariaveis['erro'], page)
 
     titulo = ft.Text(
         "Abastecimento",
@@ -62,7 +64,7 @@ def abastecimento(page: ft.Page, navigate_to, header):
     )
     button_buscar_automatixa = ft.ElevatedButton(
         "Buscar OS (Automático)",
-        on_click=lambda e: buscar_os(input_numos.value)
+        on_click=lambda e: buscar_os()
     )
     # Retorna a view configurada
     return ft.View(

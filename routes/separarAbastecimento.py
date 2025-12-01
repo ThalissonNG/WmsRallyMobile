@@ -135,28 +135,7 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             else:
                 snackbar("Endereço Picking inválido. Tente novamente.", colorVariaveis["erro"], page)
 
-        def atualizar_endereco_picking(codendereco, numos, page):
-            response = requests.post(
-                base_url + "/abastecimento",
-                json={
-                    "codendereco": codendereco,
-                    "numos": numos,
-                    "matricula": matricula,
-                    "codfilial": codfilial,
-                    "codprod": dados_os[0][1],
-                    "action": "atualizar_endereco_picking",
-                },
-            )
-            print(f"Status code: {response.status_code}")
-            resposta = response.json()
-            mensagem = resposta.get("message")
-
-            if response.status_code == 200:
-                snackbar(mensagem, colorVariaveis["sucesso"], page)
-                navigate_to("/menu")
-            elif response.status_code == 404:
-                snackbar(mensagem, colorVariaveis["erro"], page)
-
+        
         input_codendereco_picking = ft.TextField(
             label="Endereço Picking",
             keyboard_type=ft.KeyboardType.NUMBER,
@@ -187,6 +166,45 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             itens.append(button_validarEndereco_picking)
         return ft.Column(itens)
 
+    def atualizar_endereco_picking(codendereco, numos, page):
+        response = requests.post(
+            base_url + "/abastecimento",
+            json={
+                "codendereco": codendereco,
+                "numos": numos,
+                "matricula": matricula,
+                "codfilial": codfilial,
+                "codprod": dados_os[0][1],
+                "action": "atualizar_endereco_picking",
+            },
+        )
+        print(f"Status code: {response.status_code}")
+        resposta = response.json()
+        mensagem = resposta.get("message")
+
+        if response.status_code == 200:
+            snackbar(mensagem, colorVariaveis["sucesso"], page)
+            navigate_to("/menu")
+        elif response.status_code == 404:
+            snackbar(mensagem, colorVariaveis["erro"], page)
+
+    def construir_container_sem_picking(numos, page):
+        print(f"Nenhum endereço de picking disponível.{numos}")
+        input_codendereco_picking = ft.TextField(
+            label="Endereço Picking",
+            keyboard_type=ft.KeyboardType.NUMBER,
+        )
+        btn_validar_novo_picking = ft.ElevatedButton(
+            text="Validar Endereço",
+            on_click=lambda e: atualizar_endereco_picking(input_codendereco_picking.value, numos, page)
+        )
+        return [
+            ft.Text("Nenhum endereço de picking disponível."),
+            ft.Text("Cadastrar endereço"),
+            input_codendereco_picking,
+            btn_validar_novo_picking,
+        ]
+
     def busca_picking(codprod, codfilial):
         response = requests.post(
             base_url + "/abastecimento",
@@ -206,6 +224,12 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
             print("Dados encontrados do picking:", dados_picking)
             return dados_picking
         elif response.status_code == 404:
+            print(" 1- Erro 404 ao atualizar quantidade separada.")
+            container_principal.content.controls.clear()
+            container_principal.content.controls.extend(
+                        construir_container_sem_picking(numos, page)
+                    )
+            page.update()
             snackbar(mensagem, colorVariaveis["erro"], page)
             return []
 
@@ -241,10 +265,21 @@ def separar_abastecimento(page: ft.Page, navigate_to, header, arguments):
                     container_principal.content.controls.append(
                         construir_container_picking(dados_picking)
                     )
+                else:
+                    print(f"Não tem endereço de picknis")
+                    container_principal.content.controls.clear()
+                    container_principal.content.controls.extend(
+                        construir_container_sem_picking(numos, page)
+                    )
+            page.update()
             snackbar(mensagem, colorVariaveis["sucesso"], page)
             page.update()
             return 202
         elif response.status_code == 404:
+            print(" 2- Erro 404 ao atualizar quantidade separada.")
+            container_principal.content.controls.append(
+                        construir_container_sem_picking(numos, page)
+                    )
             snackbar(mensagem, colorVariaveis["erro"], page)
             return 404
 

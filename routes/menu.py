@@ -21,10 +21,11 @@ def menu_page(page: ft.Page, navigate_to, header):
                     controls=[ 
                         ft.Row(
                             controls=[
+                                
                                 ft.ElevatedButton(
-                                    "Separar Pedido - Multiplos",
+                                    "Separar Pedido Dist",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/buscar_pedido_multiplos")
+                                    on_click=lambda e: navigate_to("/buscar_pedido_dist")
                                 ),
                                 ft.ElevatedButton(
                                     "Transferência",
@@ -127,9 +128,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "Separar Pedido Dist",
+                                    "---------",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/buscar_pedido_dist")
+                                    on_click=lambda e: navigate_to("/buscar_pedido_multiplos")
                                 ),
                                 ft.ElevatedButton(
                                     "--------",
