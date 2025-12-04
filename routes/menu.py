@@ -103,9 +103,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     on_click=lambda e: navigate_to("/buscar_pedido_unico")
                                 ),
                                 ft.ElevatedButton(
-                                    "Abastecimento",
+                                    "Abastecimento V2",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/abastecimento")
+                                    on_click=lambda e: navigate_to("/abastecimentoV2")
                                 ),
                             ],
                             spacing=10,
@@ -130,7 +130,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                 ft.ElevatedButton(
                                     "---------",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/abastecimentoV2")
+                                    # on_click=lambda e: navigate_to("/abastecimentoV2")
                                 ),
                                 ft.ElevatedButton(
                                     "--------",
