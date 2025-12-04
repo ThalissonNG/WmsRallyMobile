@@ -130,7 +130,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                 ft.ElevatedButton(
                                     "---------",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/buscar_pedido_multiplos")
+                                    on_click=lambda e: navigate_to("/abastecimentoV2")
                                 ),
                                 ft.ElevatedButton(
                                     "--------",
