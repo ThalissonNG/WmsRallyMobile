@@ -323,7 +323,7 @@ def separar_abastecimentoV2(page: ft.Page, navigate_to, header, arguments):
             label="Capacidade",
             autofocus=True,
             keyboard_type=ft.KeyboardType.NUMBER,
-            on_click=lambda e: validar_picking_capacidadde(input_picking.value.strip(), input_capacidade.value.strip(), page),
+            on_submit=lambda e: validar_picking_capacidadde(input_picking.value.strip(), input_capacidade.value.strip(), page),
         )
         btn_validarEnderecoCapacidade = ft.ElevatedButton(
             text="Validar Endereço -",
