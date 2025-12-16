@@ -13,9 +13,17 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
     matricula = user_info.get("matricula", "N/A")
     codfilial = user_info.get("codfilial", "N/A")
 
+    container_endereco = ft.Container(
+        content=ft.Column(
+            controls=[
+            ]
+        )
+    )
+
     print(f"Bônus: {numbonus} - Produto: {codprod} - Codfab: {codfab} - Descricao: {descricao} - Quantidade: {qt}")
     print(f"Informações do arquivo config: Matricula: {matricula} - codfilial: {codfilial}")
 
+    
     def guardar_produto(page, codendereco, numbonus):
         try:
             response = requests.post(
@@ -62,6 +70,68 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                 page.update()
         except Exception as e:
             print(e)
+
+    def consultar_endereco(codprod, codfilial):
+        codprod = str(codprod)
+        response = requests.post(
+            f"{base_url}/consultarProdutoEndereco",
+            json={
+                "codbarra": codprod,
+                "codfilial": codfilial
+            },
+        )
+
+        if response.status_code == 200:
+            dados_endereco = response.json()
+            enderecos = dados_endereco.get("dados_produto_filial", [])
+
+            container_endereco.content.controls.clear()
+            
+            for enderecos in enderecos:
+                container_endereco.content.controls.extend(
+                    construir_enderecos(enderecos)
+                )
+
+            page.update()
+            return dados_endereco
+
+    def construir_enderecos(dados_endereco):
+        mod = dados_endereco[4]
+        rua = dados_endereco[5]
+        edf = dados_endereco[6]
+        nivel = dados_endereco[7]
+        apto = dados_endereco[8]
+        qt_endereco = dados_endereco[2]
+
+        return [
+            ft.Text(
+                "Endereço:",
+                size=18,
+                weight="bold",
+            ),
+            ft.Row(
+                controls=[
+                    ft.Text(f"Mod: {mod}"),
+                    ft.Text(f"Rua: {rua}"),
+                    ft.Text(f"Edf: {edf}"),
+                ],
+                expand=True,
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+            ),
+            ft.Row(
+                controls=[
+                    ft.Text(f"Nivel: {nivel}"),
+                    ft.Text(f"Apto: {apto}"),
+                    ft.Text(f"Qt Endereço: {qt_endereco}")
+                ],
+                expand=True,
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+            ),
+            ft.Divider()
+        ]
+
+    consultar_endereco(codprod, codfilial)
+    # print(dados_endereco1)
 
     codendereco = ft.TextField(
         label="CODENDERECO",
@@ -155,6 +225,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
             numbonus,
             ) 
     )
+    
 
     return ft.View(
         route="/enderecarBonus",
@@ -168,6 +239,7 @@ def enderecar_produto(page: ft.Page, navigate_to, header, arguments):
                         infosProduto,
                         codendereco,
                         buttonGuardar,
+                        container_endereco
                     ],
                 )
             ),

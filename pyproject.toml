@@ -2,7 +2,7 @@
 
 [project]
 name        = "Wms Mobile"
-version     = "1.6.4"
+version     = "1.6.5"
 description = "App móvel do WMS Rally"
 authors     = ["Thalisson Manoel", "Joab Moura"]
 readme      = "README.md"
