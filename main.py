@@ -31,6 +31,8 @@ from routes.buscarPedidosDIst import buscar_pedido_dist
 from routes.separarPedidoDist import separar_pedido_dist
 from routes.abastecimentoV2 import abastecimentoV2
 from routes.separarAbastecimentoV2 import separar_abastecimentoV2
+from routes.buscarPedidosVar import buscar_pedido_var
+from routes.separarPedidoVar import separar_pedido_var
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -126,6 +128,10 @@ def main(page: ft.Page):
             page.views.append(abastecimentoV2(page, navigate_to, create_header()))
         elif route == "/separar_abastecimentoV2":
             page.views.append(separar_abastecimentoV2(page, navigate_to, create_header(), arguments))
+        elif route == "/buscar_pedido_varejo":
+            page.views.append(buscar_pedido_var(page, navigate_to, create_header()))
+        elif route == "/separar_pedido_varejo":
+            page.views.append(separar_pedido_var(page, navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login

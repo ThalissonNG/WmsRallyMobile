@@ -128,9 +128,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "---------",
+                                    "Separar Pedido - Var",
                                     expand=True,
-                                    # on_click=lambda e: navigate_to("/abastecimentoV2")
+                                    on_click=lambda e: navigate_to("/buscar_pedido_varejo")
                                 ),
                                 ft.ElevatedButton(
                                     "--------",
