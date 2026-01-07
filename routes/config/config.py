@@ -1,5 +1,5 @@
-base_url = "http://192.168.1.42:5000/wmsMobile"
-app_version = '1.8.0'
+base_url = "http://192.168.1.99:5000/wmsMobile"
+app_version = '1.7.1'
 user_info = {}
 colorVariaveis = {
     'botaoAcao': "#0366FF",
