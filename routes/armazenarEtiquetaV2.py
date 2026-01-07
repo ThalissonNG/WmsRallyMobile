@@ -90,11 +90,11 @@ def armazenar_etiqueta_v2(page: ft.Page, navigate_to, header, arguments):
             label="Código do endereço",
             keyboard_type=ft.KeyboardType.NUMBER,
             autofocus=True,
-            on_submit=lambda e: validar_endereco(codendereco, input_codendereco.value),
+            on_submit=lambda e: validar_endereco(input_codendereco.value, matricula, codprod, qtetiqueta, codetiqueta, numbonus),
         )
         btn_validar_endereco = ft.ElevatedButton(
             text="Validar Endereço",
-            on_click=lambda e: validar_endereco(codendereco, input_codendereco.value),
+            on_click=lambda e: validar_endereco(input_codendereco.value, matricula, codprod, qtetiqueta, codetiqueta, numbonus),
         )
         
     
@@ -157,6 +157,42 @@ def armazenar_etiqueta_v2(page: ft.Page, navigate_to, header, arguments):
                 padding=10,
             )
         ]
+
+    def validar_endereco(codendereco, matricula, codprod, qt, codetiqueta, numbonus):
+        if not codendereco:
+            mensagem = "Código do endereço é obrigatório"
+            snack_bar(mensagem, colorVariaveis['erro'], "white", page)
+            return
+        print(codendereco, matricula, codprod, qt, codetiqueta, numbonus)
+
+        try:
+            response = requests.post(
+                f"{base_url}/armazenar_etiqueta/{codetiqueta}",
+                json={
+                    "codfilial": codfilial,
+                    "matricula": matricula,
+                    "codendereco": codendereco,
+                    "codprod": codprod,
+                    "qt": qt,
+                    "numbonus": numbonus
+                }
+            )
+            resposta = response.json()
+            if response.status_code == 200:
+                mensagem = resposta.get("message")
+                snack_bar(mensagem, colorVariaveis['sucesso'], "white", page)
+                navigate_to("/buscar_etiqueta_v2")
+                return None
+
+            else:
+                mensagem = resposta.get("message")
+                snack_bar(mensagem, colorVariaveis['erro'], "white", page)
+                return None
+        except Exception as e:
+            print(f"Erro ao atualizar endereço: {e}")
+            mensagem = "Erro ao atualizar endereço"
+            snack_bar(mensagem, colorVariaveis['erro'], "white", page)
+            return None
 
     buscar_dados(codetiqueta)
 
