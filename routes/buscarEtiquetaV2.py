@@ -2,12 +2,12 @@ import flet as ft
 import requests
 from routes.config.config import base_url, colorVariaveis, user_info
 
-def armazenar_bonus_v2(page: ft.Page, navigate_to, header):
+def buscar_etiqueta_v2(page: ft.Page, navigate_to, header):
     codfilial = user_info.get("codfilial")
     matricula = user_info.get("matricula")
 
     titulo = ft.Text(
-        "Armazenar Bonus",
+        "Buscar Etiqueta",
         size=24, weight="bold",
         color=colorVariaveis['titulo']
     )
@@ -23,6 +23,7 @@ def armazenar_bonus_v2(page: ft.Page, navigate_to, header):
         text="Confirmar",
         bgcolor=colorVariaveis['botaoAcao'],
         color=colorVariaveis['texto'],
+        width=300,
         on_click=lambda e: buscar_etiqueta(etiqueta_input.value)
     )
 
@@ -52,9 +53,9 @@ def armazenar_bonus_v2(page: ft.Page, navigate_to, header):
 
             if response.status_code == 200:
                 mensagem = resposta.get("message")
-                snack_bar(mensagem, colorVariaveis['sucesso'], "white", page)
+                snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
                 
-                navigate_to("/armazenar_bonus_v2", arguments={
+                navigate_to("/armazenar_etiqueta_v2", arguments={
                     "codetiqueta": codetiqueta
                 })
             else:
@@ -65,7 +66,7 @@ def armazenar_bonus_v2(page: ft.Page, navigate_to, header):
             return None
 
     return ft.View(
-        route="/armazenar_bonus_v2",
+        route="/armazenar_etiqueta_v2",
         controls=[
             header,
             titulo,

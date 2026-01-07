@@ -135,7 +135,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                 ft.ElevatedButton(
                                     "Armazenar Bônus V2",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/armazenar_bonus_v2")
+                                    on_click=lambda e: navigate_to("/buscar_etiqueta_v2")
                                 ),
                             ],
                             spacing=10,

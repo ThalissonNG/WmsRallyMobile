@@ -33,7 +33,8 @@ from routes.abastecimentoV2 import abastecimentoV2
 from routes.separarAbastecimentoV2 import separar_abastecimentoV2
 from routes.buscarPedidosVar import buscar_pedido_var
 from routes.separarPedidoVar import separar_pedido_var
-from routes.armazenarEtiquetaV2 import armazenar_bonus_v2
+from routes.buscarEtiquetaV2 import buscar_etiqueta_v2
+from routes.armazenarEtiquetaV2 import armazenar_etiqueta_v2
 
 def main(page: ft.Page):
     page.title = "Login"
@@ -133,8 +134,10 @@ def main(page: ft.Page):
             page.views.append(buscar_pedido_var(page, navigate_to, create_header()))
         elif route == "/separar_pedido_varejo":
             page.views.append(separar_pedido_var(page, navigate_to, create_header(), arguments))
-        elif route == "/armazenar_bonus_v2":
-            page.views.append(armazenar_bonus_v2(page, navigate_to, create_header()))
+        elif route == "/buscar_etiqueta_v2":
+            page.views.append(buscar_etiqueta_v2(page, navigate_to, create_header()))
+        elif route == "/armazenar_etiqueta_v2":
+            page.views.append(armazenar_etiqueta_v2(page, navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login
