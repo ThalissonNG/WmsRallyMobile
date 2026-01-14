@@ -391,6 +391,7 @@ def separar_abastecimentoV2(page: ft.Page, navigate_to, header, arguments):
             nivel = dados_picking[5]
             apto = dados_picking[6]
             qt_picking = dados_picking[7]
+            endereco = dados_picking[9]
             return[
                 ft.Row(
                     controls=[
@@ -410,6 +411,7 @@ def separar_abastecimentoV2(page: ft.Page, navigate_to, header, arguments):
                     expand=True,
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN
                 ),
+                ft.Text(f"Endereço: {endereco}"),
                 input_picking,
                 button_validarEndereco_picking
             ]

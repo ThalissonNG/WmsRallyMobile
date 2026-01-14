@@ -123,6 +123,7 @@ def armazenar_etiqueta_v2(page: ft.Page, navigate_to, header, arguments):
         apto = dados_endereco[5]
         tipo_endereco = dados_endereco[6]
         qt_endereco = dados_endereco[7]
+        endereco = dados_endereco[9]
 
         return [
             ft.Container(
@@ -141,13 +142,14 @@ def armazenar_etiqueta_v2(page: ft.Page, navigate_to, header, arguments):
                             controls=[
                                 ft.Text(f"Nível: {nivel}"),
                                 ft.Text(f"APTO: {apto}"),
+                                ft.Text(f"Qt. Endereço: {qt_endereco}"),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                         ),
                         ft.Row(
                             controls=[
                                 ft.Text(f"TipoEndereço: {tipo_endereco}"),
-                                ft.Text(f"Qt. Endereço: {qt_endereco}"),
+                                ft.Text(f"Endereço: {endereco}")
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                         ),
