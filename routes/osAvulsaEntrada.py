@@ -65,7 +65,7 @@ def os_avulsa_entrada(page, navigate_to, header):
     # Primeira etapa: validar código de barras do produto
     # ------------------------------------------------------------------
     if dados_os:
-        numos, codprod, codfab, descricao = dados_os[0][0], dados_os[0][1], dados_os[0][2], dados_os[0][3]
+        numos, codprod, codfab, descricao, qtpedida = dados_os[0][0], dados_os[0][1], dados_os[0][2], dados_os[0][3], dados_os[0][4]
 
         dynamic_section.controls.extend(
             [
@@ -77,6 +77,7 @@ def os_avulsa_entrada(page, navigate_to, header):
                     ]
                 ),
                 ft.Text(f"Descrição: {descricao}"),
+                ft.Text(f"Quantidade: {qtpedida}"),
             ]
         )
 
@@ -98,6 +99,7 @@ def os_avulsa_entrada(page, navigate_to, header):
             dynamic_section,
             codprod,
             descricao,
+            qtpedida,
             numos,
         )
 
@@ -111,6 +113,7 @@ def os_avulsa_entrada(page, navigate_to, header):
                 dynamic_section,
                 codprod,
                 descricao,
+                qtpedida,
                 numos,
             ),
         )
@@ -144,7 +147,7 @@ def snack_bar(message, cor_texto, color, page):
 # ======================================================================
 # Funções auxiliares
 # ======================================================================
-def _validar_codbarra(e, page, navigate_to, campo, dynamic_section, codprod, descricao, numos,):
+def _validar_codbarra(e, page, navigate_to, campo, dynamic_section, codprod, descricao, qtpedida, numos,):
     """Valida o código de barras do produto."""
 
     entrada = campo.value.strip()
@@ -198,6 +201,9 @@ def _validar_codbarra(e, page, navigate_to, campo, dynamic_section, codprod, des
         )
         dynamic_section.controls.append(
             ft.Text(f"Descrição: {descricao}")
+        )
+        dynamic_section.controls.append(
+            ft.Text(f"Quantidade: {qtpedida}")
         )
         snack_bar(
             "Código de barras validado com sucesso!",
