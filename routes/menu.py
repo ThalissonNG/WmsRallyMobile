@@ -45,7 +45,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                 ft.ElevatedButton(
                                     "Armazenar Bônus", 
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/armazenar_bonus"),
+                                    on_click=lambda e: navigate_to("/buscar_etiqueta_v2"),
                                 ),
                             ],
                             spacing=10,
@@ -133,9 +133,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     # on_click=lambda e: navigate_to("/buscar_pedido_varejo")
                                 ),
                                 ft.ElevatedButton(
-                                    "Armazenar Bônus V2",
+                                    "--------",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/buscar_etiqueta_v2")
+                                    # on_click=lambda e: navigate_to("/buscar_etiqueta_v2")
                                 ),
                             ],
                             spacing=10,
