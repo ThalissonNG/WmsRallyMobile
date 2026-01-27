@@ -1,4 +1,5 @@
-base_url = "http://192.168.1.42:5000/wmsMobile"
+import flet as ft
+base_url = "http://192.168.1.99:5000/wmsMobile"
 app_version = '1.8.4'
 user_info = {}
 colorVariaveis = {
@@ -12,3 +13,13 @@ colorVariaveis = {
     'erro': "#ff0000",
     'restante': "#ffb300"
 }
+
+def snack_bar(mensagem, bgcolor, color, page):
+    snack = ft.SnackBar(
+        content=ft.Text(
+            mensagem,
+            color="white"
+        ),
+        bgcolor=bgcolor
+    )
+    page.open(snack)

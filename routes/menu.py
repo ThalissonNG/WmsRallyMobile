@@ -128,9 +128,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "--------",
+                                    "Carregamento",
                                     expand=True,
-                                    # on_click=lambda e: navigate_to("/buscar_pedido_varejo")
+                                    on_click=lambda e: navigate_to("/buscar_carregamento")
                                 ),
                                 ft.ElevatedButton(
                                     "--------",
