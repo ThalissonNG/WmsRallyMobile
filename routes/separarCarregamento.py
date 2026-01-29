@@ -124,6 +124,7 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
             cod = input_codbarra.value
 
             if any(cod == item[1] for item in codbarras):
+                dialog_veiculo(numcar, cod, codveiculo)
                 print("Validado")
             else:
                 print("Invalidado")
@@ -174,7 +175,48 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
             ),
         ]
 
+    def dialog_veiculo(numcar, codbarranumped, codveiculo):
+        print(numcar, codbarranumped, codveiculo)
+
+        def validar_codveiculo():
+            codveiculo_input = input_codveiculo.value
+            if int(codveiculo) == int(codveiculo_input):
+                print("Validado")
+            else:
+                print("Invalidado")
+                snack_bar("Véiculo incorreto", colorVariaveis['erro'], colorVariaveis['texto'], page)
+                input_codveiculo.value = ""
+                page.update()
+
+        input_codveiculo = ft.TextField(
+            label="Código do Veículo",
+            autofocus=True,
+            on_submit=lambda e: validar_codveiculo()
+        )
+        btn_confirmar = ft.ElevatedButton(
+            text="Confirmar",
+            on_click=lambda e: validar_codveiculo()
+        )
+        dialog_codveiculo = ft.AlertDialog(
+            content=ft.Column(
+                controls=[
+                    ft.Text(
+                        "Informe o véiculo"
+                    ),
+                    input_codveiculo,
+                    btn_confirmar
+                ],
+            ),
+            actions=[ft.TextButton("Fechar", on_click=lambda e: fechar_dialog())],
+            
+        )
+        page.open(dialog_codveiculo)
+        page.update()
     
+        def fechar_dialog():
+            page.close(dialog_codveiculo)
+            page.update()
+
     buscar_dados(numcar)
     return ft.View(
         route="/separar_carregamento",
