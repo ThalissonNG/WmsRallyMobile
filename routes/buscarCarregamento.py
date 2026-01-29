@@ -18,10 +18,11 @@ def buscar_carregamento(page: ft.Page, navigate_to, header):
                 "matricula": matricula,
             }
             response = requests.post(url, json=payload)
-            print(response.json())
+            # print(response.json())
             mensagem = response.json()['message']
             if response.status_code == 200:
                 snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['texto'], page)
+                navigate_to("/separar_carregamento", arguments={"numcar": numcar})
                 return True
             else:
                 snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)

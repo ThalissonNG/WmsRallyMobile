@@ -36,6 +36,7 @@ from routes.separarPedidoVar import separar_pedido_var
 from routes.buscarEtiquetaV2 import buscar_etiqueta_v2
 from routes.armazenarEtiquetaV2 import armazenar_etiqueta_v2
 from routes.buscarCarregamento import buscar_carregamento
+from routes.separarCarregamento import separar_carregamento
 
 
 def main(page: ft.Page):
@@ -142,6 +143,8 @@ def main(page: ft.Page):
             page.views.append(armazenar_etiqueta_v2(page, navigate_to, create_header(), arguments))
         elif route == "/buscar_carregamento":
             page.views.append(buscar_carregamento(page, navigate_to, create_header()))
+        elif route == "/separar_carregamento":
+            page.views.append(separar_carregamento(page, navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login
