@@ -13,6 +13,10 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
         weight="bold",
         color=colorVariaveis['titulo']
     )
+    btnfinalizar=ft.ElevatedButton(
+            text="Finalizar",
+            on_click=lambda e: finalizar_carregamento(numcar)
+        )
     aba_separar = ft.Tab(
         text="Separar",
         content=ft.Column(
@@ -31,13 +35,21 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
 
             ],
             spacing=10,
-            # scroll=ft.ScrollMode.AUTO,
+            scroll=ft.ScrollMode.AUTO,
             expand=True
         )
     )
     
     aba_finalizar = ft.Tab(
-        text="Finalizar"
+        text="Finalizar",
+        content=ft.Column(
+            controls=[
+                btnfinalizar
+            ],
+            spacing=10,
+            scroll=ft.ScrollMode.AUTO,
+            expand=True
+        )
     )
     abas = ft.Tabs(
         selected_index=0,
@@ -66,6 +78,7 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
                 for res in resumo:
                     aba_resumo.content.controls.extend(contruir_resumo(res))
 
+                aba_separar.content.controls.clear()
                 aba_separar.content.controls.extend(contruir_separar(codbarras))
                 page.update()
 
@@ -82,7 +95,7 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
         codcli = resumo[1]
         cliente = resumo[2]
         destino = resumo[3]
-        volume = resumo[4]
+        dtulvolume = resumo[4]
 
         return [
             ft.Container(
@@ -95,9 +108,6 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
                                 ),
                                 ft.Text(
                                     f"Destino: {destino}"
-                                ),
-                                ft.Text(
-                                    f"Volume: {volume}"
                                 )
                             ]
                         ),
@@ -111,8 +121,9 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
                         ),
                         ft.Divider(),
                     ]
-                )
-            ),
+                ),
+                bgcolor="" if dtulvolume == None else "green",
+            ) 
             ]
 
     def contruir_separar(codbarras):
@@ -159,12 +170,15 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
                         ),
                         ft.Divider(),
                         *[
-                            ft.Row(
-                                controls=[
-                                    ft.Text(
-                                        f"Pedidos: {codbarra[0]}"
-                                    )
-                                ]
+                            ft.Container(
+                                content=ft.Row(
+                                    controls=[
+                                        ft.Text(
+                                            f"Pedidos: {codbarra[0]} / {codbarra[4]}"
+                                        )
+                                    ]
+                                ),
+                                bgcolor="" if codbarra[5] == None else "green"
                             )
                             for codbarra in codbarras
                         ]
@@ -182,6 +196,27 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
             codveiculo_input = input_codveiculo.value
             if int(codveiculo) == int(codveiculo_input):
                 print("Validado")
+                try:
+                    url = f"{base_url}/separar_carregamento/{numcar}"
+                    payload = {
+                        "action": "separar",
+                        "codveiculo": codveiculo_input,
+                        "codbarranumped": codbarranumped,
+                        "numcar": numcar
+                    }
+                    response = requests.post(url, json=payload)
+                    mensagem = response.json()['message']
+                    if response.status_code == 200:
+                        print("Separado")
+                        fechar_dialog()
+                        buscar_dados(numcar)
+                    else:
+                        print("Erro ao separar")
+                        fechar_dialog()
+                        snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+                except Exception as e:
+                    print(e)
+                    snack_bar("Erro ao separar", colorVariaveis['erro'], colorVariaveis['texto'], page)
             else:
                 print("Invalidado")
                 snack_bar("Véiculo incorreto", colorVariaveis['erro'], colorVariaveis['texto'], page)
@@ -216,6 +251,26 @@ def separar_carregamento(page: ft.Page, navigate_to, header, arguments):
         def fechar_dialog():
             page.close(dialog_codveiculo)
             page.update()
+
+    def finalizar_carregamento(numcar):
+        try:
+            url = f"{base_url}/separar_carregamento/{numcar}"
+            payload = {
+                "action": "finalizar",
+                "numcar": numcar
+            }
+            response = requests.post(url, json=payload)
+            mensagem = response.json()['message']
+            if response.status_code == 200:
+                print("Finalizado")
+                snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['texto'], page)
+                navigate_to("/buscar_carregamento")
+            else:
+                print("Erro ao finalizar")
+                snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+        except Exception as e:
+            print(e)
+            snack_bar("Erro ao finalizar - interno", colorVariaveis['erro'], colorVariaveis['texto'], page)
 
     buscar_dados(numcar)
     return ft.View(
