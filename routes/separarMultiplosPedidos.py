@@ -35,12 +35,6 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
     dados_itens = buscar_itens_pedido(numpeds_str, codfilial)
     print(f"Itens recuperados: {dados_itens}")
 
-    titulo = ft.Text(
-        "Separar Múltiplos Pedidos",
-        size=24, weight="bold",
-        color=colorVariaveis['titulo']
-    )
-
     def contruir_produto(item):
         codprod_item = item[1]
         codfab_item = item[2]
@@ -49,11 +43,45 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
         qt_separada_item = item[5]
         qt_restante_item = item[6]
         qt_endereco_item = item[7]
+        codendereco_item = item[8]
+
+        input_codbarra = ft.TextField(
+            label="Código de Barras (Em breve)",
+            expand=True,
+            autofocus=True,
+            keyboard_type=ft.KeyboardType.NUMBER,
+            on_submit=lambda e: validar_codbarra(input_codbarra.value, codprod_item)
+        )
 
         def finalizar_modal(e):
             page.close(modal_produto)
             # Aqui no futuro chamaria buscar_itens_pedido novamente ou validaria o codbarra
             snack_bar("Produto processado (Simulação)", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+
+        def validar_codbarra(codbarra, codprod):
+            if not codbarra:
+                snack_bar("Código de barras obrigatório.", colorVariaveis['erro'], colorVariaveis['texto'], page)
+                return
+            try:
+                response = requests.get(
+                    f"{base_url}/separar_multiplos_pedido",
+                    params={
+                        "codfilial": codfilial,
+                        "codbarra": codbarra,
+                        "codprod": codprod,
+                        "qtrestante": qt_restante_item,
+                        "codendereco": codendereco_item
+                    }
+                )
+                resposta = response.json()
+                mensagem = resposta.get("message")
+                if response.status_code == 200:
+                    snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                else:
+                    snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+            except ValueError:
+                snack_bar("Código inválido.", colorVariaveis['erro'], colorVariaveis['texto'], page)
+
 
         modal_content = ft.Column(
             controls=[
@@ -71,12 +99,12 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                     expand=True
                 ),
                 ft.Divider(),
-                ft.TextField(label="Código de Barras (Em breve)", disabled=True),
+                input_codbarra,
                 ft.ElevatedButton(
                     "Confirmar",
                     bgcolor=colorVariaveis['botaoAcao'],
                     color=colorVariaveis['texto'],
-                    on_click=finalizar_modal,
+                    on_click=lambda e: validar_codbarra(input_codbarra.value, codprod_item),
                     width=300
                 ),
             ],
@@ -116,6 +144,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
             except ValueError:
                 snack_bar("Código inválido.", colorVariaveis['erro'], colorVariaveis['texto'], page)
 
+        
         input_coendereco = ft.TextField(
             label="Código do Endereço",
             expand=True,
@@ -153,6 +182,13 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                 on_click=validar_endereco
             )
         ]
+
+
+    titulo = ft.Text(
+        "Separar Múltiplos Pedidos",
+        size=24, weight="bold",
+        color=colorVariaveis['titulo']
+    )
 
     aba_separar = ft.Tab(
         text="Separar",
