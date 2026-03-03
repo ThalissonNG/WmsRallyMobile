@@ -135,7 +135,7 @@ def menu_page(page: ft.Page, navigate_to, header):
                                 ft.ElevatedButton(
                                     "Separar Múltiplos Dist",
                                     expand=True,
-                                    on_click=lambda e: navigate_to("/separar_multiplos_dist")
+                                    on_click=lambda e: navigate_to("/buscar_multiplos_dist")
                                 ),
                             ],
                             spacing=10,
