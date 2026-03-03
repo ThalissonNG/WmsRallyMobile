@@ -1,8 +1,40 @@
 import flet as ft
-from routes.config.config import colorVariaveis
+import requests
+from routes.config.config import colorVariaveis, base_url, user_info
 
 def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None):
-    print(arguments)
+    print(f"Arguments recebidos: {arguments}")
+    
+    codfilial = user_info.get("codfilial")
+    matricula = user_info.get("matricula")
+    
+    # Extrair os números dos pedidos de 'arguments' e formatar como string separada por vírgula
+    numpeds_list = [str(arg.get("numped")) for arg in arguments] if arguments else []
+    numpeds_str = ", ".join(numpeds_list)
+
+    def buscar_itens_pedido(numpeds, codfilial):
+        try:
+            response = requests.get(
+                f"{base_url}/separar_multiplos_pedido",
+                params={
+                    "numped": numpeds,
+                    "codfilial": codfilial,
+                    "matricula": matricula
+                }
+            )
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"Erro ao buscar itens: {response.status_code}")
+                return None
+        except Exception as e:
+            print(f"Exceção ao buscar itens: {e}")
+            return None
+
+    # Chamada inicial para buscar os itens
+    dados_itens = buscar_itens_pedido(numpeds_str, codfilial)
+    print(f"Itens recuperados: {dados_itens}")
+
     titulo = ft.Text(
         "Separar Múltiplos Pedidos",
         size=24, weight="bold",
