@@ -37,6 +37,7 @@ from routes.buscarEtiquetaV2 import buscar_etiqueta_v2
 from routes.armazenarEtiquetaV2 import armazenar_etiqueta_v2
 from routes.buscarCarregamento import buscar_carregamento
 from routes.separarCarregamento import separar_carregamento
+from routes.buscarMultiplosDist import buscar_multiplos_dist
 
 
 def main(page: ft.Page):
@@ -145,6 +146,8 @@ def main(page: ft.Page):
             page.views.append(buscar_carregamento(page, navigate_to, create_header()))
         elif route == "/separar_carregamento":
             page.views.append(separar_carregamento(page, navigate_to, create_header(), arguments))
+        elif route == "/buscar_multiplos_dist":
+            page.views.append(buscar_multiplos_dist(page, navigate_to, create_header()))
         page.update()
 
     # Tela de login
