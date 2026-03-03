@@ -70,8 +70,9 @@ def buscar_multiplos_dist(page: ft.Page, navigate_to, header):
             resposta = response.json()
             mensagem = resposta.get("message")
             if response.status_code == 200:
+                print("Recebida resposta")
                 snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
-                # navigate_to("/menu")
+                navigate_to("/separar_multiplos_pedidos", arguments=dados_envio)
             else:
                 snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
         except Exception as ex:
