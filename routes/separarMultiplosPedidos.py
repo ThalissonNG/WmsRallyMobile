@@ -24,6 +24,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                 }
             )
             if response.status_code == 200:
+                print(response.json())
                 return response.json()
             else:
                 print(f"Erro ao buscar itens: {response.status_code}")
@@ -128,6 +129,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                         "qtrestante": qt_restante_item,
                         "codendereco": codendereco_item,
                         "numped": numped_item,
+                        "numpeds": numpeds_str,
                         "codetiqueta": codetiqueta_item
                     }
                 )
