@@ -36,24 +36,103 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
     def refresh_separar_view():
         nonlocal dados_itens
         dados_itens = buscar_itens_pedido(numpeds_str, codfilial)
+        
+        # Limpa ambas as abas para atualização
         aba_separar.content.controls.clear()
-        if dados_itens and "pedidos" in dados_itens:
-            pedidos_recebidos = dados_itens.get("pedidos", [])
-            if isinstance(pedidos_recebidos, list) and len(pedidos_recebidos) > 0:
-                if isinstance(pedidos_recebidos[0], list):
-                    item = pedidos_recebidos[0]
+        aba_resumo.content.controls.clear()
+
+        if dados_itens:
+            # Atualiza aba de separação
+            if "pedidos" in dados_itens:
+                pedidos_recebidos = dados_itens.get("pedidos", [])
+                if isinstance(pedidos_recebidos, list) and len(pedidos_recebidos) > 0:
+                    if isinstance(pedidos_recebidos[0], list):
+                        item = pedidos_recebidos[0]
+                    else:
+                        item = pedidos_recebidos
+                    aba_separar.content.controls.extend(construir_endereco(item))
                 else:
-                    item = pedidos_recebidos
-                aba_separar.content.controls.extend(construir_endereco(item))
-            else:
-                aba_separar.content.controls.append(
-                    ft.Container(
-                        content=ft.Text("Todos os pedidos foram separados!", size=20, weight="bold"),
-                        padding=20,
-                        alignment=ft.alignment.center
+                    aba_separar.content.controls.append(
+                        ft.Container(
+                            content=ft.Text("Todos os pedidos foram separados!", size=20, weight="bold"),
+                            padding=20,
+                            alignment=ft.alignment.center
+                        )
                     )
-                )
+            
+            # Atualiza aba de resumo
+            if "resumo" in dados_itens:
+                lista_resumo = dados_itens.get("resumo", [])
+                for item_resumo in lista_resumo:
+                    aba_resumo.content.controls.extend(construir_resumo(item_resumo))
+            elif not aba_resumo.content.controls:
+                aba_resumo.content.controls.append(ft.Text("Nenhum resumo disponível", size=16))
+
         page.update()
+
+    def construir_resumo(resumo):
+        codfilial_resumo = resumo[0]
+        codprod_resumo = resumo[1]
+        codfab_resumo = resumo[2]
+        descricao_resumo = resumo[3]
+        qt_pedida_resumo = resumo[4]
+        qt_restante_resumo = resumo[5]
+        qt_separada_resumo = resumo[6]
+        pendencia_resumo = resumo[7]
+        codetiqueta_resumo = resumo[8]
+
+        cor_resumo = None
+        cor_resumo_texto = None
+
+        if int(qt_separada_resumo) == 0:
+            cor_resumo = None
+            cor_resumo_texto = None
+        elif qt_separada_resumo < qt_pedida_resumo:
+            cor_resumo = colorVariaveis['restante']
+            cor_resumo_texto = colorVariaveis['textoPreto']
+        elif qt_separada_resumo == qt_pedida_resumo:
+            cor_resumo = colorVariaveis['sucesso']
+            cor_resumo_texto = colorVariaveis['textoPreto']
+        elif qt_separada_resumo > qt_pedida_resumo:
+            cor_resumo = colorVariaveis['erro']
+            cor_resumo_texto = colorVariaveis['texto']
+        
+
+        return [
+            ft.Container(
+                    content=ft.Column(
+                        controls=[
+                            ft.Row(
+                                controls=[
+                                    ft.Text(f"Codprod: {codprod_resumo}", color=cor_resumo_texto, weight="bold"),
+                                    ft.Text(f"Codfab: {codfab_resumo}", color=cor_resumo_texto),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            ),
+                            ft.Text(f"Descrição: {descricao_resumo}", color=cor_resumo_texto),
+                            ft.Row(
+                                controls=[
+                                    ft.Text(f"Qt Pedida: {qt_pedida_resumo}", color=cor_resumo_texto),
+                                    ft.Text(f"Qt Separada: {qt_separada_resumo}", color=cor_resumo_texto, weight="bold"),
+                                    ft.Text(f"Qt Restante: {qt_restante_resumo}", color=cor_resumo_texto),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                wrap=True
+                            ),
+                            ft.Text(
+                                f"Etiqueta: {codetiqueta_resumo}", color=cor_resumo_texto,
+                                size=12,
+                                weight="bold"
+                            ),
+                            ft.Divider(),
+                        ],
+                    ),
+                    bgcolor=cor_resumo,
+                    padding=10,
+                    border_radius=10,
+                    margin=ft.margin.only(bottom=5)
+                )
+        ]
 
     def validar_etiqueta_modal(item):
         codetiqueta_esperada = str(item[16])
@@ -138,11 +217,13 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                 
                 if response.status_code == 200:
                     snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
-                    # Atualiza dados internos e UI do modal
-                    novos_dados = buscar_itens_pedido(numpeds_str, codfilial)
-                    if novos_dados and "pedidos" in novos_dados:
-                        peds = novos_dados.get("pedidos", [])
-                        # Encontra o item atual na nova lista para atualizar as quantidades
+                    
+                    # Atualiza ambas as abas (Separar e Resumo) em segundo plano
+                    refresh_separar_view()
+                    
+                    # Usa os dados_itens atualizados (pela refresh_separar_view) para atualizar o modal
+                    if dados_itens and "pedidos" in dados_itens:
+                        peds = dados_itens.get("pedidos", [])
                         item_atualizado = None
                         if isinstance(peds[0], list):
                             for p in peds:
@@ -187,18 +268,53 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                 txt_qt_restante,
                 ft.Divider(),
                 input_codbarra,
-                ft.ElevatedButton(
-                    "Confirmar",
-                    bgcolor=colorVariaveis['botaoAcao'],
-                    color=colorVariaveis['texto'],
-                    on_click=lambda e: validar_codbarra(input_codbarra.value, codprod_item),
-                    width=300
+                ft.Column(
+                    controls=[
+                        ft.ElevatedButton(
+                            "Confirmar",
+                            width=300,
+                            bgcolor=colorVariaveis['botaoAcao'],
+                            color=colorVariaveis['texto'],
+                            on_click=lambda e: validar_codbarra(input_codbarra.value, codprod_item),
+                        ),
+                        ft.Container(height=20),
+                        ft.ElevatedButton(
+                            "Pular Produto",
+                            expand=True,
+                            bgcolor=colorVariaveis['erro'],
+                            color=colorVariaveis['texto'],
+                            on_click=lambda e: pular_produto_acao(e),
+                        ),
+                    ],
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=10
                 ),
             ],
             tight=True,
             spacing=10,
             scroll=ft.ScrollMode.AUTO,
         )
+
+        def pular_produto_acao(e):
+            try:
+                response = requests.patch(
+                    f"{base_url}/separar_multiplos_pedido",
+                    json={
+                        "codprod": codprod_item,
+                        "numped": numped_item,
+                        "numpeds": numpeds_str
+                    }
+                )
+                if response.status_code == 200:
+                    snack_bar("Produto pulado com sucesso!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                    page.close(modal_produto)
+                    refresh_separar_view()
+                else:
+                    resposta = response.json()
+                    mensagem = resposta.get("message", "Erro ao pular produto")
+                    snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+            except Exception as ex:
+                snack_bar(f"Erro ao pular: {str(ex)}", colorVariaveis['erro'], colorVariaveis['texto'], page)
 
         modal_produto = ft.AlertDialog(
             title=ft.Text("Conferência de Produto"),
@@ -284,7 +400,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
     
     aba_resumo = ft.Tab(
         text="Resumo",
-        content=ft.Column(spacing=10, scroll=ft.ScrollMode.AUTO, expand=True, controls=[ft.Text("Resumo em breve")])
+        content=ft.Column(spacing=10, scroll=ft.ScrollMode.AUTO, expand=True, controls=[])
     )
     
     aba_finalizar = ft.Tab(
