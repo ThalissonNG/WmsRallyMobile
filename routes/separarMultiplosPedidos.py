@@ -393,6 +393,37 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
         color=colorVariaveis['titulo']
     )
 
+    def finalizar_separacao_acao(e):
+        try:
+            # Pega o numped do item atual se disponível na lista de pedidos
+            numped_atual = None
+            if dados_itens and "pedidos" in dados_itens:
+                peds = dados_itens.get("pedidos", [])
+                if peds:
+                    if isinstance(peds[0], list):
+                        numped_atual = peds[0][17]
+                    else:
+                        numped_atual = peds[17]
+
+            response = requests.post(
+                f"{base_url}/separar_multiplos_pedido",
+                json={
+                    "matricula": matricula,
+                    "codfilial": codfilial,
+                    "numped": numped_atual,
+                    "numpeds": numpeds_str
+                }
+            )
+            if response.status_code == 200:
+                snack_bar("Separação finalizada com sucesso!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                navigate_to("/buscar_multiplos_dist")
+            else:
+                resposta = response.json()
+                mensagem = resposta.get("message", "Erro ao finalizar separação")
+                snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
+        except Exception as ex:
+            snack_bar(f"Erro ao finalizar: {str(ex)}", colorVariaveis['erro'], colorVariaveis['texto'], page)
+
     aba_separar = ft.Tab(
         text="Separar",
         content=ft.Column(spacing=10, scroll=ft.ScrollMode.AUTO, expand=True, controls=[])
@@ -405,7 +436,20 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
     
     aba_finalizar = ft.Tab(
         text="Finalizar",
-        content=ft.Column(controls=[ft.Text("Finalizar em breve")], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        content=ft.Column(
+            controls=[
+                ft.ElevatedButton(
+                    "Finalizar Separação",
+                    width=300,
+                    height=50,
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    color=colorVariaveis['texto'],
+                    on_click=finalizar_separacao_acao
+                )
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=10
+        )
     )
 
     # Chamada inicial para preencher a tela
