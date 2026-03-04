@@ -7,6 +7,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
     
     codfilial = user_info.get("codfilial")
     matricula = user_info.get("matricula")
+    dados_itens = None
     
     # Extrair os números dos pedidos de 'arguments' e formatar como string separada por vírgula
     numpeds_list = [str(arg.get("numped")) for arg in arguments] if arguments else []
@@ -17,7 +18,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
             response = requests.get(
                 f"{base_url}/separar_multiplos_pedido",
                 params={
-                    "numped": numpeds,
+                    "numpeds": numpeds,
                     "codfilial": codfilial,
                     "matricula": matricula
                 }
@@ -31,9 +32,64 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
             print(f"Exceção ao buscar itens: {e}")
             return None
 
-    # Chamada inicial para buscar os itens
-    dados_itens = buscar_itens_pedido(numpeds_str, codfilial)
-    print(f"Itens recuperados: {dados_itens}")
+    def refresh_separar_view():
+        nonlocal dados_itens
+        dados_itens = buscar_itens_pedido(numpeds_str, codfilial)
+        aba_separar.content.controls.clear()
+        if dados_itens and "pedidos" in dados_itens:
+            pedidos_recebidos = dados_itens.get("pedidos", [])
+            if isinstance(pedidos_recebidos, list) and len(pedidos_recebidos) > 0:
+                if isinstance(pedidos_recebidos[0], list):
+                    item = pedidos_recebidos[0]
+                else:
+                    item = pedidos_recebidos
+                aba_separar.content.controls.extend(construir_endereco(item))
+            else:
+                aba_separar.content.controls.append(
+                    ft.Container(
+                        content=ft.Text("Todos os pedidos foram separados!", size=20, weight="bold"),
+                        padding=20,
+                        alignment=ft.alignment.center
+                    )
+                )
+        page.update()
+
+    def validar_etiqueta_modal(item):
+        codetiqueta_esperada = str(item[16])
+        
+        def validar_etiquet_acao(e):
+            if input_etiqueta.value == codetiqueta_esperada:
+                snack_bar("Etiqueta validada com sucesso!", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                page.close(modal_etiqueta)
+                refresh_separar_view()
+            else:
+                snack_bar("Etiqueta incorreta!", colorVariaveis['erro'], colorVariaveis['texto'], page)
+                input_etiqueta.value = ""
+                input_etiqueta.focus()
+                page.update()
+
+        input_etiqueta = ft.TextField(
+            label="Validar Etiqueta",
+            autofocus=True,
+            on_submit=validar_etiquet_acao
+        )
+
+        modal_etiqueta = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Validar Etiqueta do Produto"),
+            content=ft.Column([
+                ft.Text(f"Leia a etiqueta: {codetiqueta_esperada}", size=16, weight="bold"),
+                input_etiqueta,
+                ft.ElevatedButton(
+                    "Confirmar Etiqueta",
+                    bgcolor=colorVariaveis['botaoAcao'],
+                    color=colorVariaveis['texto'],
+                    on_click=validar_etiquet_acao,
+                    width=300
+                )
+            ], tight=True),
+        )
+        page.open(modal_etiqueta)
 
     def contruir_produto(item):
         codprod_item = item[1]
@@ -44,19 +100,19 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
         qt_restante_item = item[6]
         qt_endereco_item = item[7]
         codendereco_item = item[8]
+        codetiqueta_item = item[16]
+        numped_item = item[17]
+
+        txt_qt_separada = ft.Text(f"Qt Separada: {qt_separada_item}")
+        txt_qt_restante = ft.Text(f"Qt Restante: {qt_restante_item}")
 
         input_codbarra = ft.TextField(
-            label="Código de Barras (Em breve)",
+            label="Código de Barras",
             expand=True,
             autofocus=True,
             keyboard_type=ft.KeyboardType.NUMBER,
             on_submit=lambda e: validar_codbarra(input_codbarra.value, codprod_item)
         )
-
-        def finalizar_modal(e):
-            page.close(modal_produto)
-            # Aqui no futuro chamaria buscar_itens_pedido novamente ou validaria o codbarra
-            snack_bar("Produto processado (Simulação)", colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
 
         def validar_codbarra(codbarra, codprod):
             if not codbarra:
@@ -70,18 +126,46 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                         "codbarra": codbarra,
                         "codprod": codprod,
                         "qtrestante": qt_restante_item,
-                        "codendereco": codendereco_item
+                        "codendereco": codendereco_item,
+                        "numped": numped_item,
+                        "codetiqueta": codetiqueta_item
                     }
                 )
                 resposta = response.json()
                 mensagem = resposta.get("message")
+                
                 if response.status_code == 200:
                     snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                    # Atualiza dados internos e UI do modal
+                    novos_dados = buscar_itens_pedido(numpeds_str, codfilial)
+                    if novos_dados and "pedidos" in novos_dados:
+                        peds = novos_dados.get("pedidos", [])
+                        # Encontra o item atual na nova lista para atualizar as quantidades
+                        item_atualizado = None
+                        if isinstance(peds[0], list):
+                            for p in peds:
+                                if str(p[1]) == str(codprod) and str(p[17]) == str(numped_item):
+                                    item_atualizado = p
+                                    break
+                        else:
+                            if str(peds[1]) == str(codprod) and str(peds[17]) == str(numped_item):
+                                item_atualizado = peds
+                        
+                        if item_atualizado:
+                            txt_qt_separada.value = f"Qt Separada: {item_atualizado[5]}"
+                            txt_qt_restante.value = f"Qt Restante: {item_atualizado[6]}"
+                            input_codbarra.value = ""
+                            input_codbarra.focus()
+                            page.update()
+
+                elif response.status_code == 202:
+                    snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
+                    page.close(modal_produto)
+                    validar_etiqueta_modal(item)
                 else:
                     snack_bar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], page)
-            except ValueError:
-                snack_bar("Código inválido.", colorVariaveis['erro'], colorVariaveis['texto'], page)
-
+            except Exception as ex:
+                snack_bar(f"Erro: {str(ex)}", colorVariaveis['erro'], colorVariaveis['texto'], page)
 
         modal_content = ft.Column(
             controls=[
@@ -91,13 +175,14 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                 ft.Row(
                     controls=[
                         ft.Text(f"Qt Pedida: {qt_pedida_item}"),
-                        ft.Text(f"Qt Separada: {qt_separada_item}"),
+                        txt_qt_separada,
                         ft.Text(f"Qt Endereço: {qt_endereco_item}"),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     wrap=True,
                     expand=True
                 ),
+                txt_qt_restante,
                 ft.Divider(),
                 input_codbarra,
                 ft.ElevatedButton(
@@ -205,20 +290,8 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
         content=ft.Column(controls=[ft.Text("Finalizar em breve")], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
     )
 
-    # Chamada inicial para buscar os itens
-    dados_itens = buscar_itens_pedido(numpeds_str, codfilial)
-    if dados_itens and "pedidos" in dados_itens:
-        pedidos_recebidos = dados_itens.get("pedidos", [])
-        if isinstance(pedidos_recebidos, list) and len(pedidos_recebidos) > 0:
-            # Verifica se é uma lista de listas ou uma lista única de um item
-            # Se o primeiro elemento for uma lista, pegamos essa lista como o primeiro item
-            # Se não for (ex: é um int correspondente ao codfilial), a própria pedidos_recebidos é o item
-            if isinstance(pedidos_recebidos[0], list):
-                primeiro_item = pedidos_recebidos[0]
-            else:
-                primeiro_item = pedidos_recebidos
-            
-            aba_separar.content.controls.extend(construir_endereco(primeiro_item))
+    # Chamada inicial para preencher a tela
+    refresh_separar_view()
 
     # Abas
     tabs = ft.Tabs(
