@@ -23,8 +23,8 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                     "matricula": matricula
                 }
             )
-            if response.status_code == 200:
-                print(response.json())
+            if response.status_code in [200, 404]:
+                print(f"Recebida resposta ({response.status_code}): {response.json()}")
                 return response.json()
             else:
                 print(f"Erro ao buscar itens: {response.status_code}")
@@ -80,6 +80,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
         qt_separada_resumo = resumo[6]
         pendencia_resumo = resumo[7]
         codetiqueta_resumo = resumo[8]
+        tipo_entrega = resumo[9]
 
         cor_resumo = None
         cor_resumo_texto = None
@@ -119,10 +120,21 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 wrap=True
                             ),
-                            ft.Text(
-                                f"Etiqueta: {codetiqueta_resumo}", color=cor_resumo_texto,
-                                size=12,
-                                weight="bold"
+                            ft.Row(
+                                controls=[
+                                    ft.Text(
+                                        f"Etiqueta: {codetiqueta_resumo}", color=cor_resumo_texto,
+                                        size=12,
+                                        weight="bold"
+                                    ),
+                                    ft.Text(
+                                        f"Entrega: {tipo_entrega}", color=cor_resumo_texto,
+                                        size=12,
+                                        weight="bold"
+                                    )
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                wrap=True
                             ),
                             ft.Divider(),
                         ],
