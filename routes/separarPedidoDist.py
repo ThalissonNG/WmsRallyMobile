@@ -318,6 +318,7 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
         qt_separada_resumo = resumo[6]
         pendencia_resumo = resumo[7]
         codetiqueta_resumo = resumo[8]
+        tipo_entrega = resumo[9]
 
         cor_resumo = None
         cor_resumo_texto = None
@@ -378,6 +379,9 @@ def separar_pedido_dist(page: ft.Page, navigate_to, header, arguments=None):
                                 ],
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 wrap=True
+                            ),
+                            ft.Text(
+                                f"Entrega: {tipo_entrega}",
                             ),
                             ft.Divider(),
                         ],
