@@ -33,7 +33,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
             print(f"Exceção ao buscar itens: {e}")
             return None
 
-    def refresh_separar_view():
+    def refresh_separar_view(focus_endereco=True):
         nonlocal dados_itens
         dados_itens = buscar_itens_pedido(numpeds_str, codfilial)
         
@@ -50,7 +50,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                         item = pedidos_recebidos[0]
                     else:
                         item = pedidos_recebidos
-                    aba_separar.content.controls.extend(construir_endereco(item))
+                    aba_separar.content.controls.extend(construir_endereco(item, focus_init=focus_endereco))
                 else:
                     aba_separar.content.controls.append(
                         ft.Container(
@@ -218,8 +218,8 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
                 if response.status_code == 200:
                     snack_bar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], page)
                     
-                    # Atualiza ambas as abas (Separar e Resumo) em segundo plano
-                    refresh_separar_view()
+                    # Atualiza ambas as abas (Separar e Resumo) em segundo plano sem roubar o foco
+                    refresh_separar_view(focus_endereco=False)
                     
                     # Usa os dados_itens atualizados (pela refresh_separar_view) para atualizar o modal
                     if dados_itens and "pedidos" in dados_itens:
@@ -323,7 +323,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
         
         page.open(modal_produto)
 
-    def construir_endereco(item):
+    def construir_endereco(item, focus_init=True):
         qt_separada = int(item[5])
         codendereco_item = int(item[8])
         mod_item = item[9]
@@ -351,7 +351,7 @@ def separar_multiplos_pedidos(page: ft.Page, navigate_to, header, arguments=None
         input_coendereco = ft.TextField(
             label="Código do Endereço",
             expand=True,
-            autofocus=True,
+            autofocus=focus_init,
             keyboard_type=ft.KeyboardType.NUMBER,
             on_submit=validar_endereco
         )
