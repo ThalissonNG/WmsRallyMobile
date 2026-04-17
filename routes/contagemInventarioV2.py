@@ -37,6 +37,12 @@ def contagem_inventario_v2(page, navigate_to, header):
             control.error_text = None
         control.update()
 
+    def focar(control):
+        try:
+            control.focus()
+        except Exception as exc:
+            print("Erro ao focar campo V2:", exc)
+
     def limpar_campos_produto():
         state["produto_atual"] = None
         state["mostrar_cadastro_codbarra"] = False
@@ -102,7 +108,7 @@ def contagem_inventario_v2(page, navigate_to, header):
                     ft.Text("Endereço Atual", size=18, weight="bold", color=colorVariaveis["titulo"]),
                     ft.Text(f"Nº Inventário: {dados[0]}"),
                     ft.Text(f"Nº OS: {dados[1]}"),
-                    ft.Text(f"Endereço esperado: {dados[2]}", weight="bold"),
+                    # ft.Text(f"Endereço esperado: {dados[2]}", weight="bold"),
                     ft.Text(
                         f"MOD: {dados[3]}, RUA: {dados[4]}, EDI: {dados[5]}, NIV: {dados[6]}, APT: {dados[7]}"
                     ),
@@ -294,7 +300,7 @@ def contagem_inventario_v2(page, navigate_to, header):
                     controls=[
                         ft.Text(f"Inventário: {dados[0]}", weight="bold"),
                         ft.Text(f"OS: {dados[1]}"),
-                        ft.Text(f"Endereço: {dados[2]}"),
+                        # ft.Text(f"Endereço: {dados[2]}"),
                         ft.Text(f"Itens no resumo: {len(state['resumo'])}"),
                     ],
                 ),
@@ -340,6 +346,7 @@ def contagem_inventario_v2(page, navigate_to, header):
             )
             if response.status_code in [200, 202]:
                 dados_os = response.json().get("dados_os", [])
+                print("Dados OS recebidos:", dados_os)
                 if not dados_os:
                     snack_bar("Nenhum inventário disponível.", colorVariaveis["erro"], colorVariaveis["texto"], page)
                     return
@@ -349,6 +356,7 @@ def contagem_inventario_v2(page, navigate_to, header):
                 state["etapa"] = "endereco"
                 carregar_resumo(silencioso=True)
                 render_all()
+                focar(endereco_field)
             else:
                 snack_bar("Erro ao buscar inventário.", colorVariaveis["erro"], colorVariaveis["texto"], page)
         except Exception as exc:
@@ -362,9 +370,11 @@ def contagem_inventario_v2(page, navigate_to, header):
         if endereco_field.value.strip() == str(state["dados_os"][0][2]):
             state["etapa"] = "codbarra"
             snack_bar("Endereço validado!", colorVariaveis["sucesso"], colorVariaveis["textoPreto"], page)
+            render_all()
+            focar(codbarra_field)
         else:
             snack_bar("Endereço incorreto", colorVariaveis["erro"], colorVariaveis["texto"], page)
-        render_all()
+            render_all()
 
     def validar_codbarra(e):
         if not state["dados_os"]:
@@ -390,16 +400,20 @@ def contagem_inventario_v2(page, navigate_to, header):
                 validade_field.value = validade_padrao()
                 validade_field.error_text = None
                 render_all()
+                focar(quantidade_field)
             elif response.status_code == 500:
                 state["produto_atual"] = None
                 state["mostrar_cadastro_codbarra"] = True
                 snack_bar("Código de barras não cadastrado", colorVariaveis["erro"], colorVariaveis["texto"], page)
                 render_all()
+                focar(codbarra_field)
             else:
                 snack_bar("Resposta inesperada ao validar código de barras.", colorVariaveis["erro"], colorVariaveis["texto"], page)
+                focar(codbarra_field)
         except Exception as exc:
             print("Erro ao validar código de barras V2:", exc)
             snack_bar("Erro ao validar código de barras.", colorVariaveis["erro"], colorVariaveis["texto"], page)
+            focar(codbarra_field)
 
     def confirmar_quantidade(e):
         if not state["produto_atual"]:
@@ -430,11 +444,14 @@ def contagem_inventario_v2(page, navigate_to, header):
                 limpar_campos_produto()
                 state["etapa"] = "codbarra"
                 render_all()
+                focar(codbarra_field)
             else:
                 snack_bar(mensagem, colorVariaveis["erro"], colorVariaveis["texto"], page)
+                focar(quantidade_field)
         except Exception as exc:
             print("Erro ao confirmar quantidade V2:", exc)
             snack_bar("Erro ao confirmar quantidade.", colorVariaveis["erro"], colorVariaveis["texto"], page)
+            focar(quantidade_field)
 
     def iniciar_edicao(item):
         state["editando_codprod"] = item[0]
