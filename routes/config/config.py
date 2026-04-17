@@ -1,6 +1,6 @@
 import flet as ft
 base_url = "http://192.168.1.42:5000/wmsMobile"
-app_version = '1.9.5'
+app_version = '1.9.6'
 user_info = {}
 colorVariaveis = {
     'botaoAcao': "#0366FF",
