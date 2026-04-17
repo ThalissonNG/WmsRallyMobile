@@ -68,16 +68,6 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
-                                    "Inventário V2",
-                                    expand=True,
-                                    on_click=lambda e: navigate_to("/contagem_inventario_v2")
-                                ),
-                            ],
-                            spacing=10,
-                        ),
-                        ft.Row(
-                            controls=[
-                                ft.ElevatedButton(
                                     "Inventario Rotativo",
                                     expand=True,
                                     on_click=lambda e: navigate_to("/contagem_inventario_rotativo")
@@ -146,6 +136,21 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     "Separar Múltiplos Dist",
                                     expand=True,
                                     on_click=lambda e: navigate_to("/buscar_multiplos_dist")
+                                ),
+                            ],
+                            spacing=10,
+                        ),
+                        ft.Row(
+                            controls=[
+                                ft.ElevatedButton(
+                                    "Inventário V2",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/contagem_inventario_v2")
+                                ),
+                                ft.ElevatedButton(
+                                    "--------",
+                                    expand=True,
+                                    # on_click=lambda e: navigate_to("/")
                                 ),
                             ],
                             spacing=10,
