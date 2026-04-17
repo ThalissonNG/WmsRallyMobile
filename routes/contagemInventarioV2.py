@@ -101,7 +101,7 @@ def contagem_inventario_v2(page, navigate_to, header):
         return ft.Container(
             padding=12,
             border_radius=12,
-            bgcolor=card_bg,
+            # bgcolor=card_bg,
             content=ft.Column(
                 spacing=6,
                 controls=[
@@ -152,7 +152,7 @@ def contagem_inventario_v2(page, navigate_to, header):
                     weight="bold",
                 )
             )
-        controls.append(ft.Container(padding=12, border_radius=12, bgcolor=section_bg, content=ft.Column(controls=endereco_controls)))
+        controls.append(ft.Container(padding=12, border_radius=12, content=ft.Column(controls=endereco_controls)))
 
         if state["etapa"] in ("codbarra", "quantidade"):
             barcode_controls = [
@@ -171,7 +171,7 @@ def contagem_inventario_v2(page, navigate_to, header):
                 ft.Container(
                     padding=12,
                     border_radius=12,
-                    bgcolor=section_bg,
+                    # bgcolor=section_bg,
                     content=ft.Column(controls=barcode_controls),
                 )
             )
@@ -182,7 +182,7 @@ def contagem_inventario_v2(page, navigate_to, header):
                 ft.Container(
                     padding=12,
                     border_radius=12,
-                    bgcolor=section_bg,
+                    # bgcolor=section_bg,
                     content=ft.Column(
                         spacing=8,
                         controls=[
@@ -203,7 +203,7 @@ def contagem_inventario_v2(page, navigate_to, header):
                 ft.Container(
                     padding=12,
                     border_radius=12,
-                    bgcolor=section_bg,
+                    # bgcolor=section_bg,
                     content=ft.Column(
                         spacing=8,
                         controls=[
@@ -243,18 +243,19 @@ def contagem_inventario_v2(page, navigate_to, header):
                             spacing=2,
                             controls=[
                                 ft.Text(f"Codprod: {item[0]}", weight="bold"),
-                                ft.Text(f"Descrição: {item[1]}"),
+                                ft.Text(f"Descrição: {item[1]}", no_wrap=False),
                                 ft.Text(f"CodFab: {item[2]}"),
                                 ft.Text(f"Quantidade: {item[3]}", weight="bold"),
                             ],
-                        ),
-                        ft.TextButton(
-                            text="Editar",
-                            icon=ft.Icons.EDIT,
-                            on_click=lambda e, item=item: iniciar_edicao(item),
+                            expand=True,
                         ),
                     ],
-                )
+                ),
+                ft.TextButton(
+                    text="Editar",
+                    icon=ft.Icons.EDIT,
+                    on_click=lambda e, item=item: iniciar_edicao(item),
+                ),
             ]
 
             if state["editando_codprod"] == item[0]:
@@ -294,7 +295,7 @@ def contagem_inventario_v2(page, navigate_to, header):
             ft.Container(
                 padding=12,
                 border_radius=12,
-                bgcolor=section_bg,
+                # bgcolor=section_bg,
                 content=ft.Column(
                     spacing=6,
                     controls=[
