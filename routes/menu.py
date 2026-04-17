@@ -68,6 +68,16 @@ def menu_page(page: ft.Page, navigate_to, header):
                         ft.Row(
                             controls=[
                                 ft.ElevatedButton(
+                                    "Inventário V2",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/contagem_inventario_v2")
+                                ),
+                            ],
+                            spacing=10,
+                        ),
+                        ft.Row(
+                            controls=[
+                                ft.ElevatedButton(
                                     "Inventario Rotativo",
                                     expand=True,
                                     on_click=lambda e: navigate_to("/contagem_inventario_rotativo")

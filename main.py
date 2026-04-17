@@ -15,6 +15,7 @@ from routes.buscarDevolucao import buscar_devolucao
 from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 from routes.separarDevolucao import separar_devolucao
 from routes.contagemInventario import contagem_inventario
+from routes.contagemInventarioV2 import contagem_inventario_v2
 from routes.cadastrarCodbarra import cadastrar_codbarra
 from routes.contagemInventarioRotativo import contagem_inventario_rotativo
 from routes.osAvulsa import os_avulsa
@@ -72,6 +73,10 @@ def main(page: ft.Page):
 
     # Função de navegação entre rotas
     def navigate_to(route, arguments=None):
+        for overlay_control in page.overlay[:]:
+            if hasattr(overlay_control, "open"):
+                overlay_control.open = False
+            page.overlay.remove(overlay_control)
         page.views.clear()
         if route == "/login":
             page.views.append(create_login_view())
@@ -103,6 +108,8 @@ def main(page: ft.Page):
             page.views.append(separar_devolucao(page, navigate_to, create_header(), arguments))
         elif route == "/contagem_inventario":
             page.views.append(contagem_inventario(page, navigate_to, create_header()))
+        elif route == "/contagem_inventario_v2":
+            page.views.append(contagem_inventario_v2(page, navigate_to, create_header()))
         elif route == "/cadastrar_codbarra":
             page.views.append(cadastrar_codbarra(page, navigate_to, create_header()))
         elif route == "/contagem_inventario_rotativo":

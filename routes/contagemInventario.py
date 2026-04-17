@@ -362,14 +362,14 @@ def contagem_inventario(e, navigate_to, header):
         if response.status_code == 200:
             dados = response.json()
             mensagem = dados.get("mensagem")
-            snackbar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], e.page)
+            # snackbar(mensagem, colorVariaveis['sucesso'], colorVariaveis['textoPreto'], e.page)
             e.page.close(dialogo)
-            navigate_to("/contagem_inventario")
+            navigate_to("/menu")
             e.page.update()
         else:
             dados = response.json()
             mensagem = dados.get("mensagem")
-            snackbar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], e.page)
+            # snackbar(mensagem, colorVariaveis['erro'], colorVariaveis['texto'], e.page)
             e.page.update()
     
     def abrir_dialog_codbarra_nao_cadastrado(e):
