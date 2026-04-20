@@ -307,7 +307,7 @@ def main(page: ft.Page):
             on_click=login,
         )
         versao = ft.Text(
-            f"Versão: {app_version}" 
+            f"Versão - FL2: {app_version}" 
         )
         button_settings = ft.IconButton(
             icon=ft.Icons.SETTINGS,
