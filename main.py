@@ -28,6 +28,7 @@ from routes.separarPedidoUnico import separar_pedido_unico
 from routes.abastecimento import abastecimento
 from routes.separarAbastecimento import separar_abastecimento
 from routes.ajustarEndereco import ajustar_endereco
+from routes.ajustarContagemEnd import ajustar_contagem_end
 from routes.buscarPedidosDIst import buscar_pedido_dist
 from routes.separarPedidoDist import separar_pedido_dist
 from routes.abastecimentoV2 import abastecimentoV2
@@ -134,6 +135,8 @@ def main(page: ft.Page):
             page.views.append(separar_abastecimento(page, navigate_to, create_header(), arguments))
         elif route == "/ajustar_endereco":
             page.views.append(ajustar_endereco(page, navigate_to, create_header()))
+        elif route == "/ajustar_contagem_end":
+            page.views.append(ajustar_contagem_end(page, navigate_to, create_header()))
         elif route == "/buscar_pedido_dist":
             page.views.append(buscar_pedido_dist(page, navigate_to, create_header()))
         elif route == "/separar_pedido_dist":

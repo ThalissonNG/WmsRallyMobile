@@ -148,9 +148,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     on_click=lambda e: navigate_to("/contagem_inventario_v2")
                                 ),
                                 ft.ElevatedButton(
-                                    "--------",
+                                    "Ajustar Contagem End",
                                     expand=True,
-                                    # on_click=lambda e: navigate_to("/")
+                                    on_click=lambda e: navigate_to("/ajustar_contagem_end")
                                 ),
                             ],
                             spacing=10,
