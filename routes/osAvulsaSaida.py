@@ -7,28 +7,6 @@ def os_avulsa_saida(page, navigate_to, header):
     matricula = user_info['matricula']
     codfilial = user_info['codfilial']
 
-    # 1) Chama a API para buscar endereço e produto
-    try:
-        response = requests.post(
-            f"{base_url}/os_avulsa_saida",
-            json={
-                "matricula": matricula,
-                "codfilial": codfilial,
-                "action": "buscar_dados"
-            }
-        )
-        response.raise_for_status()
-        dados_endereco = response.json().get("endereco")  # ex: (codend, MOD, RUA, EDI, NIV, APT, codprod, qt, numos)
-        print(f"Dados do endereço: {dados_endereco}")
-    except Exception:
-        page.snack_bar = ft.SnackBar(
-            ft.Text("Erro ao buscar dados"),
-            bgcolor=colorVariaveis['erro']
-        )
-        page.snack_bar.open = True
-        page.update()
-        dados_endereco = None
-
     # 2) Cabeçalho da tela
     titulo = ft.Text(
         "OS Avulsa - Saída",
@@ -42,20 +20,18 @@ def os_avulsa_saida(page, navigate_to, header):
         spacing=12
     )
 
-    # 4) Controles fixos no topo
-    controls = [
-        header,
-        titulo,
-        ft.Divider(),
-    ]
+    def renderizar_dados_saida(dados_endereco):
+        dynamic_section.controls.clear()
 
-    # 5) Se recebi dados do endpoint, monto o primeiro bloco
-    if dados_endereco:
-        # Exibe MOD, RUA, EDI, NIV, APT e Código do Produto (índice 6)
+        if not dados_endereco:
+            dynamic_section.controls.append(
+                ft.Text("Nenhuma OS disponível.", color=colorVariaveis['erro'])
+            )
+            page.update()
+            return
+
         endereco_info = ft.Container(
             padding=10,
-            # border=ft.border.all(1, ft.Colors.WHITE),
-            # border_radius=5,
             content=ft.Column(
                 spacing=4,
                 controls=[
@@ -68,22 +44,19 @@ def os_avulsa_saida(page, navigate_to, header):
                             ft.Text(f"NIV: {dados_endereco[4]}"),
                             ft.Text(f"APT: {dados_endereco[5]}"),
                         ],
-                        # spacing=8,
-                        ),
-                        ft.Row(
-                            controls=[
-                                ft.Text(f"Códprod: {dados_endereco[6]}"),
-                                ft.Text(f"Códfab: {dados_endereco[7]}"),
-                            ]
-                        ),
-                        ft.Text(f"Descrição: {dados_endereco[8]}"),
+                    ),
+                    ft.Row(
+                        controls=[
+                            ft.Text(f"Códprod: {dados_endereco[6]}"),
+                            ft.Text(f"Códfab: {dados_endereco[7]}"),
+                        ]
+                    ),
+                    ft.Text(f"Descrição: {dados_endereco[8]}"),
                 ]
             )
         )
 
-        # Campo para digitar o código do endereço
         input_cod_end = ft.TextField(
-            autofocus=True,
             label="Código do Endereço",
             hint_text="Escaneie ou digite aqui",
             keyboard_type=ft.KeyboardType.TEXT,
@@ -105,10 +78,93 @@ def os_avulsa_saida(page, navigate_to, header):
             endereco_info,
             ft.Row(spacing=8, controls=[input_cod_end, btn_confirmar])
         ])
-    else:
+        page.update()
+
+    def buscar_dados_os(action, numos=None):
+        payload = {
+            "matricula": matricula,
+            "codfilial": codfilial,
+            "action": action,
+        }
+
+        if action == "buscar_dados_manual":
+            if not numos:
+                input_numos.error_text = "Informe o número da OS"
+                snack_bar(
+                    "Digite o número da OS para busca manual.",
+                    colorVariaveis['texto'],
+                    colorVariaveis['erro'],
+                    page
+                )
+                page.update()
+                return
+
+            input_numos.error_text = None
+            payload["numos"] = numos
+
+        dynamic_section.controls.clear()
         dynamic_section.controls.append(
-            ft.Text("Não foi possível carregar o endereço.", color=colorVariaveis['erro'])
+            ft.Text("Buscando dados da OS...", color=colorVariaveis['titulo'])
         )
+        page.update()
+
+        try:
+            response = requests.post(f"{base_url}/os_avulsa_saida", json=payload)
+            response.raise_for_status()
+            dados_endereco = response.json().get("endereco")
+            print(f"Dados do endereço: {dados_endereco}")
+            renderizar_dados_saida(dados_endereco)
+        except Exception:
+            dynamic_section.controls.clear()
+            dynamic_section.controls.append(
+                ft.Text("Nenhuma OS disponível.", color=colorVariaveis['erro'])
+            )
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Erro ao buscar dados"),
+                bgcolor=colorVariaveis['erro']
+            )
+            page.snack_bar.open = True
+            page.update()
+
+    input_numos = ft.TextField(
+        label="Número da OS",
+        hint_text="Digite o número da OS",
+        keyboard_type=ft.KeyboardType.NUMBER,
+        autofocus=True,
+        expand=True,
+        border_radius=5,
+        border_color=colorVariaveis['bordarInput'],
+        on_submit=lambda e: buscar_dados_os(
+            "buscar_dados_manual", e.control.value.strip()
+        ),
+    )
+
+    btn_busca_manual = ft.ElevatedButton(
+        text="Buscar OS Manual",
+        bgcolor=colorVariaveis['botaoAcao'],
+        color=colorVariaveis['texto'],
+        on_click=lambda e: buscar_dados_os(
+            "buscar_dados_manual", input_numos.value.strip()
+        ),
+    )
+
+    btn_busca_automatica = ft.ElevatedButton(
+        text="Buscar OS Automática",
+        bgcolor=colorVariaveis['botaoAcao'],
+        color=colorVariaveis['texto'],
+        on_click=lambda e: buscar_dados_os("buscar_dados"),
+    )
+
+    # 4) Controles fixos no topo
+    controls = [
+        header,
+        titulo,
+        ft.Divider(),
+        ft.Row(spacing=8, controls=[input_numos, btn_busca_manual]),
+        ft.Container(height=12),
+        btn_busca_automatica,
+        ft.Divider(),
+    ]
 
     # 6) Retorna a View com todo o conteúdo
     return ft.View(
