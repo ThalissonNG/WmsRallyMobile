@@ -19,39 +19,7 @@ def os_avulsa_entrada(page, navigate_to, header):
     matricula = user_info["matricula"]
     codfilial = user_info["codfilial"]
 
-    # Seção dinâmica que será atualizada de acordo com o fluxo
-    dynamic_section = ft.Column(
-        expand=True,
-        scroll=ft.ScrollMode.AUTO,
-        spacing=12,
-    )
-
-    # ------------------------------------------------------------------
-    # 1) Buscar dados da OS de entrada
-    # ------------------------------------------------------------------
-    try:
-        response = requests.post(
-            f"{base_url}/os_avulsa_entrada",
-            json={
-                "matricula": matricula,
-                "codfilial": codfilial,
-                "action": "buscar_dados",
-            },
-        )
-        response.raise_for_status()
-        dados_os = response.json().get("dados_os")
-    except Exception:
-        page.snack_bar = ft.SnackBar(
-            ft.Text("Erro ao buscar dados"),
-            bgcolor=colorVariaveis["erro"],
-        )
-        page.snack_bar.open = True
-        page.update()
-        dados_os = None
-
-    # ------------------------------------------------------------------
     # Cabeçalho fixo da tela
-    # ------------------------------------------------------------------
     titulo = ft.Text(
         "OS Avulsa - Entrada",
         size=24,
@@ -59,13 +27,30 @@ def os_avulsa_entrada(page, navigate_to, header):
         color=colorVariaveis["titulo"],
     )
 
-    controls = [header, titulo, ft.Divider()]
+    # Seção dinâmica que será atualizada de acordo com o fluxo
+    dynamic_section = ft.Column(
+        expand=True,
+        scroll=ft.ScrollMode.AUTO,
+        spacing=12,
+    )
 
-    # ------------------------------------------------------------------
-    # Primeira etapa: validar código de barras do produto
-    # ------------------------------------------------------------------
-    if dados_os:
-        numos, codprod, codfab, descricao, qtpedida = dados_os[0][0], dados_os[0][1], dados_os[0][2], dados_os[0][3], dados_os[0][4]
+    def renderizar_dados_os(dados_os):
+        dynamic_section.controls.clear()
+
+        if not dados_os:
+            dynamic_section.controls.append(
+                ft.Text("Nenhuma OS disponível.", color=colorVariaveis["erro"])
+            )
+            page.update()
+            return
+
+        numos, codprod, codfab, descricao, qtpedida = (
+            dados_os[0][0],
+            dados_os[0][1],
+            dados_os[0][2],
+            dados_os[0][3],
+            dados_os[0][4],
+        )
 
         dynamic_section.controls.extend(
             [
@@ -82,7 +67,6 @@ def os_avulsa_entrada(page, navigate_to, header):
         )
 
         campo_cod_bar = ft.TextField(
-            autofocus=True,
             label="Código de Barras do Produto",
             hint_text="Escaneie ou digite aqui",
             keyboard_type=ft.KeyboardType.TEXT,
@@ -121,10 +105,91 @@ def os_avulsa_entrada(page, navigate_to, header):
         dynamic_section.controls.append(
             ft.Row(spacing=8, controls=[campo_cod_bar, btn_cod_bar])
         )
-    else:
+        page.update()
+
+    def buscar_dados_os(action, numos=None):
+        payload = {
+            "matricula": matricula,
+            "codfilial": codfilial,
+            "action": action,
+        }
+
+        if action == "buscar_dados_manual":
+            if not numos:
+                input_numos.error_text = "Informe o número da OS"
+                snack_bar(
+                    "Digite o número da OS para busca manual.",
+                    colorVariaveis["texto"],
+                    colorVariaveis["erro"],
+                    page,
+                )
+                page.update()
+                return
+
+            input_numos.error_text = None
+            payload["numos"] = numos
+
+        dynamic_section.controls.clear()
         dynamic_section.controls.append(
-            ft.Text("Nenhuma OS disponível.", color=colorVariaveis["erro"])
+            ft.Text("Buscando dados da OS...", color=colorVariaveis["titulo"])
         )
+        page.update()
+
+        try:
+            response = requests.post(f"{base_url}/os_avulsa_entrada", json=payload)
+            response.raise_for_status()
+            dados_os = response.json().get("dados_os")
+            renderizar_dados_os(dados_os)
+        except Exception:
+            dynamic_section.controls.clear()
+            dynamic_section.controls.append(
+                ft.Text("Nenhuma OS disponível.", color=colorVariaveis["erro"])
+            )
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Erro ao buscar dados"),
+                bgcolor=colorVariaveis["erro"],
+            )
+            page.snack_bar.open = True
+            page.update()
+
+    input_numos = ft.TextField(
+        label="Número da OS",
+        hint_text="Digite o número da OS",
+        keyboard_type=ft.KeyboardType.NUMBER,
+        autofocus=True,
+        expand=True,
+        border_radius=5,
+        border_color=colorVariaveis["bordarInput"],
+        on_submit=lambda e: buscar_dados_os(
+            "buscar_dados_manual", e.control.value.strip()
+        ),
+    )
+
+    btn_busca_manual = ft.ElevatedButton(
+        text="Buscar OS Manual",
+        bgcolor=colorVariaveis["botaoAcao"],
+        color=colorVariaveis["texto"],
+        on_click=lambda e: buscar_dados_os(
+            "buscar_dados_manual", input_numos.value.strip()
+        ),
+    )
+
+    btn_busca_automatica = ft.ElevatedButton(
+        text="Buscar OS Automática",
+        bgcolor=colorVariaveis["botaoAcao"],
+        color=colorVariaveis["texto"],
+        on_click=lambda e: buscar_dados_os("buscar_dados"),
+    )
+
+    controls = [
+        header,
+        titulo,
+        ft.Divider(),
+        ft.Row(spacing=8, controls=[input_numos, btn_busca_manual]),
+        ft.Container(height=12),
+        btn_busca_automatica,
+        ft.Divider(),
+    ]
 
     return ft.View(
         route="/os_avulsa_entrada",
@@ -334,4 +399,3 @@ def _validar_endereco( e, page, navigate_to, campo, dynamic_section, codprod, nu
     finally:
         btn.disabled = False
         page.update()
-
