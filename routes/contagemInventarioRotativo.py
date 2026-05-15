@@ -251,7 +251,8 @@ def contagem_inventario_rotativo(e, navigate_to, header):
                     ft.Text(f"CODFAB: {produto[0][2]}"),
                     campo_quantidade,
                     campo_validade
-                ]
+                ],
+                scroll=True
             ),
             actions=[ft.TextButton("Confirmar", on_click=lambda e: confirmar_quantidade(e))]
         )
