@@ -213,7 +213,8 @@ def transferir_produto(page, navigate_to, header):
                     "codenderecoAtual": origem,
                     "codenderecoNovo": destino,
                     "quantidade": qt,
-                    "codfilial": codfilial
+                    "codfilial": codfilial,
+                    "matricula": matricula
                 }
             )
             if resp.status_code == 202:
