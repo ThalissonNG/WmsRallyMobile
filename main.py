@@ -41,6 +41,8 @@ from routes.buscarCarregamento import buscar_carregamento
 from routes.separarCarregamento import separar_carregamento
 from routes.buscarMultiplosDist import buscar_multiplos_dist
 from routes.separarMultiplosPedidos import separar_multiplos_pedidos
+from routes.buscarTransferenciaDevolucaoV2 import buscar_transferencia_devolucao_v2
+from routes.separarTransferenciaDevolucaoV2 import separar_transferencia_devolucao_v2
 
 
 def main(page: ft.Page):
@@ -161,6 +163,10 @@ def main(page: ft.Page):
             page.views.append(buscar_multiplos_dist(page, navigate_to, create_header()))
         elif route == "/separar_multiplos_pedidos":
             page.views.append(separar_multiplos_pedidos(page, navigate_to, create_header(), arguments))
+        elif route == "/buscar_transferencia_devolucao_v2":
+            page.views.append(buscar_transferencia_devolucao_v2(page, navigate_to, create_header()))
+        elif route == "/separar_transferencia_devolucao_v2":
+            page.views.append(separar_transferencia_devolucao_v2(page, navigate_to, create_header(), arguments))
         page.update()
 
     # Tela de login

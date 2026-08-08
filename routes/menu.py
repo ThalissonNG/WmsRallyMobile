@@ -148,9 +148,9 @@ def menu_page(page: ft.Page, navigate_to, header):
                                     on_click=lambda e: navigate_to("/contagem_inventario_v2")
                                 ),
                                 ft.ElevatedButton(
-                                    "--------",
+                                    "Transferência V2",
                                     expand=True,
-                                    # on_click=lambda e: navigate_to("/ajustar_contagem_end")
+                                    on_click=lambda e: navigate_to("/buscar_transferencia_devolucao_v2")
                                 ),
                             ],
                             spacing=10,
