@@ -1,4 +1,5 @@
 import flet as ft
+base_url = "http://192.168.1.42:5000/wmsMobile"
 app_version = '1.10.0'
 user_info = {}
 colorVariaveis = {
