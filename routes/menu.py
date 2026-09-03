@@ -155,6 +155,16 @@ def menu_page(page: ft.Page, navigate_to, header):
                             ],
                             spacing=10,
                         ),
+                        ft.Row(
+                            controls=[
+                                ft.ElevatedButton(
+                                    "Inventário V3",
+                                    expand=True,
+                                    on_click=lambda e: navigate_to("/contagem_inventario_v3")
+                                ),
+                            ],
+                            spacing=10,
+                        ),
                     ],
                     spacing=10,
                     scroll=ft.ScrollMode.AUTO,

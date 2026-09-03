@@ -16,6 +16,7 @@ from routes.separarTransferenciaDevolucao import separar_transferencia_devolucao
 from routes.separarDevolucao import separar_devolucao
 from routes.contagemInventario import contagem_inventario
 from routes.contagemInventarioV2 import contagem_inventario_v2
+from routes.contagemInventarioV3 import contagem_inventario_v3
 from routes.cadastrarCodbarra import cadastrar_codbarra
 from routes.contagemInventarioRotativo import contagem_inventario_rotativo
 from routes.osAvulsa import os_avulsa
@@ -113,6 +114,8 @@ def main(page: ft.Page):
             page.views.append(contagem_inventario(page, navigate_to, create_header()))
         elif route == "/contagem_inventario_v2":
             page.views.append(contagem_inventario_v2(page, navigate_to, create_header()))
+        elif route == "/contagem_inventario_v3":
+            page.views.append(contagem_inventario_v3(page, navigate_to, create_header()))
         elif route == "/cadastrar_codbarra":
             page.views.append(cadastrar_codbarra(page, navigate_to, create_header()))
         elif route == "/contagem_inventario_rotativo":
